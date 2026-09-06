@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { BY_KEY, sectionForPath } from "@/lib/sections";
+import { BY_KEY } from "@/lib/sections";
 import { useTabs } from "@/lib/tabs";
 import { Logo } from "./icons";
 import s from "./TabBar.module.css";
@@ -26,13 +25,12 @@ function Close() {
 }
 
 export default function TabBar() {
-  const pathname = usePathname();
   const { tabs, close } = useTabs();
-  const current = sectionForPath(pathname).key;
 
   return (
     <div className={s.bar}>
-      <div className={`${s.tab} ${s.logoTab}`} style={{ zIndex: 1 }}>
+      {/* earlier tabs stack above later ones, so a hovered tab fills behind its neighbour */}
+      <div className={`${s.tab} ${s.logoTab}`} style={{ zIndex: tabs.length + 1 }}>
         <Link href="/" className={`${s.link} ${s.inner}`} aria-label="Home">
           <Logo className={s.logo} />
         </Link>
@@ -45,7 +43,7 @@ export default function TabBar() {
           <div
             key={key}
             className={s.tab}
-            style={{ zIndex: key === current ? tabs.length + 2 : i + 2 }}
+            style={{ zIndex: tabs.length - i }}
           >
             <div className={s.inner}>
               <Link href={section.href} className={s.label}>

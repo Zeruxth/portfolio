@@ -25,7 +25,8 @@
   position: absolute;
   inset: 0;
   clip-path: polygon(0 0, calc(100% - 72px) 0, 100% 100%, 0 100%);
-  background: transparent;
+  /* opaque, so an earlier tab occludes the one behind it the way real tabs stack */
+  background: var(--bg);
   transition: background 0.18s ease;
 }
 .tab:hover::before,
