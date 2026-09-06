@@ -27,15 +27,17 @@ function Close() {
 export default function TabBar() {
   const { tabs, close } = useTabs();
   const pathname = usePathname();
-  // the tab you are already on is inert, exactly like the menu row for it
-  const currentId = tabForPath(pathname)?.id ?? null;
+  // Only the logo goes inert, and only on home: there is genuinely nothing to
+  // do there. A section tab always has an actionable close button, so it keeps
+  // its hover even while you are on that page.
+  const atHome = tabForPath(pathname) === null;
 
   return (
     <div className={s.bar}>
       {/* earlier tabs stack above later ones, so a hovered tab fills behind its neighbour */}
       <div
         className={`${s.tab} ${s.logoTab}`}
-        data-active={currentId === null}
+        data-active={atHome}
         style={{ zIndex: tabs.length + 1 }}
       >
         <Link href="/" className={`${s.link} ${s.inner}`} aria-label="Home">
@@ -48,7 +50,6 @@ export default function TabBar() {
         <div
           key={tab.id}
           className={s.tab}
-          data-active={tab.id === currentId}
           style={{ zIndex: tabs.length - i }}
         >
           <div className={s.inner}>
