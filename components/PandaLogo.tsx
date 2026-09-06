@@ -5,9 +5,6 @@ import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
 import { Logo } from "./icons";
 import s from "./PandaLogo.module.css";
 
-/** the mark inks itself in once per visit, then idles */
-const DRAWN_KEY = "aki:panda-drawn";
-
 /** ms after which each group starts drawing, keyed by data-part */
 const STAGGER: Record<string, number> = {
   head: 0, earRight: 90, earLeft: 110, eyes: 220,
@@ -19,21 +16,15 @@ const rand = (min: number, max: number) => min + Math.random() * (max - min);
 export default function PandaLogo({ className }: { className?: string }) {
   const ref = useRef<SVGSVGElement>(null);
 
+  // Runs on every page load. Client-side navigation does not replay it: the tab
+  // bar lives in the root layout, so this never unmounts between routes.
+  //
   // Set the dash before first paint, or the complete mark flashes for a frame
   // before the draw-on starts.
   useIsomorphicLayoutEffect(() => {
     const svg = ref.current;
     if (!svg) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let firstVisit = false;
-    try {
-      firstVisit = !sessionStorage.getItem(DRAWN_KEY);
-      if (firstVisit) sessionStorage.setItem(DRAWN_KEY, "1");
-    } catch {
-      firstVisit = false; // private mode: skip rather than replay on every load
-    }
-    if (!firstVisit) return;
 
     const groups = Array.from(svg.querySelectorAll<SVGGElement>("g[data-part]"));
     for (const g of groups) {
