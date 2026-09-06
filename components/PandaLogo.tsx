@@ -37,35 +37,23 @@ export default function PandaLogo({ className }: { className?: string }) {
 
     const groups = Array.from(svg.querySelectorAll<SVGGElement>("g[data-part]"));
     for (const g of groups) {
+      const delay = STAGGER[g.dataset.part ?? ""] ?? 0;
       for (const path of Array.from(g.querySelectorAll("path"))) {
-        const len = path.getTotalLength();
-        path.style.strokeDasharray = `${len}`;
-        path.style.strokeDashoffset = `${len}`;
+        path.style.setProperty("--len", String(path.getTotalLength()));
+        path.style.animationDelay = `${delay}ms`;
       }
     }
     svg.dataset.draw = "true";
 
-    // one frame later, release them — a transition needs a painted start value
-    const raf = requestAnimationFrame(() => {
-      for (const g of groups) {
-        const delay = STAGGER[g.dataset.part ?? ""] ?? 0;
-        for (const path of Array.from(g.querySelectorAll("path"))) {
-          path.style.transitionDelay = `${delay}ms`;
-          path.style.strokeDashoffset = "0";
-        }
-      }
-    });
-
     const done = window.setTimeout(() => {
       for (const path of Array.from(svg.querySelectorAll("path"))) {
-        path.style.strokeDasharray = "";
-        path.style.strokeDashoffset = "";
-        path.style.transitionDelay = "";
+        path.style.removeProperty("--len");
+        path.style.animationDelay = "";
       }
       delete svg.dataset.draw;
     }, 1400);
 
-    return () => { cancelAnimationFrame(raf); clearTimeout(done); };
+    return () => clearTimeout(done);
   }, []);
 
   // Blink idles on a random interval; the ear twitch is driven by hover.

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useTabs } from "@/lib/tabs";
+import { usePathname } from "next/navigation";
+import { tabForPath, useTabs } from "@/lib/tabs";
 import PandaLogo from "./PandaLogo";
 import s from "./TabBar.module.css";
 
@@ -25,11 +26,18 @@ function Close() {
 
 export default function TabBar() {
   const { tabs, close } = useTabs();
+  const pathname = usePathname();
+  // the tab you are already on is inert, exactly like the menu row for it
+  const currentId = tabForPath(pathname)?.id ?? null;
 
   return (
     <div className={s.bar}>
       {/* earlier tabs stack above later ones, so a hovered tab fills behind its neighbour */}
-      <div className={`${s.tab} ${s.logoTab}`} style={{ zIndex: tabs.length + 1 }}>
+      <div
+        className={`${s.tab} ${s.logoTab}`}
+        data-active={currentId === null}
+        style={{ zIndex: tabs.length + 1 }}
+      >
         <Link href="/" className={`${s.link} ${s.inner}`} aria-label="Home">
           <PandaLogo className={s.logo} />
         </Link>
@@ -37,7 +45,12 @@ export default function TabBar() {
       </div>
 
       {tabs.map((tab, i) => (
-        <div key={tab.id} className={s.tab} style={{ zIndex: tabs.length - i }}>
+        <div
+          key={tab.id}
+          className={s.tab}
+          data-active={tab.id === currentId}
+          style={{ zIndex: tabs.length - i }}
+        >
           <div className={s.inner}>
             <Link href={tab.href} className={s.label}>
               {tab.label}

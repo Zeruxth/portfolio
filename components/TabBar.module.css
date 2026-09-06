@@ -29,8 +29,8 @@
   background: var(--bg);
   transition: background 0.18s ease;
 }
-.tab:hover::before,
-.tab:focus-within::before { background: var(--ink); }
+.tab:not([data-active="true"]):hover::before,
+.tab:not([data-active="true"]):focus-within::before { background: var(--ink); }
 
 .inner {
   position: relative;
@@ -44,8 +44,8 @@
 /* only the first tab draws a left edge; the rest sit under the previous diagonal */
 .bar > .tab:first-child .inner { border-left: 1px solid var(--ink); }
 
-.tab:hover .inner,
-.tab:focus-within .inner { color: var(--bg); }
+.tab:not([data-active="true"]):hover .inner,
+.tab:not([data-active="true"]):focus-within .inner { color: var(--bg); }
 
 /* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
 .logoTab .inner { width: 209px; padding: 0; position: relative; }
