@@ -5,15 +5,38 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { SECTIONS, sectionForPath, type SectionKey } from "./sections";
+import { PROJECTS } from "@/content/projects";
+import { SECTIONS } from "./sections";
+
+export interface Tab {
+  id: string;
+  label: string;
+  href: string;
+}
 
 /**
- * Tabs accumulate as you navigate, browser-style. Closing one steps back to the
- * tab before it. Home is not a tab — it is the logo, and it never closes.
+ * The tab a route opens, or null for home. Projects get their own tab, so the
+ * bar reads logo / Selected Projects / <project name> as you go deeper.
  */
+export function tabForPath(pathname: string): Tab | null {
+  const path = pathname.replace(/\/+$/, "") || "/";
+  if (path === "/") return null;
+
+  const slug = path.match(/^\/projects\/(.+)$/)?.[1];
+  if (slug) {
+    const project = PROJECTS.find((p) => p.slug === slug);
+    return project
+      ? { id: `project:${project.slug}`, label: project.title, href: `/projects/${project.slug}` }
+      : null;
+  }
+
+  const section = SECTIONS.find((s) => s.href !== "/" && s.href === path);
+  return section ? { id: section.key, label: section.label, href: section.href } : null;
+}
+
 interface TabsState {
-  tabs: SectionKey[];
-  close: (key: SectionKey) => void;
+  tabs: Tab[];
+  close: (id: string) => void;
 }
 
 const Ctx = createContext<TabsState>({ tabs: [], close: () => {} });
@@ -21,38 +44,40 @@ const Ctx = createContext<TabsState>({ tabs: [], close: () => {} });
 export function TabsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [tabs, setTabs] = useState<SectionKey[]>([]);
+  const [tabs, setTabs] = useState<Tab[]>([]);
 
-  const current = sectionForPath(pathname).key;
+  const current = tabForPath(pathname);
+  const currentId = current?.id ?? null;
 
   useEffect(() => {
     // home is the root, and its frame shows the logo tab alone — going there
     // closes everything else rather than leaving tabs standing behind it
-    if (current === "home") {
+    if (!current) {
       setTabs((open) => (open.length ? [] : open));
       return;
     }
-    setTabs((open) => (open.includes(current) ? open : [...open, current]));
-  }, [current]);
+    setTabs((open) =>
+      open.some((t) => t.id === current.id) ? open : [...open, current],
+    );
+    // the id is what identifies the route; the object is rebuilt every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentId]);
 
   const close = useCallback(
-    (key: SectionKey) => {
-      const i = tabs.indexOf(key);
+    (id: string) => {
+      const i = tabs.findIndex((t) => t.id === id);
       if (i === -1) return;
-      const next = tabs.filter((k) => k !== key);
+      const next = tabs.filter((t) => t.id !== id);
       setTabs(next);
 
       // Navigate OUTSIDE the state updater: React runs updaters during render,
       // and routing from there updates the Router mid-render.
-      if (key === current) {
+      if (id === currentId) {
         const fallback = next[i - 1] ?? next[next.length - 1];
-        const target = fallback
-          ? SECTIONS.find((s) => s.key === fallback)?.href ?? "/"
-          : "/";
-        router.push(target);
+        router.push(fallback ? fallback.href : "/");
       }
     },
-    [tabs, current, router],
+    [tabs, currentId, router],
   );
 
   const value = useMemo(() => ({ tabs, close }), [tabs, close]);

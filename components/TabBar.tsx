@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { BY_KEY } from "@/lib/sections";
 import { useTabs } from "@/lib/tabs";
 import { Logo } from "./icons";
 import s from "./TabBar.module.css";
@@ -37,31 +36,24 @@ export default function TabBar() {
         <Edge />
       </div>
 
-      {tabs.map((key, i) => {
-        const section = BY_KEY[key];
-        return (
-          <div
-            key={key}
-            className={s.tab}
-            style={{ zIndex: tabs.length - i }}
-          >
-            <div className={s.inner}>
-              <Link href={section.href} className={s.label}>
-                {section.label}
-              </Link>
-              <button
-                type="button"
-                className={s.close}
-                onClick={() => close(key)}
-                aria-label={`Close ${section.label}`}
-              >
-                <Close />
-              </button>
-            </div>
-            <Edge />
+      {tabs.map((tab, i) => (
+        <div key={tab.id} className={s.tab} style={{ zIndex: tabs.length - i }}>
+          <div className={s.inner}>
+            <Link href={tab.href} className={s.label}>
+              {tab.label}
+            </Link>
+            <button
+              type="button"
+              className={s.close}
+              onClick={() => close(tab.id)}
+              aria-label={`Close ${tab.label}`}
+            >
+              <Close />
+            </button>
           </div>
-        );
-      })}
+          <Edge />
+        </div>
+      ))}
     </div>
   );
 }
