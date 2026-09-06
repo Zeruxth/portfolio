@@ -54,7 +54,7 @@
   letter-spacing: 0.2px;
   text-transform: uppercase;
 }
-.enter svg { width: 30.344px; height: 19.211px; fill: currentColor; flex: none; }
+.enter svg { width: 30.344px; height: 19.211px; flex: none; }
 
 .meta {
   width: 176px;

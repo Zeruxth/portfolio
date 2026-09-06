@@ -1,20 +1,44 @@
 /* Exported from Figma. The arrow is one path shared by the contact block and the
    hover rows — the Figma exports differ only in fill, so it takes currentColor. */
 
+/**
+ * The arrow, as a stroke rather than the outlined fill Figma exported.
+ *
+ * Its centreline was recovered from that outline: each end cap's midpoint is a
+ * centreline endpoint, each kink's midpoint a vertex. Offsetting it back out by
+ * half the original width lands within 0.03 units of the exported outline, so
+ * this is the path Figma strokes.
+ *
+ * 1.886 is the logo's on-screen weight (1.43085 authored, drawn 1.3179x its
+ * viewBox). Every arrow is rendered at 30.344px — 1:1 with the viewBox — so the
+ * authored number IS the on-screen number. Change the logo's display size and
+ * this needs revisiting.
+ */
+export const ARROW_STROKE = 1.886;
+
 export function Arrow({ className }: { className?: string }) {
   return (
     <svg
       className={className}
       viewBox="0 0 30.3438 19.2109"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <path d="M29.5557 8.44629L30.3438 9.23926L29.5879 10.0625L21.1943 19.2109L19.4697 17.6289L25.6846 10.8545L17.2061 12.5244L16.8438 12.5957L16.5068 12.4463L9.62305 9.40234L0.769531 12.4814L0 10.2705L9.29004 7.04004L9.72559 6.88867L10.1475 7.0752L17.1162 10.1553L26.1816 8.37109L19.502 1.65039L21.1621 0L29.5557 8.44629Z" />
+      <g
+        stroke="currentColor"
+        strokeWidth={ARROW_STROKE}
+        strokeLinecap="butt"
+        strokeLinejoin="miter"
+      >
+        <path d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544" />
+        <path d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252" />
+      </g>
     </svg>
   );
 }
 
-export const LOGO_PATHS = [
+const LOGO_PATHS = [
   "M15.2354 27.3783L8.05012 24.897L4.89687 22.1056L3.50116 14.145L4.98075 10.9464L5.79145 9.1939L7.01627 6.54613L8.75867 5.19849L10.9406 3.51087L13.6329 1.42854H23.8164L26.1535 3.52746L28.5702 5.69789L31.9322 8.71722L32.0161 9.02009L32.5636 10.9958L34.31 17.2982L31.1051 23.7081L28.8532 24.627L22.1105 27.3783H15.2354Z",
   "M23.1444 7.42489L25.2638 6.59781L27.3832 7.42489",
   "M13.5295 7.26982L11.3067 6.90797L9.75594 8.45876",
