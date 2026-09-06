@@ -35,7 +35,8 @@
   height: 19.211px;
   fill: currentColor;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transform: translateX(-12px);
+  transition: opacity 0.18s ease, transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .exp {
@@ -57,9 +58,22 @@
 }
 
 .row[data-active="true"] { background: #222222; color: #DEDEDE; }
-.row:hover, .row:focus-visible { background: var(--c); color: var(--on); }
-.row:hover .arrow, .row:focus-visible .arrow { opacity: 1; }
-.row:hover .exp, .row:focus-visible .exp { grid-template-rows: 1fr; }
+
+/*
+ * The row for the page you are already on is inert: it stays black, gets no
+ * arrow and does not expand. There is nothing to preview about where you are.
+ */
+.row:not([data-active="true"]):hover,
+.row:not([data-active="true"]):focus-visible { background: var(--c); color: var(--on); }
+
+.row:not([data-active="true"]):hover .arrow,
+.row:not([data-active="true"]):focus-visible .arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.row:not([data-active="true"]):hover .exp,
+.row:not([data-active="true"]):focus-visible .exp { grid-template-rows: 1fr; }
 
 .contact {
   border-top: 1px solid var(--ink);
