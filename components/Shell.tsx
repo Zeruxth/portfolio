@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useSectionHover } from "@/lib/section-hover";
 import { BY_KEY, sectionForPath } from "@/lib/sections";
-import Tab from "./Tab";
+import TabBar from "./TabBar";
 import Menu from "./Menu";
 import Band from "./Band";
 import s from "./Shell.module.css";
@@ -19,7 +19,7 @@ export default function Shell({ children }: { children: ReactNode }) {
 
   return (
     <div className={s.frame}>
-      <Tab />
+      <TabBar />
       <div
         className={s.panel}
         style={

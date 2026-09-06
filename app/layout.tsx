@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import { SectionHoverProvider } from "@/lib/section-hover";
+import { TabsProvider } from "@/lib/tabs";
 import Shell from "@/components/Shell";
 import "./globals.css";
 import "./kinetic.css";
@@ -27,8 +28,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SectionHoverProvider>
-          {/* the band lives here, not in the pages, so it survives navigation */}
-          <Shell>{children}</Shell>
+          <TabsProvider>
+            {/* the band and the tab bar live here, not in the pages, so they survive navigation */}
+            <Shell>{children}</Shell>
+          </TabsProvider>
         </SectionHoverProvider>
       </body>
     </html>

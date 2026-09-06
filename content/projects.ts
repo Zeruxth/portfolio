@@ -1,22 +1,53 @@
 /**
- * PLACEHOLDER. Titles, years and counts are invented — swap for the real work.
- * `cover` is null until real stills exist; the placeholder generator fills in.
+ * Fields come straight from the Selected Projects design (Figma 2098:1297):
+ * title, description, disciplines, year and an optional note, plus one image.
+ *
+ * `image` is a path under /public. One square image per project is enough —
+ * the collapsed row shows it at 48px in luminosity blend, the open row at 363px
+ * in full colour. Null falls back to generated placeholder art.
+ *
+ * TODO(aki): titles below are real; everything marked PLACEHOLDER needs your copy.
  */
 export interface Project {
   slug: string;
   title: string;
+  /** one or two sentences, set in mono under the title */
+  description: string;
+  /** rendered slash-joined: ["Editorial","Web","Research"] -> EDITORIAL/WEB/RESEARCH */
+  disciplines: string[];
   year: string;
-  discipline: string;
-  cover: string | null;
+  /** optional third metadata line, e.g. "Graduation project" */
+  note?: string;
+  image: string | null;
 }
 
 export const PROJECTS: Project[] = [
-  { slug: "night-market", title: "Night Market Identity", year: "2026", discipline: "Identity", cover: null },
-  { slug: "signal-noise", title: "Signal / Noise", year: "2025", discipline: "Motion", cover: null },
-  { slug: "haifa-type-week", title: "Haifa Type Week", year: "2025", discipline: "Print", cover: null },
-  { slug: "tape-deck-03", title: "Tape Deck 03", year: "2024", discipline: "Packaging", cover: null },
-  { slug: "moth-club", title: "Moth Club Posters", year: "2023", discipline: "Print", cover: null },
-  { slug: "red-line", title: "Red Line Signage", year: "2021", discipline: "Wayfinding", cover: null },
+  {
+    slug: "my-life-is-a-beautiful-attack",
+    title: "My life is a beautiful attack",
+    description:
+      "A research book and interactive website exploring the visual language of monsters.",
+    disciplines: ["Editorial", "Web", "Research"],
+    year: "2026",
+    note: "Graduation project",
+    image: null,
+  },
+  {
+    slug: "the-monster-archetype",
+    title: "The monster archetype",
+    description: "PLACEHOLDER — description needed.",
+    disciplines: ["PLACEHOLDER"],
+    year: "PLACEHOLDER",
+    image: null,
+  },
+  {
+    slug: "zoo-distillery",
+    title: "Zoo distillery",
+    description: "PLACEHOLDER — description needed.",
+    disciplines: ["PLACEHOLDER"],
+    year: "PLACEHOLDER",
+    image: null,
+  },
 ];
 
 export const INTRO =

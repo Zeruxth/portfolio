@@ -1,0 +1,62 @@
+.bar {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  height: var(--tab-h);
+}
+
+/* consecutive tabs tuck under the previous one's diagonal */
+.tab {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  margin-right: -71px;
+  color: var(--ink);
+}
+.tab + .tab .inner { padding-left: 74px; }
+
+.inner {
+  border-left: 1px solid var(--ink);
+  border-top: 1px solid var(--ink);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: transparent;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.edge { width: 72px; height: var(--tab-h); flex: none; display: block; }
+.edgeFill { fill: transparent; transition: fill 0.18s ease; }
+.edgeLine { fill: none; stroke: var(--ink); }
+
+.label {
+  font-family: var(--ui);
+  font-size: 22px;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.logo { width: 35.771px; height: 26.57px; display: block; }
+
+.close {
+  all: unset;
+  width: 10.7px;
+  height: 10.7px;
+  flex: none;
+  cursor: pointer;
+  display: block;
+  color: inherit;
+}
+.close svg { display: block; width: 100%; height: 100%; stroke: currentColor; }
+
+/* the whole tab fills, diagonal included — the same read as the active menu row */
+.tab:hover .inner,
+.tab:focus-within .inner { background: var(--ink); color: var(--bg); }
+.tab:hover .edgeFill,
+.tab:focus-within .edgeFill { fill: var(--ink); }
+.tab:hover .edgeLine,
+.tab:focus-within .edgeLine { stroke: var(--ink); }
+
+.link { display: flex; align-items: stretch; color: inherit; }

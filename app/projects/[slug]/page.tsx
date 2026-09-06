@@ -20,7 +20,7 @@ export default async function ProjectPage({
       <div className={s.head}>
         <span>{project.title}</span>
         <span>
-          {project.discipline} · {project.year}
+          {project.disciplines.join("/")} &middot; {project.year}
         </span>
       </div>
       <div className={s.body}>
