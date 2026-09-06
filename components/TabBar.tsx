@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTabs } from "@/lib/tabs";
-import { Logo } from "./icons";
+import PandaLogo from "./PandaLogo";
 import s from "./TabBar.module.css";
 
 /** the diagonal that closes each tab; the fill is the .tab silhouette in CSS */
@@ -31,7 +31,7 @@ export default function TabBar() {
       {/* earlier tabs stack above later ones, so a hovered tab fills behind its neighbour */}
       <div className={`${s.tab} ${s.logoTab}`} style={{ zIndex: tabs.length + 1 }}>
         <Link href="/" className={`${s.link} ${s.inner}`} aria-label="Home">
-          <Logo className={s.logo} />
+          <PandaLogo className={s.logo} />
         </Link>
         <Edge />
       </div>

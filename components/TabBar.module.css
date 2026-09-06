@@ -48,8 +48,8 @@
 .tab:focus-within .inner { color: var(--bg); }
 
 /* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
-.logoTab .inner { width: 209px; }
-.logo { width: 35.771px; height: 26.57px; display: block; }
+.logoTab .inner { width: 209px; padding-left: 13.77px; }
+.logo { width: 49.165px; height: 36.519px; display: block; }
 
 .edge {
   position: relative;

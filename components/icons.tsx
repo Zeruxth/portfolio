@@ -14,7 +14,7 @@ export function Arrow({ className }: { className?: string }) {
   );
 }
 
-const LOGO_PATHS = [
+export const LOGO_PATHS = [
   "M15.2354 27.3783L8.05012 24.897L4.89687 22.1056L3.50116 14.145L4.98075 10.9464L5.79145 9.1939L7.01627 6.54613L8.75867 5.19849L10.9406 3.51087L13.6329 1.42854H23.8164L26.1535 3.52746L28.5702 5.69789L31.9322 8.71722L32.0161 9.02009L32.5636 10.9958L34.31 17.2982L31.1051 23.7081L28.8532 24.627L22.1105 27.3783H15.2354Z",
   "M23.1444 7.42489L25.2638 6.59781L27.3832 7.42489",
   "M13.5295 7.26982L11.3067 6.90797L9.75594 8.45876",
@@ -38,9 +38,34 @@ const LOGO_PATHS = [
   "M22.3691 20.9167L20.9734 22.1056H18.936L18.526 20.6779L17.5403 22.1056H15.2355L14.6152 20.9167",
 ];
 
-export function Logo({ className }: { className?: string }) {
+/**
+ * Indices into LOGO_PATHS, grouped so each part can move independently.
+ * 17 and 19 are compound duplicates of the eye patches (7, 8) plus the pupils
+ * (16, 18) — rendering them double-strokes the eyes and breaks the blink,
+ * since only one copy of each pupil would scale.
+ */
+export const LOGO_GROUPS: { name: string; paths: number[] }[] = [
+  { name: "head", paths: [0] },
+  { name: "earRight", paths: [11, 14, 15] },
+  { name: "earLeft", paths: [12, 13] },
+  { name: "eyes", paths: [7, 8] },
+  { name: "pupilLeft", paths: [18] },
+  { name: "pupilRight", paths: [16] },
+  { name: "nose", paths: [9, 10] },
+  { name: "mouth", paths: [20] },
+  { name: "marks", paths: [1, 2, 3, 4, 5, 6] },
+];
+
+export function Logo({
+  className,
+  ref,
+}: {
+  className?: string;
+  ref?: React.Ref<SVGSVGElement>;
+}) {
   return (
     <svg
+      ref={ref}
       className={className}
       viewBox="0 0 37.3056 28.0937"
       fill="none"
@@ -48,15 +73,19 @@ export function Logo({ className }: { className?: string }) {
       role="img"
       aria-label="Aki Yamin"
     >
-      {LOGO_PATHS.map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          fillRule="evenodd"
-          clipRule="evenodd"
-          stroke="currentColor"
-          strokeWidth="1.43085"
-        />
+      {LOGO_GROUPS.map((g) => (
+        <g key={g.name} data-part={g.name}>
+          {g.paths.map((i) => (
+            <path
+              key={i}
+              d={LOGO_PATHS[i]}
+              fillRule="evenodd"
+              clipRule="evenodd"
+              stroke="currentColor"
+              strokeWidth="1.43085"
+            />
+          ))}
+        </g>
       ))}
     </svg>
   );
