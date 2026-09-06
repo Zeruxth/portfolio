@@ -103,17 +103,25 @@
   width: 30.344px;
   height: 19.211px;
 }
-/* Contact: the arrow flies off to the right and loops back in from the left —
-   a send, distinct from the menu's draw. */
+/*
+ * Contact: it winds up, stretches as it takes off, leaves the frame and
+ * comes back. Anticipation before the move and a squash on the way out are
+ * what stop it reading as a flat slide. Origin is the tail, so the stretch
+ * looks like the shaft extending rather than the whole mark scaling.
+ */
 @keyframes launch {
-  0%   { transform: translateX(0);     opacity: 1; }
-  44%  { transform: translateX(30px);  opacity: 0; }
-  45%  { transform: translateX(-30px); opacity: 0; }
-  100% { transform: translateX(0);     opacity: 1; }
+  0%   { transform: translateX(0)     scaleX(1);    opacity: 1; }
+  18%  { transform: translateX(-9px)  scaleX(0.82); opacity: 1; }
+  42%  { transform: translateX(22px)  scaleX(1.38); opacity: 1; }
+  58%  { transform: translateX(58px)  scaleX(1.15); opacity: 0; }
+  59%  { transform: translateX(-34px) scaleX(0.86); opacity: 0; }
+  78%  { transform: translateX(4px)   scaleX(1.06); opacity: 1; }
+  100% { transform: translateX(0)     scaleX(1);    opacity: 1; }
 }
+.contactArrow { transform-origin: left center; }
 .contact:hover .contactArrow,
 .contact:focus-visible .contactArrow {
-  animation: launch 0.62s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: launch 0.86s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

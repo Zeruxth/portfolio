@@ -1,6 +1,7 @@
 /* Provisional. These pages are not designed yet — this is honest scaffolding
    that uses the established tokens, not a proposal. */
 .head {
+  margin: 16px 16px 0;
   flex: none;
   display: flex;
   justify-content: space-between;
@@ -13,7 +14,7 @@
 }
 .head span:last-child { opacity: 0.55; font-variant-numeric: tabular-nums; }
 
-.body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-top: 16px; }
+.body { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px; }
 
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .dense { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; }
