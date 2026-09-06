@@ -48,8 +48,21 @@
 .tab:focus-within .inner { color: var(--bg); }
 
 /* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
-.logoTab .inner { width: 209px; padding-left: 13.77px; }
-.logo { width: 49.165px; height: 36.519px; display: block; }
+.logoTab .inner { width: 209px; padding: 0; position: relative; }
+/*
+ * Placed rather than padded. The mark is 36.5px tall in a 60px tab, so a 16px
+ * padding box is shorter than the mark and align-items:center clamps it to the
+ * padding edge. These offsets are measured from the padding box, which already
+ * sits 1px in from the border — so they land on Figma's 13.765 / 12.026.
+ */
+.logo {
+  position: absolute;
+  left: 12.765px;
+  top: 11.03px;
+  width: 49.165px;
+  height: 36.519px;
+  display: block;
+}
 
 .edge {
   position: relative;

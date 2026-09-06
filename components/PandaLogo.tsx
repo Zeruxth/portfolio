@@ -68,7 +68,7 @@ export default function PandaLogo({ className }: { className?: string }) {
     return () => { cancelAnimationFrame(raf); clearTimeout(done); };
   }, []);
 
-  // Idle. Irregular on purpose — a metronomic blink reads as a broken loop.
+  // Blink idles on a random interval; the ear twitch is driven by hover.
   useEffect(() => {
     const svg = ref.current;
     if (!svg) return;
@@ -96,16 +96,25 @@ export default function PandaLogo({ className }: { className?: string }) {
       }, rand(4200, 9000)));
     };
 
-    const scheduleTwitch = () => {
-      timers.push(window.setTimeout(() => {
-        fire([Math.random() < 0.5 ? "earLeft" : "earRight"], "twitch", 560);
-        scheduleTwitch();
-      }, rand(7000, 15000)));
-    };
-
     scheduleBlink();
-    scheduleTwitch();
-    return () => timers.forEach((t) => clearTimeout(t));
+
+    // The ear twitch answers the cursor rather than a clock. Ears alternate,
+    // and a re-entry mid-twitch is ignored so it cannot stack.
+    const target = svg.closest("a") ?? svg;
+    let nextEar = 0;
+    let busy = false;
+    const onEnter = () => {
+      if (busy) return;
+      busy = true;
+      fire([nextEar++ % 2 === 0 ? "earLeft" : "earRight"], "twitch", 560);
+      timers.push(window.setTimeout(() => { busy = false; }, 560));
+    };
+    target.addEventListener("pointerenter", onEnter);
+
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+      target.removeEventListener("pointerenter", onEnter);
+    };
   }, []);
 
   return <Logo className={`${s.logo} ${className ?? ""}`} ref={ref} />;
