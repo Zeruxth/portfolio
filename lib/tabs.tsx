@@ -26,28 +26,33 @@ export function TabsProvider({ children }: { children: ReactNode }) {
   const current = sectionForPath(pathname).key;
 
   useEffect(() => {
-    if (current === "home") return;
+    // home is the root, and its frame shows the logo tab alone — going there
+    // closes everything else rather than leaving tabs standing behind it
+    if (current === "home") {
+      setTabs((open) => (open.length ? [] : open));
+      return;
+    }
     setTabs((open) => (open.includes(current) ? open : [...open, current]));
   }, [current]);
 
   const close = useCallback(
     (key: SectionKey) => {
-      setTabs((open) => {
-        const i = open.indexOf(key);
-        if (i === -1) return open;
-        const next = open.filter((k) => k !== key);
-        // closing the tab you are on steps back to the one before it
-        if (key === current) {
-          const fallback = next[i - 1] ?? next[next.length - 1];
-          const target = fallback
-            ? SECTIONS.find((s) => s.key === fallback)?.href ?? "/"
-            : "/";
-          router.push(target);
-        }
-        return next;
-      });
+      const i = tabs.indexOf(key);
+      if (i === -1) return;
+      const next = tabs.filter((k) => k !== key);
+      setTabs(next);
+
+      // Navigate OUTSIDE the state updater: React runs updaters during render,
+      // and routing from there updates the Router mid-render.
+      if (key === current) {
+        const fallback = next[i - 1] ?? next[next.length - 1];
+        const target = fallback
+          ? SECTIONS.find((s) => s.key === fallback)?.href ?? "/"
+          : "/";
+        router.push(target);
+      }
     },
-    [current, router],
+    [tabs, current, router],
   );
 
   const value = useMemo(() => ({ tabs, close }), [tabs, close]);
