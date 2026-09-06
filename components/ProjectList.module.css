@@ -61,7 +61,20 @@
   letter-spacing: 0.2px;
   text-transform: uppercase;
 }
-.enter svg { width: 30.344px; height: 19.211px; flex: none; }
+.enter svg {
+  width: 30.344px;
+  height: 19.211px;
+  flex: none;
+  /* ENTER: a spring forward — the third distinct arrow move */
+  transition: transform 0.4s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+.enter:hover svg,
+.enter:focus-visible svg { transform: translateX(9px); }
+.enter:hover, .enter:focus-visible { border-bottom-width: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .enter svg { transition: none; }
+}
 
 .meta {
   width: 176px;

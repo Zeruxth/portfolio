@@ -7,6 +7,8 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // the badge defaults to bottom-left, right on top of the contact block
+  devIndicators: { position: "bottom-right" },
   // Pages is a static host: no Node server, so the whole site is pre-rendered
   output: "export",
   basePath,

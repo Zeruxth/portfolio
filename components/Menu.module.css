@@ -34,8 +34,14 @@
   width: 30.344px;
   height: 19.211px;
   opacity: 0;
-  transform: translateX(-12px);
-  transition: opacity 0.18s ease, transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition: opacity 0.12s ease;
+}
+
+/* Menu rows: the arrow inks itself in, left to right. pathLength=1 on both
+   subpaths means one dash value drives the shaft and the head together. */
+@keyframes drawArrow {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
 }
 
 .exp {
@@ -66,9 +72,11 @@
 .row:not([data-active="true"]):focus-visible { background: var(--c); color: var(--on); }
 
 .row:not([data-active="true"]):hover .arrow,
-.row:not([data-active="true"]):focus-visible .arrow {
-  opacity: 1;
-  transform: translateX(0);
+.row:not([data-active="true"]):focus-visible .arrow { opacity: 1; }
+
+.row:not([data-active="true"]):hover .arrow path,
+.row:not([data-active="true"]):focus-visible .arrow path {
+  animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1);
 }
 
 .row:not([data-active="true"]):hover .exp,
@@ -94,18 +102,22 @@
   flex: none;
   width: 30.344px;
   height: 19.211px;
-  transition: transform 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-/* the arrow redraws itself and shoots forward — only possible now it is a stroke */
+/* Contact: the arrow flies off to the right and loops back in from the left —
+   a send, distinct from the menu's draw. */
+@keyframes launch {
+  0%   { transform: translateX(0);     opacity: 1; }
+  44%  { transform: translateX(30px);  opacity: 0; }
+  45%  { transform: translateX(-30px); opacity: 0; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
 .contact:hover .contactArrow,
-.contact:focus-visible .contactArrow { transform: translateX(7px); }
-.contact:hover .contactArrow path,
-.contact:focus-visible .contactArrow path {
-  animation: trace 0.42s cubic-bezier(0.33, 0, 0.67, 1);
+.contact:focus-visible .contactArrow {
+  animation: launch 0.62s cubic-bezier(0.4, 0, 0.2, 1);
 }
-@keyframes trace {
-  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow path, .contactArrow { animation: none !important; }
 }
 
 @media (max-width: 1100px) {
