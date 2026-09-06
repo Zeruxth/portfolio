@@ -104,28 +104,26 @@
   height: 19.211px;
 }
 /*
- * Contact: it winds up, stretches as it takes off, leaves the frame and
- * comes back. Anticipation before the move and a squash on the way out are
- * what stop it reading as a flat slide. Origin is the tail, so the stretch
- * looks like the shaft extending rather than the whole mark scaling.
+ * Contact: the arrow wipes itself away and comes back. Distinct from the
+ * menu rows, which only draw in — this one erases first, so it reads as the
+ * mark redrawing rather than arriving.
+ *
+ * The dash offset runs 0 -> -1 to clear it, then jumps to +1 so it redraws
+ * from the same end it left, rather than unwinding backwards.
  */
-@keyframes launch {
-  0%   { transform: translateX(0)     scaleX(1);    opacity: 1; }
-  18%  { transform: translateX(-9px)  scaleX(0.82); opacity: 1; }
-  42%  { transform: translateX(22px)  scaleX(1.38); opacity: 1; }
-  58%  { transform: translateX(58px)  scaleX(1.15); opacity: 0; }
-  59%  { transform: translateX(-34px) scaleX(0.86); opacity: 0; }
-  78%  { transform: translateX(4px)   scaleX(1.06); opacity: 1; }
-  100% { transform: translateX(0)     scaleX(1);    opacity: 1; }
+@keyframes eraseRedraw {
+  0%   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  45%  { stroke-dasharray: 1; stroke-dashoffset: -1; }
+  46%  { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  100% { stroke-dasharray: 1; stroke-dashoffset: 0; }
 }
-.contactArrow { transform-origin: left center; }
-.contact:hover .contactArrow,
-.contact:focus-visible .contactArrow {
-  animation: launch 0.86s cubic-bezier(0.4, 0, 0.2, 1);
+.contact:hover .contactArrow path,
+.contact:focus-visible .contactArrow path {
+  animation: eraseRedraw 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arrow path, .contactArrow { animation: none !important; }
+  .arrow path, .contactArrow path { animation: none !important; }
 }
 
 @media (max-width: 1100px) {
