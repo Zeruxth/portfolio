@@ -8,7 +8,8 @@ import { Arrow } from "./icons";
 import s from "./ProjectList.module.css";
 
 export default function ProjectList({ projects }: { projects: Project[] }) {
-  // one open at a time; the design only ever shows a single expanded row
+  // one open at a time. It stays on the last row you touched rather than
+  // collapsing on leave, so crossing the list doesn't thrash the layout.
   const [open, setOpen] = useState<string | null>(projects[0]?.slug ?? null);
 
   return (
@@ -20,16 +21,10 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             key={project.slug}
             className={s.row}
             data-open={isOpen}
-            role="button"
             tabIndex={0}
             aria-expanded={isOpen}
-            onClick={() => setOpen(isOpen ? null : project.slug)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setOpen(isOpen ? null : project.slug);
-              }
-            }}
+            onPointerEnter={() => setOpen(project.slug)}
+            onFocus={() => setOpen(project.slug)}
           >
             <div className={s.main}>
               <div>
@@ -47,7 +42,6 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                     href={`/projects/${project.slug}`}
                     className={s.enter}
                     tabIndex={isOpen ? 0 : -1}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     Enter
                     <Arrow />

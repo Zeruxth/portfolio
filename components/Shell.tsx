@@ -33,8 +33,10 @@ export default function Shell({ children }: { children: ReactNode }) {
           <Menu />
           <div className={s.stage}>{children}</div>
         </div>
-        {/* the box only opens for a section with something to show */}
-        <Band section={shown} open={hot && hovered !== "home"} />
+        {/* the band belongs to the homepage only — no other designed frame has it */}
+        {active.key === "home" && (
+          <Band section={shown} open={hot && hovered !== "home"} />
+        )}
       </div>
     </div>
   );

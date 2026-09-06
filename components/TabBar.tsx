@@ -33,7 +33,7 @@ export default function TabBar() {
 
   return (
     <div className={s.bar}>
-      <div className={s.tab} style={{ zIndex: 1 }}>
+      <div className={`${s.tab} ${s.logoTab}`} style={{ zIndex: 1 }}>
         <Link href="/" className={`${s.link} ${s.inner}`} aria-label="Home">
           <Logo className={s.logo} />
         </Link>

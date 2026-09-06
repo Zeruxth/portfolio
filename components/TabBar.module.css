@@ -38,6 +38,8 @@
   white-space: nowrap;
 }
 
+/* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
+.logoTab .inner { width: 209px; }
 .logo { width: 35.771px; height: 26.57px; display: block; }
 
 .close {

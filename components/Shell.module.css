@@ -21,8 +21,9 @@
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
-  border-bottom: 1px solid var(--ink);
 }
+/* the rule under the stage only exists to separate it from the band */
+.upper:not(:last-child) { border-bottom: 1px solid var(--ink); }
 
 /* every kinetic layer is a child of this box, and it clips them */
 .stage {
