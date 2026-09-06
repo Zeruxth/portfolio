@@ -1,46 +1,76 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Panda Lottie — preview</title>
+<title>Panda — motion set</title>
 <link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
 <style>
-  body { margin:0; padding:40px; background:#DEDEDE; color:#222;
-         font-family:"trade-gothic-next-condensed", "Arial Narrow", sans-serif; }
+  :root { --bg:#DEDEDE; --ink:#222; }
+  body { margin:0; padding:40px; background:var(--bg); color:var(--ink);
+         font-family:"trade-gothic-next-condensed","Arial Narrow",sans-serif; }
   h1 { font-size:22px; text-transform:uppercase; margin:0 0 4px; }
-  p  { font-family:ui-monospace,monospace; font-size:12px; opacity:.6; margin:0 0 28px; }
-  .row { display:flex; align-items:flex-end; gap:48px; flex-wrap:wrap; margin-bottom:32px; }
-  .cell { text-align:center; }
-  .cell span { display:block; font-family:ui-monospace,monospace; font-size:11px;
-               opacity:.55; margin-top:10px; }
-  .box { border:1px solid #222; display:inline-block; }
-  button { font:inherit; font-size:13px; text-transform:uppercase; letter-spacing:.04em;
-           padding:8px 14px; border:1px solid #222; background:transparent; cursor:pointer; }
-  button:hover { background:#222; color:#DEDEDE; }
+  .sub { font-family:ui-monospace,monospace; font-size:12px; opacity:.6; margin:0 0 28px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:24px; }
+  .card { border:1px solid var(--ink); }
+  .card h2 { font-size:16px; text-transform:uppercase; margin:0; padding:10px 12px;
+             border-bottom:1px solid var(--ink); display:flex; justify-content:space-between; }
+  .card h2 em { font-style:normal; font-family:ui-monospace,monospace; font-size:11px; opacity:.55; }
+  .stage { display:flex; align-items:center; justify-content:center; gap:28px; padding:20px; min-height:180px; }
+  .small { outline:1px solid rgba(34,34,34,.25); }
+  .bar { display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--ink); align-items:center; }
+  button { font:inherit; font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+           padding:6px 10px; border:1px solid var(--ink); background:transparent; cursor:pointer; }
+  button:hover { background:var(--ink); color:var(--bg); }
+  input[type=range] { flex:1; }
+  .controls { margin-bottom:24px; display:flex; gap:8px; }
 </style>
 
-<h1>Panda — draw on, ear twitch, blink</h1>
-<p>3.3s at 60fps &middot; 9 layers &middot; 21 subpaths &middot; 12KB</p>
+<h1>Panda — motion set</h1>
+<p class="sub">Each shown large, then at 36px, the size it runs at in the tab bar.</p>
 
-<div class="row">
-  <div class="cell"><div class="box"><div id="a" style="width:373px;height:281px"></div></div><span>373px — inspect</span></div>
-  <div class="cell"><div class="box"><div id="b" style="width:120px;height:90px"></div></div><span>120px</span></div>
-  <div class="cell"><div class="box"><div id="c" style="width:36px;height:27px"></div></div><span>36px — actual site size</span></div>
+<div class="controls">
+  <button onclick="all(p=>p.goToAndPlay(0,true))">Play all</button>
+  <button onclick="all(p=>{p.loop=!p.loop;p.goToAndPlay(0,true)})">Toggle loop</button>
 </div>
 
-<button id="replay">Replay</button>
-<button id="loop">Toggle loop</button>
+<div class="grid" id="grid"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
 <script>
-  const players = ["a","b","c"].map((id) =>
-    lottie.loadAnimation({
-      container: document.getElementById(id),
-      renderer: "svg", loop: false, autoplay: true, path: "/panda.json",
-    })
-  );
-  let looping = false;
-  document.getElementById("replay").onclick = () => players.forEach(p => p.goToAndPlay(0, true));
-  document.getElementById("loop").onclick = () => {
-    looping = !looping;
-    players.forEach(p => { p.loop = looping; p.goToAndPlay(0, true); });
+const SETS = [
+  ["panda-draw",   "Draw on",  "inks itself in, ear twitch, blink"],
+  ["panda-wave",   "Wave",     "NEW paw geometry — not from the logo"],
+  ["panda-nod",    "Nod",      "greeting tilt, pivots at the chin"],
+  ["panda-peek",   "Peek",     "rises from below with overshoot"],
+  ["panda-loader", "Loader",   "segment chases the outline, loops"],
+];
+const players = [];
+const grid = document.getElementById("grid");
+
+for (const [file, title, note] of SETS) {
+  const card = document.createElement("div");
+  card.className = "card";
+  card.innerHTML = `<h2>${title}<em>${note}</em></h2>
+    <div class="stage"><div class="big"></div><div class="small"></div></div>
+    <div class="bar"><button>Replay</button><input type="range" min="0" max="100" value="100"></div>`;
+  grid.appendChild(card);
+
+  const big = card.querySelector(".big"), small = card.querySelector(".small");
+  const load = (host, w) => {
+    host.style.width = w + "px";
+    const a = lottie.loadAnimation({container:host, renderer:"svg", loop:false,
+                                    autoplay:true, path:"/" + file + ".json"});
+    a.addEventListener("DOMLoaded", () => {
+      host.style.height = Math.round(w * a.animationData.h / a.animationData.w) + "px";
+    });
+    return a;
   };
+  const pair = [load(big, 200), load(small, 36)];
+  players.push(...pair);
+
+  card.querySelector("button").onclick = () => pair.forEach(p => p.goToAndPlay(0, true));
+  card.querySelector("input").oninput = (e) => {
+    const f = e.target.value / 100;
+    pair.forEach(p => p.goToAndStop(Math.round(f * (p.totalFrames - 1)), true));
+  };
+}
+function all(fn) { players.forEach(fn); }
 </script>
