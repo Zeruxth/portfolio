@@ -7,11 +7,10 @@ import { useTabs } from "@/lib/tabs";
 import { Logo } from "./icons";
 import s from "./TabBar.module.css";
 
-/** the diagonal that closes each tab; the fill path is what lets it go solid on hover */
+/** the diagonal that closes each tab; the fill is the .tab silhouette in CSS */
 function Edge() {
   return (
     <svg className={s.edge} viewBox="0 0 72.64 60.77" preserveAspectRatio="none" aria-hidden="true">
-      <path className={s.edgeFill} d="M0.32 0.384L72.32 60.384L0.32 60.384Z" />
       <path className={s.edgeLine} d="M0.32 0.384L72.32 60.384" />
     </svg>
   );

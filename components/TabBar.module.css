@@ -15,19 +15,48 @@
 }
 .tab + .tab .inner { padding-left: 74px; }
 
+/*
+ * The whole tab silhouette — rectangle plus diagonal — as ONE shape.
+ * Filling the rectangle in CSS and the triangle in SVG leaves a hairline
+ * seam where they meet, so the fill lives here and the SVG only strokes.
+ */
+.tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(0 0, calc(100% - 72px) 0, 100% 100%, 0 100%);
+  background: transparent;
+  transition: background 0.18s ease;
+}
+.tab:hover::before,
+.tab:focus-within::before { background: var(--ink); }
+
 .inner {
-  border-left: 1px solid var(--ink);
+  position: relative;
   border-top: 1px solid var(--ink);
   padding: 16px;
   display: flex;
   align-items: center;
   gap: 32px;
-  background: transparent;
-  transition: background 0.18s ease, color 0.18s ease;
+  transition: color 0.18s ease;
 }
+/* only the first tab draws a left edge; the rest sit under the previous diagonal */
+.bar > .tab:first-child .inner { border-left: 1px solid var(--ink); }
 
-.edge { width: 72px; height: var(--tab-h); flex: none; display: block; }
-.edgeFill { fill: transparent; transition: fill 0.18s ease; }
+.tab:hover .inner,
+.tab:focus-within .inner { color: var(--bg); }
+
+/* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
+.logoTab .inner { width: 209px; }
+.logo { width: 35.771px; height: 26.57px; display: block; }
+
+.edge {
+  position: relative;
+  width: 72px;
+  height: var(--tab-h);
+  flex: none;
+  display: block;
+}
 .edgeLine { fill: none; stroke: var(--ink); }
 
 .label {
@@ -37,10 +66,6 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
-
-/* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
-.logoTab .inner { width: 209px; }
-.logo { width: 35.771px; height: 26.57px; display: block; }
 
 .close {
   all: unset;
@@ -52,13 +77,5 @@
   color: inherit;
 }
 .close svg { display: block; width: 100%; height: 100%; stroke: currentColor; }
-
-/* the whole tab fills, diagonal included — the same read as the active menu row */
-.tab:hover .inner,
-.tab:focus-within .inner { background: var(--ink); color: var(--bg); }
-.tab:hover .edgeFill,
-.tab:focus-within .edgeFill { fill: var(--ink); }
-.tab:hover .edgeLine,
-.tab:focus-within .edgeLine { stroke: var(--ink); }
 
 .link { display: flex; align-items: stretch; color: inherit; }

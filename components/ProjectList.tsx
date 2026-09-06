@@ -8,9 +8,10 @@ import { Arrow } from "./icons";
 import s from "./ProjectList.module.css";
 
 export default function ProjectList({ projects }: { projects: Project[] }) {
-  // one open at a time. It stays on the last row you touched rather than
-  // collapsing on leave, so crossing the list doesn't thrash the layout.
-  const [open, setOpen] = useState<string | null>(projects[0]?.slug ?? null);
+  // the page opens with every row closed; one opens at a time on hover, and it
+  // stays on the last row you touched rather than collapsing on leave, so
+  // crossing the list doesn't thrash the layout
+  const [open, setOpen] = useState<string | null>(null);
 
   return (
     <div className={s.list}>
