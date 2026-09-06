@@ -1,0 +1,53 @@
+.band {
+  flex: none;
+  min-width: 0;
+  padding: 16px 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.band[data-ready="false"] { visibility: hidden; }
+
+.word {
+  flex: none;
+  overflow: hidden;
+  /* the clip box has to be taller than the glyphs, or overflow:hidden cuts
+     straight across the letterforms; the negative margin keeps the outer box put */
+  padding: 0.35em 0;
+  margin: -0.35em 0;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: var(--band-fs);
+  line-height: 0.72;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--accent);
+  transition: width 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.glyphs { display: block; transition: opacity 0.11s linear; }
+.glyphs[data-fade="true"] { opacity: 0; }
+
+/* the only element allowed to change size — it absorbs whatever the word doesn't use */
+.rule {
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: flex-end;
+  height: 1px;
+  /* sits exactly on the cap baseline, measured — not guessed */
+  margin-bottom: var(--band-baseline, 1px);
+  background-color: var(--accent);
+  background-size: cover;
+  background-position: center;
+  border: 0 solid var(--accent);
+  transition: height 0.34s cubic-bezier(0.2, 0.7, 0.3, 1), background-color 0.28s ease;
+}
+
+/* …and on hover it opens into a box holding a preview of what's inside */
+.rule[data-open="true"] {
+  /* the cap height of the real face, so the box is exactly as tall as the letters look */
+  height: var(--band-cap, calc(var(--band-fs) * 0.698));
+  background-image: var(--preview);
+  border-width: 1px;
+}

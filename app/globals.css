@@ -1,0 +1,45 @@
+/* --accent transitions only because it is a registered custom property */
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #222222; }
+@property --sec    { syntax: "<color>"; inherits: true; initial-value: #222222; }
+
+:root {
+  --bg: #DEDEDE;
+  --ink: #222222;
+
+  --rail: 280px;
+  --pad: 24px;
+  --tab-h: 50px;
+
+  /* set by <Band> once it has measured; never changes between sections */
+  --band-fs: 200px;
+
+  --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed",
+        "Roboto Condensed", "Arial Narrow", sans-serif;
+  --mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ui);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+
+:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (max-width: 1100px) {
+  body { overflow: auto; }
+}

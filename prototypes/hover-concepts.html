@@ -1,0 +1,1121 @@
+<title>AKI_WIP Hover Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400&family=Roboto+Condensed:ital,wght@0,400;0,500;1,400&display=swap">
+<link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
+
+<style>
+@property --accent{ syntax:"<color>"; inherits:true; initial-value:#222222; }
+@property --sec{ syntax:"<color>"; inherits:true; initial-value:#222222; }
+@property --onsec{ syntax:"<color>"; inherits:true; initial-value:#DEDEDE; }
+
+:root{
+  --bg:#DEDEDE;
+  --ink:#222222;
+  --rail:280px;
+  --pad:24px;
+  --fs:280px;
+  --diag:400px;
+  --ui:"trade-gothic-next-condensed","Trade Gothic Next LT Pro Condensed","Roboto Condensed","Arial Narrow",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--ui); -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+.frame{ height:100vh; height:100dvh; padding:var(--pad); display:flex; flex-direction:column; }
+
+/* ---------- top strip ---------- */
+.top{ flex:none; display:flex; align-items:flex-end; justify-content:space-between; gap:24px; }
+.tab{ width:var(--rail); height:50px; position:relative; flex:none; }
+.tab svg.cut{ position:absolute; inset:0; width:100%; height:100%; }
+.tab .cut .shape{ fill:var(--sec); opacity:0; transition:opacity .25s ease; }
+.tab .cut .edge{ fill:none; stroke:var(--ink); }
+.tab .logo{ position:absolute; left:17px; top:12px; width:36px; height:27px; }
+.tab .logo svg{ display:block; width:100%; height:100%; }
+.tab .logo path{ transition:stroke .25s ease; }
+
+.tools{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; padding-bottom:8px; }
+.tools .grp{ display:flex; align-items:center; gap:10px; }
+.tools .lbl{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; opacity:.5; }
+.tools .opts{ display:flex; flex-wrap:wrap; }
+.tools button{
+  all:unset;
+  font-family:var(--ui); font-size:12px; text-transform:uppercase; letter-spacing:.04em;
+  padding:5px 10px; cursor:pointer;
+  border:1px solid var(--ink); margin-left:-1px;
+  transition:background .15s ease,color .15s ease;
+}
+.tools button:first-child{ margin-left:0; }
+.tools button[aria-pressed="true"]{ background:var(--ink); color:var(--bg); }
+.tools button:focus-visible{ outline:2px solid var(--ink); outline-offset:2px; }
+.readout{
+  font-family:var(--mono); font-size:11px; letter-spacing:.02em;
+  font-variant-numeric:tabular-nums; opacity:.55; white-space:nowrap;
+}
+
+.panel{
+  flex:1 1 auto; min-height:0; min-width:0;
+  border:1px solid var(--ink);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+  transition:--accent .28s ease, --sec .28s ease, border-color .25s ease;
+}
+.upper{ flex:1 1 auto; min-height:0; display:flex; border-bottom:1px solid var(--ink); }
+
+/* ---------- rail ---------- */
+.rail{
+  width:var(--rail); flex:none;
+  border-right:1px solid var(--ink);
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.nav{ display:flex; flex-direction:column; }
+.nav .row{
+  all:unset; box-sizing:border-box;
+  display:block; width:100%; padding:16px;
+  border-bottom:1px solid var(--ink); cursor:pointer;
+  color:var(--ink); background:transparent;
+  transition:background .2s ease, color .2s ease;
+}
+.nav .row .head{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.nav .row .ttl{
+  font-family:var(--ui); font-size:22px; line-height:28px;
+  text-transform:uppercase; white-space:nowrap;
+}
+.nav .row .arw{ flex:none; width:30.344px; height:19.211px; opacity:0; transition:opacity .2s ease; }
+.nav .row .arw svg{ display:block; width:100%; height:100%; fill:currentColor; }
+
+.nav .row .exp{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .3s cubic-bezier(.2,.7,.3,1); }
+.nav .row .expIn{ display:block; overflow:hidden; min-height:0; }
+.nav .row .expTxt{
+  display:block;                      /* inline would draw the border on EVERY wrapped line */
+  margin-top:16px; padding-top:8px;
+  border-top:1px solid currentColor;
+  font-family:var(--mono); font-size:15px; line-height:1.2;
+  text-transform:uppercase;
+}
+
+.nav .row[data-active="true"]{ background:#222222; color:#DEDEDE; }
+.nav .row:hover, .nav .row:focus-visible{ background:var(--c); color:var(--on); }
+.nav .row:hover .arw, .nav .row:focus-visible .arw{ opacity:1; }
+.nav .row:hover .exp, .nav .row:focus-visible .exp{ grid-template-rows:1fr; }
+.nav .row:focus-visible{ outline:2px solid var(--ink); outline-offset:-4px; }
+
+.contact{
+  border-top:1px solid var(--ink); padding:16px;
+  display:flex; gap:10px; align-items:flex-end;
+  font-size:22px; text-transform:uppercase; line-height:1.3;
+}
+.contact i{ font-style:italic; }
+.contact .arr{ flex:none; width:30.344px; height:19.211px; }
+.contact .arr svg{ display:block; width:100%; height:100%; fill:currentColor; }
+
+/* ---------- stage ---------- */
+.stage{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; padding:16px; }
+.slot{ flex:1 1 auto; min-height:0; position:relative; }
+.intro{ font-size:36px; text-transform:uppercase; line-height:1.15; padding-top:16px; transition:opacity .3s ease; }
+
+/* ---------- band ---------- */
+.band{ flex:none; min-width:0; padding:16px 0; display:flex; gap:10px; align-items:flex-end; }
+.word{
+  flex:none; overflow:hidden;
+  padding:.35em 0; margin:-.35em 0;
+  font-family:var(--mono); font-weight:400;
+  font-size:var(--fs); line-height:.72;
+  text-transform:uppercase; white-space:nowrap;
+  color:transparent;
+  -webkit-text-stroke:1px var(--accent);
+  transition:width .34s cubic-bezier(.2,.7,.3,1), color .28s ease;
+}
+.word .t{ display:block; transition:opacity .11s linear; }
+.bleed .word{ overflow:visible; }
+
+.rule{
+  flex:1 1 0; min-width:0; align-self:flex-end;
+  height:1px; margin-bottom:1px; position:relative;
+  background:var(--accent);
+  background-size:cover; background-position:center;
+  border:0 solid var(--accent);
+  transition:height .34s cubic-bezier(.2,.7,.3,1), background-color .28s ease;
+}
+.rule .tick{ position:absolute; bottom:-6px; width:1px; height:13px; background:var(--accent); opacity:0; transition:opacity .2s ease; }
+.rule .tick.l{ left:0 } .rule .tick.r{ right:0 }
+.rule .num{
+  position:absolute; left:50%; bottom:0; transform:translate(-50%,50%);
+  background:var(--bg); padding:0 10px;
+  font-family:var(--ui); font-size:13px; letter-spacing:.1em; text-transform:uppercase;
+  white-space:nowrap; opacity:0; transition:opacity .2s ease; pointer-events:none;
+}
+
+/* ============ EFFECTS ============ */
+/* the rule becomes a box holding a preview of what's inside */
+.frame[data-box="true"] .rule{
+  height:calc(var(--fs) * 0.72);
+  background-image:var(--preview);
+  border-width:1px;
+}
+
+/* still-open options */
+.fx-tab[data-hot="true"] .tab .cut .shape{ opacity:1; }
+.fx-tab[data-hot="true"] .tab .logo path{ stroke:var(--onsec); }
+.fx-border[data-hot="true"] .panel{ border-color:var(--sec); }
+.fx-fill[data-hot="true"] .word{ color:var(--sec); }
+.fx-instrument[data-hot="true"] .rule .tick,
+.fx-instrument[data-hot="true"] .rule .num{ opacity:1; }
+
+
+/* ---------- kinetic intro: seven mechanics, one per load ---------- */
+.stage{ position:relative; overflow:hidden; }
+.intro{ position:relative; z-index:2; }
+.kfx{ position:absolute; inset:0; pointer-events:none; }
+.kcells{ z-index:5 } .kcols{ z-index:6 } .kperi{ z-index:7 } .kpanels{ z-index:1; display:flex; }
+
+.kcell{ position:absolute; overflow:hidden; opacity:0; transition:opacity 150ms steps(3,end); }
+.kcell.on{ opacity:1; transition:none; }
+.kcell .glyph{ position:absolute; font-family:var(--ui); font-weight:700; line-height:.8; white-space:pre; }
+.kcell .lab{ position:absolute; font-family:var(--mono); font-size:9px; letter-spacing:.06em; }
+
+.tile{ display:inline-block; vertical-align:-.22em; height:1em; overflow:hidden; position:relative; text-align:center; }
+.tile .tg{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+           font-family:var(--ui); font-weight:700; line-height:1; white-space:pre; }
+
+.zcol{ position:absolute; overflow:hidden; z-index:6; pointer-events:none; }
+.zblock{ position:absolute; left:0; width:100%; overflow:hidden; }
+.ztext{ position:absolute; left:0; bottom:0; white-space:nowrap; font-weight:700; line-height:1;
+        transform-origin:left bottom; transition:transform 220ms cubic-bezier(.05,.85,.20,1); }
+.zseg{ cursor:pointer; white-space:nowrap; }
+
+.kcol{ position:absolute; overflow:hidden; clip-path:inset(0 0 100% 0);
+       transition:clip-path 240ms cubic-bezier(.2,.7,.2,1); }
+.kcol.up{ clip-path:inset(100% 0 0 0); }
+.kcol .giant{ position:absolute; top:0; transform-origin:left top; font-family:var(--ui); font-weight:700;
+              line-height:.78; letter-spacing:-.01em; text-transform:uppercase;
+              word-break:break-all; overflow-wrap:anywhere; will-change:transform; }
+
+.kseg{ display:inline; cursor:pointer; padding:0 .08em;
+       -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+
+.krail{ position:absolute; overflow:hidden; font-family:var(--ui); font-weight:700; display:flex; align-items:center; }
+.krail .run{ position:absolute; white-space:nowrap; line-height:1; will-change:transform; }
+.krail.v .run{ writing-mode:vertical-rl; }
+
+.kpan{ position:relative; overflow:hidden; border-right:1px solid var(--ink); clip-path:inset(0 0 100% 0);
+       transition:flex-grow 260ms cubic-bezier(.1,.8,.2,1), clip-path 240ms cubic-bezier(.1,.85,.2,1); }
+.kpan:last-child{ border-right:0 }
+.kpanels.in .kpan{ clip-path:inset(0 0 0 0); }
+.kpan .fill{ position:absolute; white-space:nowrap; font-family:var(--ui); font-weight:700; line-height:1;
+             transform-origin:left top; }
+.kpan .pn{ position:absolute; top:6px; left:6px; font-family:var(--mono); font-size:9px; }
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+@media (max-width:1100px){
+  body{ overflow:auto; }
+  .frame{ height:auto; min-height:100dvh; }
+  .top{ flex-wrap:wrap; }
+  .tools{ align-items:flex-start; }
+  .upper{ flex-direction:column; }
+  .rail{ width:100%; border-right:0; border-bottom:1px solid var(--ink); }
+  .slot{ min-height:320px; }
+  .intro{ font-size:24px; }
+  .hint .list .li{ font-size:22px; }
+}
+</style>
+
+<div class="frame" id="frame" data-hot="false">
+  <div class="top">
+    <div class="tab">
+      <svg class="cut" viewBox="0 0 280.82 50.8841" preserveAspectRatio="none" aria-hidden="true">
+        <path class="shape" d="M280.5 50.5L220.5 0.5H0.5V50.5Z"/>
+        <path class="edge" d="M280.5 50.5L220.5 0.5H0.5V50.5"/>
+      </svg>
+      <div class="logo">
+        <svg viewBox="0 0 37.3056 28.0937" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Aki Yamin logo">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M15.2354 27.3783L8.05012 24.897L4.89687 22.1056L3.50116 14.145L4.98075 10.9464L5.79145 9.1939L7.01627 6.54613L8.75867 5.19849L10.9406 3.51087L13.6329 1.42854H23.8164L26.1535 3.52746L28.5702 5.69789L31.9322 8.71722L32.0161 9.02009L32.5636 10.9958L34.31 17.2982L31.1051 23.7081L28.8532 24.627L22.1105 27.3783H15.2354Z" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M23.1444 7.42489L25.2638 6.59781L27.3832 7.42489" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M13.5295 7.26982L11.3067 6.90797L9.75594 8.45876" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M25.9875 3.65133L26.1535 3.52746M32.5636 10.9958L32.294 11.0951" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M10.9966 3.54796L10.9407 3.51088M4.98076 10.9465L5.20704 10.9917" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M28.4687 5.77072L28.5702 5.69787" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M5.79146 9.1939L5.85351 9.25104" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M7.09871 14.8448L9.08403 19.6117L14.7185 18.4872L16.1659 13.7314L13.633 10.1129L9.08403 10.7849L7.09871 14.8448Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M21.5419 12.4391V17.1432L26.0391 20.9167L30.4847 18.2804L29.761 12.4391L25.1604 10.1129L21.5419 12.4391Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M16.4243 18.4871L17.9234 16.9881H19.7843L20.6114 18.4871L19.4225 20.0379H17.9234L16.4243 18.4871Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M17.9234 16.9881L16.4243 18.4871L17.9234 20.0379H19.4225L20.6114 18.4871L19.7843 16.9881H17.9234Z" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M28.5702 5.69789L30.4848 4.32334L33.2245 5.3572V7.4766L32.0161 9.0201" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M7.32654 4.53008L4.43174 5.25378V7.9418L5.79156 9.19387L4.98086 10.9464L3.13942 10.5781L0.761559 7.42487L1.58864 3.03099L6.8613 0.808203L10.9408 3.51084L8.75878 5.19846L7.32654 4.53008Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M7.0163 6.54616L5.79148 9.19393L4.43166 7.94186V5.25384L7.32646 4.53014L8.7587 5.19852L7.0163 6.54616Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M30.4848 4.32334L33.2245 5.3572V7.4766L32.0161 9.0201L31.9322 8.71723L28.5702 5.69789L30.4848 4.32334Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M28.5701 5.69792L26.1534 3.52749L29.4508 1.06673L34.31 1.73873L36.5328 6.02923L35.2404 10.0096L32.5635 10.9958L32.016 9.02012L33.2244 7.47663V5.35723L30.4847 4.32337L28.5701 5.69792Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M23.8257 16.4449L24.1035 13.2511H26.7418L28.1304 15.2877L26.2326 17.1855L23.8257 16.4449Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M21.542 17.1432V12.4391L25.1605 10.1129L29.7611 12.4391L30.4848 18.2804L26.0393 20.9167L21.542 17.1432ZM23.8259 16.4449L24.1036 13.2511H26.7419L28.1305 15.2877L26.2328 17.1854L23.8259 16.4449Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.43881 15.1764L10.7524 12.9355L12.1047 12.5105L13.7274 13.8627L13.1865 16.2582L9.82517 17.1854L9.43881 15.1764Z" stroke="#222222" stroke-width="1.43085"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M9.08403 19.6117L7.09871 14.8448L9.08403 10.7849L13.633 10.1129L16.1659 13.7314L14.7185 18.4872L9.08403 19.6117ZM9.43882 15.1764L10.7524 12.9355L12.1047 12.5105L13.7274 13.8628L13.1865 16.2582L9.82518 17.1854L9.43882 15.1764Z" stroke="#222222" stroke-width="1.43085"/>
+          <path d="M22.3691 20.9167L20.9734 22.1056H18.936L18.526 20.6779L17.5403 22.1056H15.2355L14.6152 20.9167" stroke="#222222" stroke-width="1.43085"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="tools">
+      <div class="grp">
+        <span class="lbl">Band sizing</span>
+        <div class="opts" id="modes">
+          <button data-mode="a" aria-pressed="true">A &#183; Full words</button>
+          <button data-mode="b" aria-pressed="false">B &#183; Shorter</button>
+          <button data-mode="c" aria-pressed="false">C &#183; Figma, bleeds</button>
+        </div>
+        <span class="readout" id="readout">TYPE &#8212; RULE &#8212;</span>
+      </div>
+      <div class="grp">
+        <span class="lbl">Effects</span>
+        <div class="opts" id="fx"></div>
+        <span class="lbl">Intro</span>
+        <div class="opts"><button id="reroll" type="button">Re-roll</button></div>
+        <span class="readout" id="kName">&#8212;</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="upper">
+      <div class="rail">
+        <nav class="nav" id="nav" aria-label="Main"></nav>
+        <div class="contact">
+          <p>Have a project, a job or some cool shit in mind? <i>Let&#8217;s talk</i></p>
+          <span class="arr">
+            <svg viewBox="0 0 30.3438 19.2109" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M29.5557 8.44629L30.3438 9.23926L29.5879 10.0625L21.1943 19.2109L19.4697 17.6289L25.6846 10.8545L17.2061 12.5244L16.8438 12.5957L16.5068 12.4463L9.62305 9.40234L0.769531 12.4814L0 10.2705L9.29004 7.04004L9.72559 6.88867L10.1475 7.0752L17.1162 10.1553L26.1816 8.37109L19.502 1.65039L21.1621 0L29.5557 8.44629Z"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="stage" id="stage">
+        <div class="kfx kpanels" id="kPanels"></div>
+        <div class="slot" id="slot"></div>
+        <p class="intro" id="intro">Hi, I&#8217;m Aki Yamin, a multidisciplinary visual designer who likes making cool shit. If it can be printed, clicked, watched or held, I&#8217;m probably interested. If it needs more than one of those, even better.</p>
+        <div class="kfx kcells" id="kCells"></div>
+        <div class="kfx kcols" id="kCols"></div>
+        <div class="kfx kperi" id="kPeri"></div>
+      </div>
+    </div>
+
+    <div class="band" id="band">
+      <span class="word" id="wl"><span class="t">AKI</span></span>
+      <span class="rule" id="rule">
+        <span class="tick l"></span><span class="tick r"></span>
+        <span class="num" id="num"></span>
+      </span>
+      <span class="word" id="wr"><span class="t">WIP</span></span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ARROW = '<svg viewBox="0 0 30.3438 19.2109" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M29.5557 8.44629L30.3438 9.23926L29.5879 10.0625L21.1943 19.2109L19.4697 17.6289L25.6846 10.8545L17.2061 12.5244L16.8438 12.5957L16.5068 12.4463L9.62305 9.40234L0.769531 12.4814L0 10.2705L9.29004 7.04004L9.72559 6.88867L10.1475 7.0752L17.1162 10.1553L26.1816 8.37109L19.502 1.65039L21.1621 0L29.5557 8.44629Z"/></svg>';
+
+  var SECTIONS = [
+    { key:"home", label:"Home", c:"#222222", on:"#DEDEDE", copy:"", meta:"", count:"" },
+    { key:"work", label:"Selected Projects", c:"#E83A3A", on:"#222222",
+      copy:"The bigger stuff. Fully developed projects across branding, illustration, print, digital products and motion, with a closer look at the ideas, decisions and details behind each one.",
+      meta:"12 pieces \u00B7 2021\u20142026", count:"12 projects" },
+    { key:"about", label:"About", c:"#199329", on:"#222222",
+      copy:"A little more about me, what I do, the things I like making and how I ended up working across so many different parts of visual design.",
+      meta:"One person \u00B7 Haifa, IL", count:"Since 2019" },
+    { key:"archive", label:"Archive", c:"#E83AD0", on:"#222222",
+      copy:"The smaller stuff. Experiments, one-offs, illustrations, moving things and other pieces that never needed a full case study, but still deserved a place of their own.",
+      meta:"147 things \u00B7 2019\u20142026", count:"147 things" }
+  ];
+  var BY={}; SECTIONS.forEach(function(s){ BY[s.key]=s; });
+
+  var WORK = [
+    ["Night Market Identity","2026"],["Signal / Noise","2025"],["Haifa Type Week","2025"],
+    ["Tape Deck 03","2024"],["Moth Club Posters","2023"],["Red Line Signage","2021"]
+  ];
+
+  var MODES = {
+    a:{ words:{home:"WIP",work:"WORK",about:"ABOUT",archive:"ARCHIVE"}, max:7, bleed:false },
+    b:{ words:{home:"WIP",work:"WORK",about:"ABOUT",archive:"PAST"},    max:5, bleed:false },
+    c:{ words:{home:"WIP",work:"WORK",about:"ABOUT",archive:"ARCHIVE"}, max:3, bleed:true  }
+  };
+
+  var FX = [
+    ["tab","Tab fills"],
+    ["instrument","Rule measures"],
+    ["fill","Letters fill solid"],
+    ["border","Frame border"]
+  ];
+
+  var PAL = [["#E83A3A","#F3E4D2"],["#199329","#DEDEDE"],["#E83AD0","#222222"],
+             ["#222222","#DEDEDE"],["#DEDEDE","#222222"],["#E83A3A","#222222"]];
+
+  function mark(i,fg){
+    switch(i%6){
+      case 0: return '<circle cx="150" cy="150" r="94" fill="'+fg+'"/>';
+      case 1: return '<g fill="'+fg+'"><rect x="-30" y="-120" width="52" height="560" transform="rotate(22 150 150)"/><rect x="90" y="-120" width="52" height="560" transform="rotate(22 150 150)"/><rect x="210" y="-120" width="52" height="560" transform="rotate(22 150 150)"/></g>';
+      case 2: return '<g fill="'+fg+'"><rect x="34" y="34" width="106" height="106"/><rect x="160" y="160" width="106" height="106"/></g>';
+      case 3: return '<g fill="none" stroke="'+fg+'" stroke-width="16"><circle cx="150" cy="150" r="40"/><circle cx="150" cy="150" r="82"/><circle cx="150" cy="150" r="124"/></g>';
+      case 4: return '<g fill="'+fg+'"><rect y="30" width="300" height="26"/><rect y="94" width="300" height="26"/><rect y="158" width="300" height="26"/><rect y="222" width="300" height="26"/></g>';
+      default: return '<path d="M20 260 L150 30 L280 260 Z" fill="'+fg+'"/>';
+    }
+  }
+  function svgURL(inner,w,h){
+    var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'">'+inner+'</svg>';
+    return "url('data:image/svg+xml,"+encodeURIComponent(s)+"')";
+  }
+  function tileURL(i){
+    var p=PAL[i%PAL.length];
+    return svgURL('<rect width="300" height="300" fill="'+p[0]+'"/>'+mark(i,p[1]),300,300);
+  }
+  function stripURL(offset,n){
+    var inner="";
+    for(var k=0;k<n;k++){
+      var p=PAL[(offset+k)%PAL.length];
+      inner+='<g transform="translate('+(k*300)+',0)"><rect width="300" height="300" fill="'+p[0]+'"/>'+mark(offset+k,p[1])+'</g>';
+    }
+    return svgURL(inner,n*300,300);
+  }
+  var PREVIEW = { work:stripURL(0,6), about:stripURL(3,6), archive:stripURL(1,6) };
+
+  var frame=document.getElementById("frame"), nav=document.getElementById("nav"),
+      modes=document.getElementById("modes"), fxBox=document.getElementById("fx"),
+      band=document.getElementById("band"), panel=document.getElementById("panel"),
+      wl=document.getElementById("wl"), wr=document.getElementById("wr"),
+      rule=document.getElementById("rule"), num=document.getElementById("num"),
+      slot=document.getElementById("slot"),
+      intro=document.getElementById("intro"), readout=document.getElementById("readout"),
+      root=document.documentElement;
+
+  nav.innerHTML = SECTIONS.map(function(s){
+    return '<button class="row" type="button" data-key="'+s.key+'" data-active="'+(s.key==="home")+'"'+
+           ' style="--c:'+s.c+';--on:'+s.on+'">'+
+             '<span class="head"><span class="ttl">'+s.label+'</span><span class="arw">'+ARROW+'</span></span>'+
+             (s.copy ? '<span class="exp"><span class="expIn"><span class="expTxt">'+s.copy+'</span></span></span>' : "")+
+           '</button>';
+  }).join("");
+
+  fxBox.innerHTML = FX.map(function(f){
+    return '<button data-fx="'+f[0]+'" aria-pressed="false">'+f[1]+'</button>';
+  }).join("");
+
+  var ADV=0.6, mode="a", active="home", current="home", hot=false, fs=280, timer=null;
+  var on = {};
+
+  function computeFs(){
+    var m=MODES[mode], avail=band.clientWidth-20;
+    var w = m.bleed ? (avail-140)/(ADV*6) : (avail-60)/(ADV*(3+m.max));
+    var h = (panel.clientHeight*0.30-32)/0.72;
+    fs = Math.max(24, Math.min(w,h));
+    root.style.setProperty("--fs", fs.toFixed(2)+"px");
+    root.style.setProperty("--diag", Math.round(slot.clientHeight*1.2)+"px");
+  }
+
+  function render(key, isHot){
+    current=key; hot=isHot;
+    var s=BY[key], word=MODES[mode].words[key];
+
+    frame.dataset.hot = String(hot);
+    frame.dataset.box = String(hot && key !== "home");
+    panel.style.setProperty("--sec", s.c);
+    panel.style.setProperty("--onsec", s.on);
+    panel.style.setProperty("--accent", hot ? s.c : "#222222");
+    rule.style.setProperty("--preview", PREVIEW[key] || "none");
+    num.textContent = s.count;
+
+    computeFs();
+    band.classList.toggle("bleed", MODES[mode].bleed);
+    wl.style.width = (3*ADV*fs)+"px";
+    wr.style.width = (word.length*ADV*fs)+"px";
+
+    var t=wr.querySelector(".t");
+    clearTimeout(timer);
+    if(t.textContent!==word){
+      t.style.opacity="0";
+      timer=setTimeout(function(){ t.textContent=word; t.style.opacity="1"; },110);
+    }
+
+
+    setTimeout(function(){
+      readout.textContent="TYPE "+Math.round(fs)+"PX \u00B7 RULE "+
+                          Math.round(rule.getBoundingClientRect().width)+"PX";
+    },360);
+  }
+
+  nav.addEventListener("pointerover",function(e){ var b=e.target.closest(".row"); if(b) render(b.dataset.key,true); });
+  nav.addEventListener("focusin",    function(e){ var b=e.target.closest(".row"); if(b) render(b.dataset.key,true); });
+  nav.addEventListener("pointerleave",function(){ render(active,false); });
+  nav.addEventListener("focusout",   function(e){ if(!nav.contains(e.relatedTarget)) render(active,false); });
+  nav.addEventListener("click",function(e){
+    var b=e.target.closest(".row"); if(!b) return;
+    active=b.dataset.key;
+    Array.prototype.forEach.call(nav.children,function(c){ c.dataset.active=String(c.dataset.key===active); });
+    render(active,true);
+  });
+
+  modes.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    mode=b.dataset.mode;
+    Array.prototype.forEach.call(modes.children,function(c){ c.setAttribute("aria-pressed",String(c.dataset.mode===mode)); });
+    render(current,hot);
+  });
+
+  fxBox.addEventListener("click",function(e){
+    var b=e.target.closest("button"); if(!b) return;
+    var k=b.dataset.fx;
+    on[k]=!on[k];
+    b.setAttribute("aria-pressed",String(!!on[k]));
+    frame.classList.toggle("fx-"+k, !!on[k]);
+    render(current,hot);
+  });
+
+  window.addEventListener("resize",function(){ render(current,hot); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ render(current,hot); });
+  render("home",false);
+})();
+</script>
+
+<script>
+/* ============================================================
+   KINETIC INTRO \u2014 seven mechanics, one chosen at random per load.
+   Every layer is a child of .stage, which is overflow:hidden,
+   so nothing escapes the frame.
+   ============================================================ */
+(function(){
+  "use strict";
+
+  var stage   = document.getElementById("stage"),
+      intro   = document.getElementById("intro"),
+      kCells  = document.getElementById("kCells"),
+      kCols   = document.getElementById("kCols"),
+      kPeri   = document.getElementById("kPeri"),
+      kPanels = document.getElementById("kPanels"),
+      kName   = document.getElementById("kName"),
+      rerollB = document.getElementById("reroll");
+
+  var ORIG = intro.innerHTML;
+  var TEXT = intro.textContent.replace(/\s+/g, " ").trim().toUpperCase();
+  var WORDS = TEXT.split(" ");
+
+  var COLORS = ["#E83A3A", "#199329", "#E83AD0"];   /* black is ink only, never a ground */
+  var INK = "#222222";
+
+  /* deal from a shuffled bag rather than picking each ground independently:
+     independent picks land on two colours often enough to look flat */
+  var bag = [];
+  function deal(){
+    if (!bag.length){
+      bag = COLORS.slice();
+      for (var i=bag.length-1;i>0;i--){ var j=rnd(i+1), t=bag[i]; bag[i]=bag[j]; bag[j]=t; }
+    }
+    return bag.pop();
+  }
+  var LABELS = ["0.1M","0.3M","0.5M","48/188","23:48:05","A013","A3B1","04.11","18.13M","AUTO","0625","21C"];
+  var SYMBOLS = "*&%^#@$!?/\\<>+=~".split("");
+
+  var PHRASES = [
+    "HI, I\u2019M AKI YAMIN,", "A MULTIDISCIPLINARY VISUAL DESIGNER",
+    "WHO LIKES MAKING COOL SHIT.", "IF IT CAN BE PRINTED, CLICKED,",
+    "WATCHED OR HELD,", "I\u2019M PROBABLY INTERESTED.",
+    "IF IT NEEDS MORE THAN ONE OF THOSE,", "EVEN BETTER."
+  ];
+
+  var SEGS = [
+    ["HI, I\u2019M AKI YAMIN,","STILL AKI YAMIN,","AKI YAMIN, OBVIOUSLY,"],
+    ["A MULTIDISCIPLINARY VISUAL DESIGNER","A GUY WITH TOO MANY OPEN TABS","A DESIGNER, ALLEGEDLY,"],
+    ["WHO LIKES MAKING COOL SHIT.","WHO MAKES SHIT, OCCASIONALLY COOL.","WHO KEEPS MAKING THINGS ANYWAY."],
+    ["IF IT CAN BE PRINTED, CLICKED, WATCHED OR HELD,","IF IT CAN BE TOUCHED OR SCROLLED,","IF IT FITS ON A WALL OR A SCREEN,"],
+    ["I\u2019M PROBABLY INTERESTED.","I\u2019M ALREADY IN.","I\u2019LL PROBABLY SAY YES."],
+    ["IF IT NEEDS MORE THAN ONE OF THOSE, EVEN BETTER.","IF IT NEEDS ALL OF THEM, BETTER STILL.","THE MESSIER THE BRIEF, THE BETTER."]
+  ];
+
+  var rnd = function(n){ return Math.floor(Math.random()*n); },
+      pick = function(a){ return a[rnd(a.length)]; },
+      clamp = function(v,a,b){ return v<a?a:v>b?b:v; },
+      rangeR = function(a,b){ return a+Math.random()*(b-a); };
+
+  function onInk(){ return INK; }          /* every ground is chromatic now, so ink is always black */
+
+  /* real cap height and baseline for the face in use, as ratios of the em \u2014
+     guessing these leaves dead strips wherever the caps fall short of the box */
+  function faceMetrics(el){
+    var cs = getComputedStyle(el), base = parseFloat(cs.fontSize);
+    var c = document.createElement("canvas").getContext("2d");
+    c.font = "700 " + base + "px " + cs.fontFamily;
+    var m = c.measureText("H");
+    var cap  = m.actualBoundingBoxAscent  || base*0.71;
+    var asc  = m.fontBoundingBoxAscent    || base*0.93;
+    var desc = m.fontBoundingBoxDescent   || base*0.24;
+    var blFromTop = (base-(asc+desc))/2 + asc;
+    return { base:base, capR:cap/base, descR:desc/base,
+             blTopR:blFromTop/base, blBotR:(base-blFromTop)/base };
+  }
+
+  /* ---- lifecycle: one mechanic at a time, everything revocable ---- */
+  var ac = null, loopId = null, timers = new Set(), resizeFn = null;
+  /* one mechanic runs at a time, so a single live frame id is enough;
+     pushing every id into an array grew it by 60 entries a second */
+  function raf(fn){ loopId = requestAnimationFrame(fn); return loopId; }
+  function later(fn, ms){
+    var id = setTimeout(function(){ timers.delete(id); fn(); }, ms);
+    timers.add(id); return id;
+  }
+  function sig(){ return { signal: ac.signal }; }
+
+  function teardown(){
+    if (ac) ac.abort();
+    if (loopId) { cancelAnimationFrame(loopId); loopId = null; }
+    timers.forEach(clearTimeout); timers.clear();
+    resizeFn = null; bag = [];
+    kCells.innerHTML = kCols.innerHTML = kPeri.innerHTML = kPanels.innerHTML = "";
+    kPanels.className = "kfx kpanels";
+    var z = stage.querySelectorAll(".zcol"); for (var i=0;i<z.length;i++) z[i].remove();
+    intro.innerHTML = ORIG;
+  }
+
+  /* ================= 1. GRID CELL FLIP ================= */
+  function grid(){
+    var blocks = [], cw, chh, reach, lastX = -1, lastY = -1;
+    var SPREAD = 30, HOLD = 520, HOLDJIT = 320, MOVE = 16;
+
+    function build(){
+      kCells.innerHTML = ""; blocks = [];
+      var COLS = stage.clientWidth < 760 ? 9 : 16, ROWS = stage.clientHeight < 380 ? 8 : 10;
+      var W = stage.clientWidth, H = stage.clientHeight;
+      cw = W/COLS; chh = H/ROWS;
+      reach = Math.min(W*0.25, H*0.52);
+      var letters = TEXT.replace(/[^A-Z]/g, "").split("");
+      var taken = new Array(COLS*ROWS); for (var t=0;t<taken.length;t++) taken[t]=false;
+
+      function fits(r,c,bw,bh){
+        if (c+bw>COLS || r+bh>ROWS) return false;
+        for (var y=r;y<r+bh;y++) for (var x=c;x<c+bw;x++) if (taken[y*COLS+x]) return false;
+        return true;
+      }
+      for (var r=0;r<ROWS;r++) for (var c=0;c<COLS;c++){
+        if (taken[r*COLS+c]) continue;
+        var bw = pick([1,1,1,2,2,3]), bh = pick([1,1,2,2,3]);
+        while (bw>1 && !fits(r,c,bw,bh)) bw--;
+        while (bh>1 && !fits(r,c,bw,bh)) bh--;
+        if (!fits(r,c,bw,bh)){ bw=1; bh=1; }
+        for (var y2=r;y2<r+bh;y2++) for (var x2=c;x2<c+bw;x2++) taken[y2*COLS+x2]=true;
+
+        var w = bw*cw, h = bh*chh, x = c*cw, y = r*chh;
+        var col = deal(), ink = onInk(col);
+        var el = document.createElement("div");
+        el.className = "kcell";
+        el.style.cssText = "left:"+x+"px;top:"+y+"px;width:"+w+"px;height:"+h+"px;background:"+col;
+
+        if (Math.random() < .15){
+          var l = document.createElement("span");
+          l.className = "lab"; l.textContent = pick(LABELS); l.style.color = ink;
+          l.style.top = Math.random()<.5 ? "5px" : "auto";
+          l.style.bottom = l.style.top==="auto" ? "5px" : "auto";
+          l.style.left = Math.random()<.5 ? "5px" : "auto";
+          l.style.right = l.style.left==="auto" ? "5px" : "auto";
+          el.appendChild(l);
+        } else {
+          var g = document.createElement("span");
+          g.className = "glyph"; g.textContent = pick(letters); g.style.color = ink;
+          var roll = Math.random(), fs, ox, oy;
+          if (roll < .28){ fs = h*rangeR(.38,.62); ox = rangeR(.08,.5)*w; oy = rangeR(.05,.32)*h; }
+          else if (roll < .68){ fs = h*rangeR(1.0,1.7); ox = -w*rangeR(0,.35); oy = -h*rangeR(.05,.45); }
+          else { fs = h*rangeR(2.4,4.0); ox = -w*rangeR(.2,1.2); oy = -h*rangeR(.5,1.8); }
+          g.style.fontSize = fs.toFixed(0)+"px";
+          g.style.left = ox.toFixed(0)+"px";
+          g.style.top = oy.toFixed(0)+"px";
+          el.appendChild(g);
+        }
+        kCells.appendChild(el);
+        blocks.push({ el:el, cx:x+w/2, cy:y+h/2 });
+      }
+      lastX = lastY = -1;
+    }
+
+    function flood(px,py){
+      for (var i=0;i<blocks.length;i++){
+        var b = blocks[i];
+        var d = Math.hypot((b.cx-px)/reach, (b.cy-py)/(reach*1.15));
+        if (d > 1) continue;
+        if (Math.random() > 0.22 + (1-d)*0.72) continue;
+        (function(el,d){
+          clearTimeout(el._on); clearTimeout(el._off);
+          el._on = later(function(){
+            el.classList.add("on");
+            el._off = later(function(){ el.classList.remove("on"); }, HOLD + rnd(HOLDJIT));
+          }, d*reach*SPREAD/100);
+        })(b.el, d);
+      }
+    }
+
+    stage.addEventListener("pointermove", function(e){
+      var r = stage.getBoundingClientRect();
+      var x = e.clientX-r.left, y = e.clientY-r.top;
+      if (lastX>=0 && Math.hypot(x-lastX, y-lastY) < MOVE) return;
+      flood(x,y); lastX = x; lastY = y;
+    }, sig());
+    stage.addEventListener("pointerleave", function(){ lastX = lastY = -1; }, sig());
+
+    build();
+    resizeFn = build;
+  }
+
+  /* ================= 2. ZOOM STACK ================= */
+  function zoom(){
+    var STAGGER = 70, MAXSY = 16, active = null, segColour = [];
+    intro.innerHTML = "";
+    segColour = PHRASES.map(function(){ return deal(); });
+
+    PHRASES.forEach(function(p,i){
+      var el = document.createElement("span");
+      el.className = "zseg"; el.textContent = p; el._i = i;
+      el.addEventListener("pointerenter", function(){ open(el,p); }, sig());
+      intro.appendChild(el);
+      intro.appendChild(document.createTextNode(" "));
+    });
+    intro.addEventListener("pointerleave", close, sig());
+
+    function close(){
+      if (!active) return;
+      var col = active; active = null;
+      var kids = [].slice.call(col.children);
+      kids.slice().reverse().forEach(function(b,k){
+        later(function(){ b.style.display = "none"; }, k*Math.round(STAGGER*0.55));
+      });
+      if (col._seg) col._seg.style.visibility = "";
+      later(function(){ col.remove(); }, kids.length*Math.round(STAGGER*0.55)+80);
+    }
+
+    function open(seg, text){
+      close();
+      var rects = seg.getClientRects();
+      var sr = rects.length ? rects[rects.length-1] : seg.getBoundingClientRect();
+      var st = stage.getBoundingClientRect();
+      var M = faceMetrics(intro), base = M.base;
+      var left = sr.left-st.left, width = sr.width, bottom = sr.bottom-st.top;
+      var colour = segColour[seg._i||0], ink = onInk(colour);
+
+      var col = document.createElement("div");
+      col.className = "zcol";
+      col.style.cssText = "left:"+left+"px;top:0;width:"+width+"px;height:"+bottom+"px";
+      col._seg = seg;
+
+      /* block height IS the cap height, so the first block sits exactly on the real text */
+      var items = [], y = base*M.descR, sy = 1;
+      for (var i=0;i<9;i++){
+        var h = base*M.capR*sy;
+        items.push({ y:y, h:h, sx: i===0 ? 1 : rangeR(1.0,1.20) });
+        if (y+h > bottom) break;
+        y += h*(1-rangeR(0.40,0.75));
+        if (i>=1) sy = Math.min(sy*rangeR(1.55,2.40), MAXSY);
+      }
+
+      var n = items.length;
+      var built = items.map(function(it,i){
+        var blk = document.createElement("div");
+        blk.className = "zblock";
+        blk.style.cssText = "bottom:"+it.y.toFixed(1)+"px;height:"+it.h.toFixed(1)+"px;"+
+                            "background:"+colour+";z-index:"+(n-i)+";display:none";
+        var t = document.createElement("div");
+        t.className = "ztext"; t.textContent = text; t.style.color = ink;
+        t.style.fontSize = base.toFixed(1)+"px";
+        var tS = it.h/(M.capR*base);
+        t.style.bottom = (-M.blBotR*base*tS).toFixed(2)+"px";
+        var ty = Math.min(it.h*0.5, it.h);
+        t.style.transform = "translateY("+ty.toFixed(1)+"px) scaleX("+it.sx.toFixed(3)+") scaleY("+tS.toFixed(3)+")";
+        blk._t = t; blk._sx = it.sx; blk._sy = tS;
+        blk.appendChild(t); col.appendChild(blk);
+        return blk;
+      });
+      stage.appendChild(col); seg.style.visibility = "hidden";
+
+      built.forEach(function(blk,i){
+        later(function(){
+          blk.style.display = "block";
+          void blk.offsetWidth;                    /* flush layout so the rise animates */
+          blk._t.style.transform = "translateY(0px) scaleX("+blk._sx.toFixed(3)+") scaleY("+blk._sy.toFixed(3)+")";
+        }, i*STAGGER);
+      });
+      active = col;
+    }
+    resizeFn = close;
+  }
+
+  /* ================= 3. COLUMN SCROLL ================= */
+  function columns(){
+    var cols = [], loop = null, mx = 0, my = 0, inside = false;
+
+    function build(){
+      kCols.innerHTML = ""; cols = [];
+      var n = stage.clientWidth < 760 ? 3 : 5;
+      var H = stage.clientHeight, W = stage.clientWidth, slotW = W/n;
+      for (var i=0;i<n;i++){
+        var w = slotW*rangeR(.42,.66), x = slotW*i + rangeR(.08,.34)*slotW;
+        var h = H*rangeR(.5,.94), fromTop = Math.random() < .6;
+        var top = fromTop ? 0 : Math.max(H-h-rangeR(0,H*.06), 0);
+        var col = deal();
+        var el = document.createElement("div");
+        el.className = "kcol" + (fromTop ? "" : " up");
+        el.style.cssText = "left:"+x+"px;top:"+top+"px;width:"+w+"px;height:"+h+"px;background:"+col;
+        var rec = { el:el, cx:x+w/2, w:w, h:h };
+
+        var g = document.createElement("div");
+        g.className = "giant";
+        g.textContent = (TEXT+" ").repeat(3);       /* always longer than the column can show */
+        g.style.color = onInk(col);
+        g.style.fontSize = (w/rangeR(3.0,4.0)).toFixed(1)+"px";
+        g.style.width = (w*1.30).toFixed(0)+"px";
+        g.style.left = (-w*rangeR(.08,.25)).toFixed(0)+"px";
+        rec.stretch = rangeR(2.6,3.4);
+        el.appendChild(g); rec.g = g; rec.speed = rangeR(.5,1);
+        kCols.appendChild(el); cols.push(rec);
+      }
+      raf(function(){
+        cols.forEach(function(c){
+          c.range = Math.max(c.g.scrollHeight*c.stretch - c.h, 0);
+          c.travel = Math.min(c.range, c.h*rangeR(1.2,2.2));   /* cap the scroll or it races */
+          c.off = rangeR(0, Math.max(c.range-c.travel, 0));
+        });
+      });
+    }
+
+    function frame(){
+      var ny = clamp(my/stage.clientHeight, 0, 1);
+      cols.forEach(function(c){
+        var dx = Math.abs(mx-c.cx);
+        var open = inside ? clamp(1-(dx-c.w*.55)/210, 0, 1) : 0;
+        var pct = ((1-open)*100).toFixed(1);
+        c.el.style.clipPath = c.el.classList.contains("up")
+          ? "inset("+pct+"% 0 0 0)" : "inset(0 0 "+pct+"% 0)";
+        var ty = clamp((c.off||0) + ny*(c.travel||0)*c.speed, 0, c.range||0);
+        c.g.style.transform = "translateY("+(-ty).toFixed(1)+"px) scaleY("+(c.stretch||1).toFixed(2)+")";
+      });
+      loop = raf(frame);
+    }
+
+    stage.addEventListener("pointermove", function(e){
+      var r = stage.getBoundingClientRect();
+      mx = e.clientX-r.left; my = e.clientY-r.top; inside = true;
+      if (!loop) loop = raf(frame);
+    }, sig());
+    stage.addEventListener("pointerleave", function(){
+      inside = false;
+      later(function(){ if (!inside && loop){ cancelAnimationFrame(loop); loop = null; frame_once(); } }, 400);
+    }, sig());
+    function frame_once(){
+      cols.forEach(function(c){
+        c.el.style.clipPath = c.el.classList.contains("up") ? "inset(100% 0 0 0)" : "inset(0 0 100% 0)";
+      });
+    }
+
+    build();
+    resizeFn = build;
+  }
+
+  /* ================= 4. PERIMETER ================= */
+  function perimeter(){
+    var rails = [], v = 0, lx = null, ly = null, loop = null, shown = false;
+
+    function build(){
+      kPeri.innerHTML = ""; rails = []; shown = false;
+      var W = stage.clientWidth, H = stage.clientHeight;
+      var depths = [0.040,0.075,0.135,0.215].sort(function(){ return Math.random()-.5; })
+                    .map(function(r){ return Math.round(clamp(H*r, 14, H*0.26)); });
+      var dT = depths[0], dR = depths[1], dB = depths[2], dL = depths[3];
+      var midH = H-dT-dB;
+      var defs = [
+        { axis:"x", dir:-1, d:dT, css:"left:0;top:0;width:"+W+"px;height:"+dT+"px",                    hid:"translateY("+(-dT-2)+"px)", len:W },
+        { axis:"y", dir:-1, d:dR, css:"left:"+(W-dR)+"px;top:"+dT+"px;width:"+dR+"px;height:"+midH+"px", hid:"translateX("+(dR+2)+"px)", len:midH },
+        { axis:"x", dir: 1, d:dB, css:"left:0;top:"+(H-dB)+"px;width:"+W+"px;height:"+dB+"px",          hid:"translateY("+(dB+2)+"px)", len:W },
+        { axis:"y", dir: 1, d:dL, css:"left:0;top:"+dT+"px;width:"+dL+"px;height:"+midH+"px",           hid:"translateX("+(-dL-2)+"px)", len:midH }
+      ];
+      defs.forEach(function(d){
+        var col = deal();
+        var r = document.createElement("div");
+        r.className = "krail" + (d.axis==="y" ? " v" : "");
+        r.style.cssText = d.css + ";background:"+col+";color:"+onInk(col)+";transform:"+d.hid+
+                          ";transition:transform 250ms cubic-bezier(.1,.85,.2,1)";
+        var run = document.createElement("div");
+        run.className = "run"; run.textContent = TEXT + "   ";
+        r.appendChild(run); kPeri.appendChild(r);
+
+        run.style.fontSize = "100px";
+        var RM = faceMetrics(run);
+        var fs = d.d/RM.capR;                       /* cap height fills the rail depth */
+        run.style.fontSize = fs.toFixed(1)+"px";
+        var inset = -(RM.blTopR-RM.capR)*fs;
+        if (d.axis === "x"){ run.style.left = "0"; run.style.top = inset.toFixed(1)+"px"; }
+        else               { run.style.top = "0";  run.style.left = inset.toFixed(1)+"px"; }
+
+        var unit = d.axis==="x" ? run.scrollWidth : run.scrollHeight;
+        var reps = Math.ceil((d.len+unit)/Math.max(unit,1))+1;
+        run.textContent = (TEXT+"   ").repeat(reps);
+        rails.push({ el:r, run:run, axis:d.axis, dir:d.dir, off:0, unit:Math.max(unit,1), hid:d.hid });
+      });
+    }
+
+    function show(on){
+      if (on === shown) return; shown = on;
+      rails.forEach(function(r,i){
+        r.el.style.transitionDelay = (on ? i*55 : (rails.length-1-i)*35)+"ms";
+        r.el.style.transform = on ? "none" : r.hid;
+      });
+    }
+    function frame(){
+      v *= 0.93;
+      rails.forEach(function(r){
+        var n = r.off + v*0.5*r.dir;
+        r.off = ((n % r.unit) + r.unit) % r.unit;   /* JS % goes negative and empties the rail */
+        r.run.style.transform = r.axis==="x"
+          ? "translateX("+(-r.off).toFixed(1)+"px)" : "translateY("+(-r.off).toFixed(1)+"px)";
+      });
+      if (Math.abs(v) > 0.04) loop = raf(frame); else loop = null;
+    }
+
+    stage.addEventListener("pointerenter", function(){ show(true); }, sig());
+    stage.addEventListener("pointermove", function(e){
+      var r = stage.getBoundingClientRect(), x = e.clientX-r.left, y = e.clientY-r.top;
+      if (lx !== null) v = clamp(v + Math.hypot(x-lx, y-ly)*0.5, -70, 70);
+      lx = x; ly = y;
+      if (!loop) loop = raf(frame);
+    }, sig());
+    stage.addEventListener("pointerleave", function(){ lx = ly = null; show(false); }, sig());
+
+    build();
+    resizeFn = build;
+  }
+
+  /* ================= 5. PANEL SPLIT ================= */
+  function panels(){
+    var pans = [], N = 5, loop = null, inside = false;
+
+    function build(){
+      kPanels.innerHTML = ""; pans = []; kPanels.classList.remove("in");
+      N = stage.clientWidth < 760 ? 3 : 5;
+      for (var i=0;i<N;i++){
+        var col = deal(), ink = onInk(col);
+        var p = document.createElement("div");
+        p.className = "kpan";
+        p.style.cssText = "flex-grow:1;background:"+col;
+        var f = document.createElement("div");
+        f.className = "fill"; f.textContent = WORDS[rnd(WORDS.length)]; f.style.color = ink;
+        var nm = document.createElement("div");
+        nm.className = "pn"; nm.textContent = "P"+String(i+1); nm.style.color = ink;
+        p.appendChild(f); p.appendChild(nm); kPanels.appendChild(p);
+        pans.push({ el:p, f:f });
+      }
+      /* measure each word once, so per-frame sizing is arithmetic with no layout reads */
+      raf(function(){
+        pans.forEach(function(p){
+          p.f.style.transform = "none"; p.f.style.fontSize = "100px";
+          p.w100 = p.f.getBoundingClientRect().width || 1;
+          var M = faceMetrics(p.f); p.capR = M.capR; p.blTopR = M.blTopR;
+        });
+        tick();
+      });
+    }
+    function tick(){
+      var H = stage.clientHeight;
+      var ws = pans.map(function(p){ return p.el.clientWidth; });
+      pans.forEach(function(p,i){
+        var w = ws[i]; if (!w || !p.w100) return;
+        var fs = (w*1.08)/p.w100*100;
+        var sy = H/(p.capR*fs);                    /* caps fill the panel, no dead space */
+        p.f.style.fontSize = fs.toFixed(1)+"px";
+        p.f.style.left = (-w*0.04).toFixed(1)+"px";
+        p.f.style.top = (-(p.blTopR-p.capR)*fs*sy).toFixed(1)+"px";
+        p.f.style.transform = "scaleY("+sy.toFixed(3)+")";
+      });
+    }
+    function run(){ tick(); loop = raf(run); }
+
+    stage.addEventListener("pointerenter", function(){
+      inside = true; kPanels.classList.add("in");
+      pans.forEach(function(p,i){ p.el.style.transitionDelay = (i*45)+"ms"; });
+      if (!loop) loop = raf(run);
+    }, sig());
+    stage.addEventListener("pointermove", function(e){
+      var r = stage.getBoundingClientRect();
+      var k = clamp(Math.floor(clamp((e.clientX-r.left)/r.width, 0, 1)*N), 0, N-1);
+      pans.forEach(function(p,i){ p.el.style.flexGrow = i===k ? 3.2 : 0.7; });
+      inside = true; if (!loop) loop = raf(run);
+    }, sig());
+    stage.addEventListener("pointerleave", function(){
+      inside = false; kPanels.classList.remove("in");
+      pans.forEach(function(p,i){
+        p.el.style.transitionDelay = ((pans.length-1-i)*30)+"ms";
+        p.el.style.flexGrow = 1;
+      });
+      later(function(){ if (!inside && loop){ cancelAnimationFrame(loop); loop = null; } }, 420);
+    }, sig());
+
+    build();
+    resizeFn = build;
+  }
+
+  /* ================= 6. SCRAMBLE TILES ================= */
+  function scramble(){
+    var RADIUS = 150, TICK = 70;
+    var units = [], covered = {}, tiles = [], mx = -9999, my = -9999,
+        inside = false, loop = null, lastTick = 0;
+
+    /* one span per non-space character; spaces stay text nodes so wrapping still works */
+    intro.innerHTML = ""; units = []; covered = {}; tiles = [];
+    var word = 0;
+    for (var i=0;i<TEXT.length;i++){
+      var ch = TEXT.charAt(i);
+      if (ch === " "){ intro.appendChild(document.createTextNode(" ")); word++; continue; }
+      var sp = document.createElement("span");
+      sp.textContent = ch;
+      intro.appendChild(sp);
+      units.push({ el:sp, word:word });
+    }
+
+    function life(){ return performance.now() + 220 + Math.random()*380; }
+
+    function spawn(start){
+      var span = 1;
+      if (Math.random() < .34) span++;
+      if (Math.random() < .14) span++;
+      var w = units[start].word, end = start, k;
+      for (k=1;k<span;k++){
+        var n = start+k;
+        if (n >= units.length || units[n].word !== w || covered[n]) break;
+        end = n;
+      }
+      for (k=start;k<=end;k++) if (covered[k]) return;
+
+      var col = deal();
+      var tile = document.createElement("span");
+      tile.className = "tile";
+      tile.style.background = col;
+      tile.style.width = rangeR(.55,1.15).toFixed(2)+"em";   /* independent of what it replaces */
+      var g = document.createElement("span");
+      g.className = "tg"; g.textContent = pick(SYMBOLS);
+      g.style.fontSize = "1.3em"; g.style.color = onInk(col);
+      tile.appendChild(g);
+
+      units[start].el.parentNode.insertBefore(tile, units[start].el);
+      for (k=start;k<=end;k++){ units[k].el.style.display = "none"; covered[k] = true; }
+      tiles.push({ el:tile, from:start, to:end, die:life() });
+    }
+    function heal(t){
+      t.el.remove();
+      for (var k=t.from;k<=t.to;k++){ units[k].el.style.display = ""; delete covered[k]; }
+    }
+    /* positions move every time a tile lands, so measure fresh each tick */
+    function candidates(){
+      var base = intro.getBoundingClientRect(), out = [];
+      for (var i=0;i<units.length;i++){
+        if (covered[i]) continue;
+        var r = units[i].el.getBoundingClientRect();
+        if (r.width <= 0) continue;
+        var d = Math.hypot(r.left-base.left+r.width/2-mx, r.top-base.top+r.height/2-my);
+        if (d < RADIUS) out.push({ i:i, t:1-d/RADIUS });
+      }
+      return out;
+    }
+    function frame(){
+      var now = performance.now();
+      for (var i=tiles.length-1;i>=0;i--){
+        if (now > tiles[i].die){ heal(tiles[i]); tiles.splice(i,1); }
+      }
+      if (inside && now-lastTick > TICK){
+        lastTick = now;
+        var cands = candidates();
+        cands.sort(function(a,b){ return b.t-a.t; });
+        var n = Math.min(3, Math.ceil(cands.length*0.12));
+        for (var k=0;k<n && cands.length;k++){
+          var j = Math.floor(Math.pow(Math.random(),1.8)*cands.length);
+          spawn(cands[j].i); cands.splice(j,1);
+        }
+      }
+      if (!inside && tiles.length === 0){ loop = null; return; }   /* idle: stop burning frames */
+      loop = raf(frame);
+    }
+
+    intro.addEventListener("pointermove", function(e){
+      var b = intro.getBoundingClientRect();
+      mx = e.clientX-b.left; my = e.clientY-b.top; inside = true;
+      if (!loop) loop = raf(frame);
+    }, sig());
+    intro.addEventListener("pointerleave", function(){ inside = false; mx = my = -9999; }, sig());
+    loop = raf(frame);
+    resizeFn = null;
+  }
+
+  /* ================= 7. REWRITE ON HOVER ================= */
+  function rewrite(){
+    var idx = SEGS.map(function(){ return 0; });
+    var fired = SEGS.map(function(){ return 0; });
+    var colour = SEGS.map(function(){ return deal(); });
+    var lastAny = 0, nodes = [];
+
+    intro.innerHTML = "";
+    nodes = SEGS.map(function(s,i){
+      var el = document.createElement("span");
+      el.className = "kseg"; el.textContent = s[0]; el.tabIndex = 0;
+      el.addEventListener("pointerenter", function(){ advance(i); }, sig());
+      el.addEventListener("focus", function(){ advance(i); }, sig());
+      intro.appendChild(el);
+      intro.appendChild(document.createTextNode(" "));
+      return el;
+    });
+
+    function advance(i){
+      /* swapping reflows the line, which slides the segment out from under a still cursor
+         and fires pointerenter again \u2014 without these guards it cycles every alternate at once */
+      var now = performance.now();
+      if (now-fired[i] < 600) return;
+      if (now-lastAny < 200) return;
+      fired[i] = now; lastAny = now;
+      idx[i] = (idx[i]+1) % SEGS[i].length;
+      var el = nodes[i];
+      el.textContent = SEGS[i][idx[i]];
+      el.style.background = colour[i];              /* an edited phrase keeps its box */
+      el.style.color = onInk(colour[i]);
+    }
+    resizeFn = null;
+  }
+
+  /* ---- roll one ---- */
+  var MECHANICS = [
+    ["Grid cell flip", grid],
+    ["Zoom stack", zoom],
+    ["Column scroll", columns],
+    ["Perimeter", perimeter],
+    ["Panel split", panels],
+    ["Scramble tiles", scramble],
+    ["Rewrite on hover", rewrite]
+  ];
+
+  var currentIdx = -1;
+  function roll(){
+    teardown();
+    ac = new AbortController();
+    var i = rnd(MECHANICS.length);
+    if (MECHANICS.length > 1 && i === currentIdx) i = (i+1) % MECHANICS.length;
+    currentIdx = i;
+    kName.textContent = MECHANICS[i][0].toUpperCase();
+    MECHANICS[i][1]();
+  }
+
+  rerollB.addEventListener("click", roll);
+
+  var rt = null;
+  window.addEventListener("resize", function(){
+    clearTimeout(rt);
+    rt = setTimeout(function(){ if (resizeFn) resizeFn(); }, 160);
+  });
+
+  roll();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if (resizeFn) resizeFn(); });
+})();
+</script>

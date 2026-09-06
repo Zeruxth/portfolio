@@ -1,0 +1,10 @@
+.intro {
+  font-size: 36px;          /* fixed — it fills the column, it does not scale */
+  text-transform: uppercase;
+  line-height: 1.15;
+  padding-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .intro { font-size: 24px; }
+}

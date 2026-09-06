@@ -1,0 +1,16 @@
+.tab {
+  width: var(--rail);
+  height: var(--tab-h);
+  position: relative;
+  flex: none;
+  color: var(--ink);
+}
+.cut { position: absolute; inset: 0; width: 100%; height: 100%; }
+.logo {
+  position: absolute;
+  left: 17px;
+  top: 12px;
+  width: 36px;
+  height: 27px;
+  display: block;
+}
