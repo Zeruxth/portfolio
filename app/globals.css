@@ -15,8 +15,6 @@
 
   --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed",
         "Roboto Condensed", "Arial Narrow", sans-serif;
-  /* project titles are set in the NON-condensed cut */
-  --display: "trade-gothic-next", "Trade Gothic Next LT Pro", "Roboto", Arial, sans-serif;
   --mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
