@@ -3,6 +3,23 @@
   display: flex;
   align-items: stretch;
   height: var(--tab-h);
+  /* clips a tab while it is still sliding in from the left */
+  overflow: hidden;
+}
+
+/*
+ * A new tab slides out from behind the one before it. This reads correctly
+ * because earlier tabs carry the higher z-index and paint an opaque ground,
+ * so the incoming tab is genuinely hidden behind them for the first half.
+ */
+@keyframes tabIn {
+  from { transform: translateX(-100%); }
+  to   { transform: none; }
+}
+.tab:not(.logoTab) { animation: tabIn 0.42s cubic-bezier(0.2, 0.8, 0.3, 1) backwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tab:not(.logoTab) { animation: none; }
 }
 
 /* consecutive tabs tuck under the previous one's diagonal */

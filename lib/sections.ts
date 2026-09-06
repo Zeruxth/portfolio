@@ -1,3 +1,6 @@
+/** PLACEHOLDER — swap for the address you actually want people mailing. */
+export const CONTACT_EMAIL = "hello@akiyamin.com";
+
 export type SectionKey = "home" | "projects" | "about" | "archive";
 
 export interface Section {

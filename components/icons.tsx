@@ -31,8 +31,9 @@ export function Arrow({ className }: { className?: string }) {
         strokeLinecap="butt"
         strokeLinejoin="miter"
       >
-        <path d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544" />
-        <path d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252" />
+        {/* pathLength normalises both subpaths so one dash value drives them equally */}
+        <path pathLength={1} d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544" />
+        <path pathLength={1} d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252" />
       </g>
     </svg>
   );

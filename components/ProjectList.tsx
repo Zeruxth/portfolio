@@ -21,6 +21,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
           <div
             key={project.slug}
             className={s.row}
+            style={{ animationDelay: `${i * 55}ms` }}
             data-open={isOpen}
             tabIndex={0}
             aria-expanded={isOpen}

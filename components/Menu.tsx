@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SECTIONS, sectionForPath } from "@/lib/sections";
+import { CONTACT_EMAIL, SECTIONS, sectionForPath } from "@/lib/sections";
 import { useSectionHover } from "@/lib/section-hover";
 import { Arrow } from "./icons";
 import s from "./Menu.module.css";
@@ -46,12 +46,12 @@ export default function Menu() {
         ))}
       </nav>
 
-      <div className={s.contact}>
+      <a className={s.contact} href={`mailto:${CONTACT_EMAIL}`}>
         <p>
           Have a project, a job or some cool shit in mind? <em>Let’s talk</em>
         </p>
         <Arrow className={s.contactArrow} />
-      </div>
+      </a>
     </div>
   );
 }

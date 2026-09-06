@@ -83,9 +83,30 @@
   font-size: 22px;
   text-transform: uppercase;
   line-height: 1.3;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .contact em { font-style: italic; }
-.contactArrow { flex: none; width: 30.344px; height: 19.211px; }
+.contact:hover, .contact:focus-visible { background: var(--ink); color: var(--bg); }
+
+.contactArrow {
+  flex: none;
+  width: 30.344px;
+  height: 19.211px;
+  transition: transform 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+/* the arrow redraws itself and shoots forward — only possible now it is a stroke */
+.contact:hover .contactArrow,
+.contact:focus-visible .contactArrow { transform: translateX(7px); }
+.contact:hover .contactArrow path,
+.contact:focus-visible .contactArrow path {
+  animation: trace 0.42s cubic-bezier(0.33, 0, 0.67, 1);
+}
+@keyframes trace {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
 
 @media (max-width: 1100px) {
   .rail { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }
