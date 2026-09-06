@@ -1,0 +1,46 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Panda Lottie — preview</title>
+<link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
+<style>
+  body { margin:0; padding:40px; background:#DEDEDE; color:#222;
+         font-family:"trade-gothic-next-condensed", "Arial Narrow", sans-serif; }
+  h1 { font-size:22px; text-transform:uppercase; margin:0 0 4px; }
+  p  { font-family:ui-monospace,monospace; font-size:12px; opacity:.6; margin:0 0 28px; }
+  .row { display:flex; align-items:flex-end; gap:48px; flex-wrap:wrap; margin-bottom:32px; }
+  .cell { text-align:center; }
+  .cell span { display:block; font-family:ui-monospace,monospace; font-size:11px;
+               opacity:.55; margin-top:10px; }
+  .box { border:1px solid #222; display:inline-block; }
+  button { font:inherit; font-size:13px; text-transform:uppercase; letter-spacing:.04em;
+           padding:8px 14px; border:1px solid #222; background:transparent; cursor:pointer; }
+  button:hover { background:#222; color:#DEDEDE; }
+</style>
+
+<h1>Panda — draw on, ear twitch, blink</h1>
+<p>3.3s at 60fps &middot; 9 layers &middot; 21 subpaths &middot; 12KB</p>
+
+<div class="row">
+  <div class="cell"><div class="box"><div id="a" style="width:373px;height:281px"></div></div><span>373px — inspect</span></div>
+  <div class="cell"><div class="box"><div id="b" style="width:120px;height:90px"></div></div><span>120px</span></div>
+  <div class="cell"><div class="box"><div id="c" style="width:36px;height:27px"></div></div><span>36px — actual site size</span></div>
+</div>
+
+<button id="replay">Replay</button>
+<button id="loop">Toggle loop</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
+<script>
+  const players = ["a","b","c"].map((id) =>
+    lottie.loadAnimation({
+      container: document.getElementById(id),
+      renderer: "svg", loop: false, autoplay: true, path: "/panda.json",
+    })
+  );
+  let looping = false;
+  document.getElementById("replay").onclick = () => players.forEach(p => p.goToAndPlay(0, true));
+  document.getElementById("loop").onclick = () => {
+    looping = !looping;
+    players.forEach(p => { p.loop = looping; p.goToAndPlay(0, true); });
+  };
+</script>
