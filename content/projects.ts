@@ -115,12 +115,12 @@ export const PROJECTS: Project[] = [
   {
     slug: "the-monster-archetype",
     title: "The monster archetype",
-    // meta and copy are from the inner page (Figma 2123:4301), thumbnail from 2129:612
+    // meta and copy are from the inner page (Figma 2123:4301), thumbnail from 2129:611
     description: MONSTER_SUMMARY,
     disciplines: ["Editorial", "Web", "Research"],
     year: "2026",
     note: "Graduation project",
-    image: "/projects/the-monster-archetype/thumb.png",
+    image: "/projects/the-monster-archetype/thumb.jpg",
     study: {
       summary: MONSTER_SUMMARY,
       // TODO(aki): real URL
