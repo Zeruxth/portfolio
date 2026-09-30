@@ -1,0 +1,214 @@
+/* Inner project page — Figma 2123:4301 */
+
+/* the page's own scroll; container-type lets the sidebar be exactly one view high */
+.scroller {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  container-type: size;
+}
+
+.layout {
+  position: relative; /* chapter offsets are measured against this */
+  display: flex;
+  align-items: flex-start;
+}
+
+/* 429 / 1390 of the Figma frame, held between the frame's min and max */
+.side {
+  position: sticky;
+  top: 0;
+  flex: none;
+  width: clamp(429px, 30.86%, 581px);
+  height: 100cqh;
+  border-right: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+}
+
+.stack {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* every block is placed by CaseStudy.tsx; they only ever move vertically */
+.block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--ink);
+  will-change: transform;
+}
+.intro { border-top: 0; }
+
+/* folding: the same 1fr -> 0fr track the menu explainers use */
+.body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.32s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.block[data-folded="true"] .body { grid-template-rows: 0fr; }
+.bodyIn { overflow: hidden; min-height: 0; }
+
+.introHead { border-bottom: 1px solid var(--ink); }
+
+.back {
+  display: flex;
+  width: 62.344px;
+  height: 35px;
+  padding: 16px 16px 0;
+  color: var(--ink);
+}
+.backArrow {
+  width: 30.344px;
+  height: 19.211px;
+  transform: rotate(180deg);
+}
+
+.title {
+  padding: 16px;
+  font-family: var(--ui);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 38px; /* the 70px Figma frame; whole pixels keep the stacked rules crisp */
+  text-transform: uppercase;
+}
+
+/* headings are the way back to their block once they have stacked */
+.block[data-folded="true"] .title,
+.block[data-folded="true"] .label { cursor: pointer; }
+
+.introBody {
+  padding: 16px 16px 24px; /* 16 + the frame's 8px bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+
+.text {
+  font-family: var(--mono);
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: 0.18px;
+}
+
+.link {
+  align-self: flex-start;
+  font-family: var(--ui);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-decoration-thickness: from-font;
+}
+
+.label {
+  padding: 16px 16px 14px; /* 14 is the gap to the text, and it stays when folded */
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+.chapterText { padding: 0 16px 16px; }
+
+.foot {
+  flex: none;
+  border-top: 1px solid var(--ink);
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+  background: var(--bg);
+}
+
+.next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.nextArrow { flex: none; width: 30.344px; height: 19.211px; }
+
+@keyframes drawArrow {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+.next:hover .nextArrow path,
+.next:focus-visible .nextArrow path,
+.back:hover .backArrow path,
+.back:focus-visible .backArrow path {
+  animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1);
+}
+
+/* images flush to the rule and the frame, 16px between everything */
+.media {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.chapter { display: flex; flex-direction: column; gap: 16px; }
+
+.row { display: flex; gap: 16px; }
+
+/* ratio-locked: the width follows the column, the height follows the width */
+.tile {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.placeholder {
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  background: #242424;
+  color: #E4E4E4;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nextArrow path, .backArrow path { animation: none !important; }
+}
+
+/* Not designed yet: below the desktop layout the sidebar simply sits on top. */
+@media (max-width: 1100px) {
+  .scroller { overflow: visible; container-type: normal; }
+  .layout { flex-direction: column; align-items: stretch; }
+  .side { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--ink); }
+  .stack { overflow: visible; }
+  .block { position: static; transform: none !important; }
+  .block .body { grid-template-rows: 1fr !important; }
+  .media { padding: 16px 0; }
+}
