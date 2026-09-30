@@ -27,7 +27,7 @@
 .main {
   flex: 1 1 0;
   min-width: 0;
-  max-width: 473px;
+  max-width: 590px;
   align-self: center;
   display: flex;
   flex-direction: column;
@@ -109,10 +109,13 @@
 .row:not([data-open="true"]) .main { gap: 0; }
 .row[data-open="true"] .main { align-self: stretch; }
 
-/* 120% of the Figma 363 x 361 */
+/*
+ * 349px at a 1440 window, growing to 436px (120% of the Figma 363) by 1920
+ * and holding there. Height keeps Figma's 363:361.
+ */
 .row[data-open="true"] .cover {
-  width: 436px;
-  height: 433px;
+  width: clamp(349px, calc(18.125vw + 88px), 436px);
+  height: calc(clamp(349px, calc(18.125vw + 88px), 436px) * 361 / 363);
   mix-blend-mode: normal;
 }
 
