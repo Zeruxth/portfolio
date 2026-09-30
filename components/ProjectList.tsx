@@ -66,7 +66,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                           {d}
                           {k < project.disciplines.length - 1 && "\u00a0/"}
                         </span>
-                        <wbr />
+                        {" "}
                       </span>
                     ))}
                   </li>

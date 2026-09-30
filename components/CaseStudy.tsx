@@ -221,7 +221,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                               {d}
                               {k < project.disciplines.length - 1 && "\u00a0/"}
                             </span>
-                            <wbr />
+                            {" "}
                           </span>
                         ))}
                       </li>
