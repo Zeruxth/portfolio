@@ -98,6 +98,9 @@ const vid = (slug: string) =>
 const tma = img("the-monster-archetype");
 const tmaVid = vid("the-monster-archetype");
 
+const MONSTER_SUMMARY =
+  "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.";
+
 export const PROJECTS: Project[] = [
   {
     slug: "my-life-is-a-beautiful-attack",
@@ -112,15 +115,14 @@ export const PROJECTS: Project[] = [
   {
     slug: "the-monster-archetype",
     title: "The monster archetype",
-    description: "PLACEHOLDER — description needed.",
-    // meta and copy below are from the inner page, Figma 2123:4301
+    // meta and copy are from the inner page (Figma 2123:4301), thumbnail from 2129:612
+    description: MONSTER_SUMMARY,
     disciplines: ["Editorial", "Web", "Research"],
     year: "2026",
     note: "Graduation project",
-    image: null,
+    image: "/projects/the-monster-archetype/thumb.png",
     study: {
-      summary:
-        "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.",
+      summary: MONSTER_SUMMARY,
       // TODO(aki): real URL
       link: { label: "Link to the project", href: "#" },
       // stills exported at 2x from Figma; videos compressed from the originals,

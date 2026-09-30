@@ -7,6 +7,9 @@ import { placeholderTile } from "@/lib/placeholder";
 import { Arrow } from "./icons";
 import s from "./ProjectList.module.css";
 
+// images live under /public, which Pages serves below the base path
+const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export default function ProjectList({ projects }: { projects: Project[] }) {
   // the page opens with every row closed; one opens at a time on hover, and it
   // stays on the last row you touched rather than collapsing on leave, so
@@ -77,7 +80,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
               className={s.cover}
               style={{
                 backgroundImage: project.image
-                  ? `url('${project.image}')`
+                  ? `url('${BASE}${project.image}')`
                   : placeholderTile(i),
               }}
             />
