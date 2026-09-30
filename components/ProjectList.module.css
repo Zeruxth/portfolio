@@ -109,9 +109,10 @@
 .row:not([data-open="true"]) .main { gap: 0; }
 .row[data-open="true"] .main { align-self: stretch; }
 
+/* 120% of the Figma 363 x 361 */
 .row[data-open="true"] .cover {
-  width: 363px;
-  height: 361px;
+  width: 436px;
+  height: 433px;
   mix-blend-mode: normal;
 }
 
@@ -134,7 +135,7 @@
 }
 
 @media (max-width: 1100px) {
-  .row[data-open="true"] .cover { width: 180px; height: 180px; }
+  .row[data-open="true"] .cover { width: 216px; height: 216px; }
   .meta { width: 120px; font-size: 13px; }
   .title { font-size: 24px; }
   .desc { font-size: 15px; }
