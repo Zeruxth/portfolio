@@ -123,8 +123,7 @@ export const PROJECTS: Project[] = [
     image: "/projects/the-monster-archetype/thumb.jpg",
     study: {
       summary: MONSTER_SUMMARY,
-      // TODO(aki): real URL
-      link: { label: "Link to the project", href: "#" },
+      link: { label: "Link to the project", href: "https://archetype.monster/" },
       // stills exported at 2x from Figma; videos compressed from the originals,
       // each framed and grounded as its Figma frame is
       intro: [
