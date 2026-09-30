@@ -60,7 +60,15 @@ export interface CaseStudy {
 /** Figma's wide slides: 809 x 424 */
 const WIDE = 809 / 424;
 
-const img = (label: string, ratio = 1): Media => ({ kind: "image", label, ratio, src: null });
+/** an image tile; `file` is looked up in /public/projects/<slug>/ */
+const img = (slug: string) => (label: string, file: string, ratio = 1): Media => ({
+  kind: "image",
+  label,
+  ratio,
+  src: `/projects/${slug}/${file}`,
+});
+
+const tma = img("the-monster-archetype");
 
 export const PROJECTS: Project[] = [
   {
@@ -87,31 +95,31 @@ export const PROJECTS: Project[] = [
         "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.",
       // TODO(aki): real URL
       link: { label: "Link to the project", href: "#" },
-      // TODO(aki): export each tile from Figma into
-      // public/projects/the-monster-archetype/ and set its src
+      // tiles exported at 2x from Figma; swap a file (or its kind to "video")
+      // when the final version is ready
       intro: [
-        [img("Glyphs", WIDE)],
-        [img("Rorschach"), img("Emotions")],
+        [tma("Glyphs", "glyphs.png", WIDE)],
+        [tma("Rorschach", "rorschach.png"), tma("Emotions", "emotions.png")],
       ],
       chapters: [
         {
           label: "The book",
           text: "The 296-page book brings the research together through a sequence of monsters, cultures and emotions. Historical imagery and academic research sit alongside original illustrations and Rorschach-inspired forms, using the visual language of the project to move between studying the monster and interpreting it.",
           rows: [
-            [img("Book — cover", WIDE)],
-            [img("Spread A"), img("Spread B")],
-            [img("Spread C"), img("Spread D")],
-            [img("Book — open", WIDE)],
-            [img("Spread E"), img("Spread F")],
+            [tma("Book — cover", "book-cover.jpg", WIDE)],
+            [tma("Spread A", "spread-a.jpg"), tma("Spread B", "spread-b.jpg")],
+            [tma("Spread C", "spread-c.jpg"), tma("Spread D", "spread-d.jpg")],
+            [tma("Book — open", "book-open.png", WIDE)],
+            [tma("Spread E", "spread-e.jpg"), tma("Spread F", "spread-f.jpg")],
           ],
         },
         {
           label: "The website",
           text: "The website extends the project into a more personal and interactive experience. A Rorschach-inspired test asks visitors to interpret ambiguous forms, while a visual guide and research section let them explore the monsters, emotions and ideas behind the project in different ways.",
           rows: [
-            [img("Website", WIDE)],
-            [img("Screen A"), img("Screen B")],
-            [img("Social preview", WIDE)],
+            [tma("Website", "website.png", WIDE)],
+            [tma("Screen A", "screen-a.png"), tma("Screen B", "screen-b.png")],
+            [tma("Social preview", "social-preview.png", WIDE)],
           ],
         },
       ],
