@@ -15,23 +15,31 @@ export interface Tab {
 }
 
 /**
- * The tab a route opens, or null for home. Projects get their own tab, so the
- * bar reads logo / Selected Projects / <project name> as you go deeper.
+ * The tabs a route opens, outermost first; empty for home. A project opens its
+ * section too, so the bar reads logo / Selected Projects / <project name>
+ * however you arrived.
  */
-export function tabForPath(pathname: string): Tab | null {
+export function tabsForPath(pathname: string): Tab[] {
   const path = pathname.replace(/\/+$/, "") || "/";
-  if (path === "/") return null;
+  if (path === "/") return [];
 
   const slug = path.match(/^\/projects\/(.+)$/)?.[1];
   if (slug) {
     const project = PROJECTS.find((p) => p.slug === slug);
-    return project
-      ? { id: `project:${project.slug}`, label: project.title, href: `/projects/${project.slug}` }
-      : null;
+    if (!project) return [];
+    return [
+      ...tabsForPath("/projects"),
+      { id: `project:${project.slug}`, label: project.title, href: `/projects/${project.slug}` },
+    ];
   }
 
   const section = SECTIONS.find((s) => s.href !== "/" && s.href === path);
-  return section ? { id: section.key, label: section.label, href: section.href } : null;
+  return section ? [{ id: section.key, label: section.label, href: section.href }] : [];
+}
+
+/** The tab for the route itself, or null for home. */
+export function tabForPath(pathname: string): Tab | null {
+  return tabsForPath(pathname).at(-1) ?? null;
 }
 
 interface TabsState {
@@ -44,22 +52,24 @@ const Ctx = createContext<TabsState>({ tabs: [], close: () => {} });
 export function TabsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [tabs, setTabs] = useState<Tab[]>([]);
+  // seeded from the route, so the bar is already right in the server HTML
+  const [tabs, setTabs] = useState<Tab[]>(() => tabsForPath(pathname));
 
-  const current = tabForPath(pathname);
-  const currentId = current?.id ?? null;
+  const chain = tabsForPath(pathname);
+  const currentId = chain.at(-1)?.id ?? null;
 
   useEffect(() => {
     // home is the root, and its frame shows the logo tab alone — going there
     // closes everything else rather than leaving tabs standing behind it
-    if (!current) {
+    if (!chain.length) {
       setTabs((open) => (open.length ? [] : open));
       return;
     }
-    setTabs((open) =>
-      open.some((t) => t.id === current.id) ? open : [...open, current],
-    );
-    // the id is what identifies the route; the object is rebuilt every render
+    setTabs((open) => {
+      const missing = chain.filter((t) => !open.some((o) => o.id === t.id));
+      return missing.length ? [...open, ...missing] : open;
+    });
+    // the id is what identifies the route; the objects are rebuilt every render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId]);
 

@@ -14,22 +14,23 @@
   align-items: flex-start;
 }
 
-/* 429 / 1390 of the Figma frame, held between the frame's min and max */
+/*
+ * 429 / 1390 of the Figma frame, held between the frame's min and max. The
+ * column runs the full length of the page; only the stack inside it sticks,
+ * so NEXT PROJECT sits at the very end and shows up when you get there.
+ */
 .side {
-  position: sticky;
-  top: 0;
+  position: relative;
   flex: none;
+  align-self: stretch;
   width: clamp(429px, 30.86%, 581px);
-  height: 100cqh;
   border-right: 1px solid var(--ink);
-  display: flex;
-  flex-direction: column;
 }
 
 .stack {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
+  position: sticky;
+  top: 0;
+  height: 100cqh;
   overflow: hidden;
 }
 
@@ -131,7 +132,10 @@
 .chapterText { padding: 0 16px 16px; }
 
 .foot {
-  flex: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-top: 1px solid var(--ink);
   padding: 16px;
   display: flex;
@@ -206,8 +210,9 @@
 @media (max-width: 1100px) {
   .scroller { overflow: visible; container-type: normal; }
   .layout { flex-direction: column; align-items: stretch; }
-  .side { position: static; width: auto; height: auto; border-right: 0; border-bottom: 1px solid var(--ink); }
-  .stack { overflow: visible; }
+  .side { width: auto; border-right: 0; border-bottom: 1px solid var(--ink); }
+  .stack { position: static; height: auto; overflow: visible; }
+  .foot { position: static; }
   .block { position: static; transform: none !important; }
   .block .body { grid-template-rows: 1fr !important; }
   .media { padding: 16px 0; }
