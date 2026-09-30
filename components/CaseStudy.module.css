@@ -104,16 +104,24 @@
   letter-spacing: 0.18px;
 }
 
+/* the underline is drawn, not text-decoration, so it can sit clear of the
+   letters and redraw itself left to right on hover */
 .link {
   align-self: flex-start;
+  padding-bottom: 4px;
   font-family: var(--ui);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.3;
-  letter-spacing: 0.16px;
+  letter-spacing: 0.14px;
   text-transform: uppercase;
-  text-decoration: underline;
-  text-decoration-thickness: from-font;
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
 }
+@keyframes drawLine {
+  from { background-size: 0% 1px; }
+  to   { background-size: 100% 1px; }
+}
+.link:hover,
+.link:focus-visible { animation: drawLine 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
 
 .label {
   padding: 16px 16px 14px; /* 14 is the gap to the text, and it stays when folded */
@@ -198,7 +206,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nextArrow path, .backArrow path { animation: none !important; }
+  .nextArrow path, .backArrow path, .link { animation: none !important; }
 }
 
 /* Not designed yet: below the desktop layout the sidebar simply sits on top. */
