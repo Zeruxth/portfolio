@@ -127,10 +127,15 @@ export const PROJECTS: Project[] = [
       // each framed and grounded as its Figma frame is
       intro: [
         [tma("Glyphs", "glyphs.png", WIDE)],
-        [tmaVid("Rorschach", "rorschach", 1, {
-          ground: "#242424",
-          frame: { left: 10, top: 0, width: 80, height: 100 },
-        }), tma("Emotions", "emotions.png")],
+        [
+          // sized so the finished shape lands where Figma has it: 346 of 474px
+          // wide, centred (it spans 908 of the video's 1080px)
+          tmaVid("Rorschach", "rorschach", 1, {
+            ground: "#242424",
+            frame: { left: 6.6, top: -4.25, width: 86.8, height: 108.5 },
+          }),
+          tma("Emotions", "emotions.png"),
+        ],
       ],
       chapters: [
         {
