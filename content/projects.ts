@@ -13,7 +13,7 @@ export interface Project {
   title: string;
   /** one or two sentences, set in mono under the title */
   description: string;
-  /** rendered slash-joined, a space before each slash: ["Editorial","Web"] -> EDITORIAL /WEB */
+  /** rendered slash-joined, spaced slashes: ["Editorial","Web"] -> EDITORIAL / WEB */
   disciplines: string[];
   year: string;
   /** optional third metadata line, e.g. "Graduation project" */
