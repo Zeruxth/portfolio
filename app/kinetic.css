@@ -1,11 +1,13 @@
 /* Global on purpose: lib/kinetic.ts builds these nodes imperatively.
    The k- prefix keeps them out of the component namespace. */
 
+/* Every layer sits above the paragraph (z-index 2), so wherever the animation
+   is, the text beneath it is hidden. */
 .k-layer { position: absolute; inset: 0; pointer-events: none; }
 .k-cells  { z-index: 5; }
 .k-cols   { z-index: 6; }
 .k-peri   { z-index: 7; }
-.k-panels { z-index: 1; display: flex; }
+.k-panels { z-index: 8; display: flex; }   /* was 1 — the only layer under the text */
 
 .k-intro { position: relative; z-index: 2; }
 .k-slot  { flex: 1 1 auto; min-height: 0; }

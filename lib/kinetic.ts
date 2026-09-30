@@ -106,12 +106,22 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
   }
   const sig = () => ({ signal: ac!.signal });
 
+  /* A mechanic's reaction to the cursor arriving. Stored as well as bound,
+     because a mechanic mounted DURING an entry never hears about it: listeners
+     added while an event is being dispatched do not receive that event. */
+  let enterHook: (() => void) | null = null;
+  function onStageEnter(fn: () => void) {
+    enterHook = fn;
+    h.stage.addEventListener("pointerenter", fn, sig());
+  }
+
   function teardown() {
     ac?.abort();
     if (loopId !== null) { cancelAnimationFrame(loopId); loopId = null; }
     timers.forEach((t) => clearTimeout(t));
     timers.clear();
     onResize = null;
+    enterHook = null;
     bag = [];
     h.cells.innerHTML = h.cols.innerHTML = h.peri.innerHTML = h.panels.innerHTML = "";
     h.panels.classList.remove("is-in");
@@ -432,7 +442,7 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
       if (Math.abs(v) > 0.04) raf(frame); else running = false;
     }
 
-    h.stage.addEventListener("pointerenter", () => show(true), sig());
+    onStageEnter(() => show(true));
     h.stage.addEventListener("pointermove", (e) => {
       const r = h.stage.getBoundingClientRect();
       const x = e.clientX - r.left, y = e.clientY - r.top;
@@ -500,12 +510,12 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
     function loop() { tick(); if (running) raf(loop); }
     function start() { if (!running) { running = true; raf(loop); } }
 
-    h.stage.addEventListener("pointerenter", () => {
+    onStageEnter(() => {
       inside = true;
       h.panels.classList.add("is-in");
       pans.forEach((p, i) => { p.el.style.transitionDelay = `${i * 45}ms`; });
       start();
-    }, sig());
+    });
     h.stage.addEventListener("pointermove", (e) => {
       const r = h.stage.getBoundingClientRect();
       const k = clamp(Math.floor(clamp((e.clientX - r.left) / r.width, 0, 1) * N), 0, N - 1);
@@ -667,13 +677,31 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
 
   let currentIndex = -1;
 
+  /* Dealt from a shuffled bag, so a visitor meets all seven before any one
+     repeats. Picking at random could leave some unseen for many entries. */
+  let order: number[] = [];
+  function nextIndex(): number {
+    if (!order.length) {
+      order = MECHANICS.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = rnd(i + 1);
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+      // never hand out the one just shown across a bag boundary
+      const last = order.length - 1;
+      if (last > 0 && order[last] === currentIndex) {
+        [order[0], order[last]] = [order[last], order[0]];
+      }
+    }
+    return order.pop()!;
+  }
+
   function roll() {
     teardown();
     ac = new AbortController();
-    let i = rnd(MECHANICS.length);
-    if (i === currentIndex) i = (i + 1) % MECHANICS.length;
-    currentIndex = i;
-    MECHANICS[i][1]();
+    currentIndex = nextIndex();
+    h.stage.dataset.mechanic = MECHANICS[currentIndex][0];
+    MECHANICS[currentIndex][1]();
   }
 
   let resizeTimer: number | undefined;
@@ -683,6 +711,24 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
   };
   window.addEventListener("resize", handleResize);
 
+  /*
+   * A fresh mechanic every time the cursor comes into the frame, rather than
+   * only on refresh — otherwise a visitor sees whichever one they landed on.
+   *
+   * Registered before the first mechanic mounts so it runs ahead of that
+   * mechanic's own listeners. On an entry it tears the old mechanic down (its
+   * listeners are removed mid-dispatch, so they are skipped), mounts the next,
+   * and hands it the entry directly. The very first entry plays the mechanic
+   * mounted at load, so that pick from the bag is not wasted.
+   */
+  let entered = false;
+  const handleEnter = () => {
+    if (!entered) { entered = true; return; }
+    roll();
+    enterHook?.();
+  };
+  h.stage.addEventListener("pointerenter", handleEnter);
+
   roll();
   void document.fonts?.ready.then(() => onResize?.());
 
@@ -691,6 +737,8 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
     current: () => (currentIndex < 0 ? "" : MECHANICS[currentIndex][0]),
     destroy() {
       teardown();
+      h.stage.removeEventListener("pointerenter", handleEnter);
+      delete h.stage.dataset.mechanic;
       window.removeEventListener("resize", handleResize);
       clearTimeout(resizeTimer);
     },
