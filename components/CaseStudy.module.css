@@ -46,14 +46,9 @@
 }
 .intro { border-top: 0; }
 
-/* folding: the same 1fr -> 0fr track the menu explainers use */
-.body {
-  display: grid;
-  grid-template-rows: 1fr;
-  transition: grid-template-rows 0.32s cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-.block[data-folded="true"] .body { grid-template-rows: 0fr; }
-.bodyIn { overflow: hidden; min-height: 0; }
+/* the text is always there; a later block covers it rather than it folding away */
+.body { display: grid; }
+.bodyIn { min-height: 0; }
 
 .introHead { border-bottom: 1px solid var(--ink); }
 
@@ -214,6 +209,6 @@
   .stack { position: static; height: auto; overflow: visible; }
   .foot { position: static; }
   .block { position: static; transform: none !important; }
-  .block .body { grid-template-rows: 1fr !important; }
+  .block { clip-path: none !important; }
   .media { padding: 16px 0; }
 }

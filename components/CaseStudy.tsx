@@ -51,10 +51,9 @@ function Rows({ rows }: { rows: MediaRow[] }) {
 /**
  * The sidebar is a viewport-high column that never scrolls. Each block sits
  * level with the first row of its chapter and rides up with the page; when it
- * reaches the stack at the top it stops there. When the next block would run
- * into it, it folds down to its heading, so the stack reads
- * title / THE BOOK / THE WEBSITE as you go. NEXT PROJECT is outside the stack,
- * pinned to the bottom.
+ * reaches the stack at the top it stops there. The next block slides up over
+ * it and stops just under its heading, so the stack reads
+ * title / THE BOOK / THE WEBSITE as you go. NEXT PROJECT sits at the very end.
  *
  * Positions are written straight to the DOM on scroll — no React render per frame.
  */
@@ -64,7 +63,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
   const side = useRef<HTMLElement>(null);
   const blocks = useRef<(HTMLElement | null)[]>([]);
   const anchors = useRef<(HTMLElement | null)[]>([]);
-  // measured: where each block rests, and its folded / open heights
+  // measured: where each block rests, its heading height and its full height
   const geo = useRef<{ rest: number[]; shut: number[]; open: number[] }>({
     rest: [], shut: [], open: [],
   });
@@ -83,9 +82,14 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
     for (let i = 0; i < rest.length; i++) {
       const b = blocks.current[i];
       if (!b) continue;
-      b.style.transform = `translateY(${Math.round(ys[i])}px)`;
-      const folded = i < rest.length - 1 && ys[i + 1] < ys[i] + open[i];
-      b.dataset.folded = String(folded);
+      const y = Math.round(ys[i]);
+      b.style.transform = `translateY(${y}px)`;
+      // the next block slides over this one; cut this one off at its top edge
+      // so nothing peeks out underneath
+      const room = i < rest.length - 1 ? Math.round(ys[i + 1]) - y : Infinity;
+      const hidden = Math.max(0, Math.round(open[i]) - room);
+      b.style.clipPath = hidden ? `inset(0 0 ${hidden}px 0)` : "";
+      b.dataset.folded = String(hidden > 0);
     }
   }, []);
 
@@ -99,8 +103,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
       if (!b) continue;
       const head = b.querySelector<HTMLElement>("[data-head]")!;
       const body = b.querySelector<HTMLElement>("[data-body]")!;
-      // the content inside the 0fr track keeps its full height; fractional
-      // heights, so stacked rules land on the same pixel rather than one apart
+      // fractional heights, so stacked rules land on the same pixel rather than one apart
       const content = body.firstElementChild!.firstElementChild!;
       const h = (el: Element) => el.getBoundingClientRect().height;
       const border = h(b) - h(head) - h(body);
