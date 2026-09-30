@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PROJECTS } from "@/content/projects";
+import CaseStudy from "@/components/CaseStudy";
 import s from "../../page.module.css";
 
 export function generateStaticParams() {
@@ -12,8 +13,13 @@ export default async function ProjectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const project = PROJECTS.find((p) => p.slug === slug);
-  if (!project) notFound();
+  const i = PROJECTS.findIndex((p) => p.slug === slug);
+  if (i === -1) notFound();
+  const project = PROJECTS[i];
+
+  if (project.study) {
+    return <CaseStudy project={project} next={PROJECTS[(i + 1) % PROJECTS.length]} />;
+  }
 
   return (
     <>

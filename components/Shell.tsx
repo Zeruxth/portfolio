@@ -16,6 +16,8 @@ export default function Shell({ children }: { children: ReactNode }) {
   const active = sectionForPath(pathname);
   const shown = hovered ? BY_KEY[hovered] : active;
   const hot = hovered !== null;
+  // a project's inner page gives the whole panel to the project — no menu rail
+  const inner = /^\/projects\/[^/]+/.test(pathname);
 
   return (
     <div className={s.frame}>
@@ -30,7 +32,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         }
       >
         <div className={s.upper}>
-          <Menu />
+          {!inner && <Menu />}
           <div className={s.stage}>{children}</div>
         </div>
         {/* the band belongs to the homepage only — no other designed frame has it */}

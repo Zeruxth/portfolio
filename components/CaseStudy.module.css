@@ -1,0 +1,233 @@
+/* Inner project page — Figma 2123:4301 */
+
+/* the page's own scroll; container-type lets the sidebar be exactly one view high */
+.scroller {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  container-type: size;
+}
+
+.layout {
+  position: relative; /* chapter offsets are measured against this */
+  display: flex;
+  align-items: flex-start;
+}
+
+/*
+ * 429 / 1390 of the Figma frame, held between the frame's min and max. The
+ * column runs the full length of the page; only the stack inside it sticks,
+ * so NEXT PROJECT sits at the very end and shows up when you get there.
+ */
+.side {
+  position: relative;
+  flex: none;
+  align-self: stretch;
+  width: clamp(429px, 30.86%, 581px);
+  border-right: 1px solid var(--ink);
+}
+
+.stack {
+  position: sticky;
+  top: 0;
+  height: 100cqh;
+  overflow: hidden;
+}
+
+/* every block is placed by CaseStudy.tsx; they only ever move vertically */
+.block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--ink);
+  will-change: transform;
+}
+.intro { border-top: 0; }
+
+/* the text is always there; a later block covers it rather than it folding away */
+.body { display: grid; }
+.bodyIn { min-height: 0; }
+
+.introHead { border-bottom: 1px solid var(--ink); }
+
+.back {
+  display: flex;
+  width: 62.344px;
+  height: 35px;
+  padding: 16px 16px 0;
+  color: var(--ink);
+}
+.backArrow {
+  width: 30.344px;
+  height: 19.211px;
+  transform: rotate(180deg);
+}
+
+.title {
+  padding: 16px;
+  font-family: var(--ui);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 38px; /* the 70px Figma frame; whole pixels keep the stacked rules crisp */
+  text-transform: uppercase;
+}
+
+/* headings are the way back to their block once they have stacked */
+.block[data-folded="true"] .title,
+.block[data-folded="true"] .label { cursor: pointer; }
+
+.introBody {
+  padding: 16px 16px 24px; /* 16 + the frame's 8px bottom */
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.meta {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 18px;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+
+.text {
+  font-family: var(--mono);
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: 0.18px;
+}
+
+/* the underline is drawn, not text-decoration, so it can sit clear of the
+   letters and redraw itself left to right on hover */
+.link {
+  align-self: flex-start;
+  padding-bottom: 4px;
+  font-family: var(--ui);
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+  background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat;
+}
+@keyframes drawLine {
+  from { background-size: 0% 1px; }
+  to   { background-size: 100% 1px; }
+}
+.link:hover,
+.link:focus-visible { animation: drawLine 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+
+.label {
+  padding: 16px 16px 14px; /* 14 is the gap to the text, and it stays when folded */
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+.chapterText { padding: 0 16px 16px; }
+
+.foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-top: 1px solid var(--ink);
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+  background: var(--bg);
+}
+
+.next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+.nextArrow { flex: none; width: 30.344px; height: 19.211px; }
+
+@keyframes drawArrow {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+.next:hover .nextArrow path,
+.next:focus-visible .nextArrow path,
+.back:hover .backArrow path,
+.back:focus-visible .backArrow path {
+  animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1);
+}
+
+/* images flush to the rule and the frame, 16px between everything */
+.media {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.chapter { display: flex; flex-direction: column; gap: 16px; }
+
+.row { display: flex; gap: 16px; }
+
+/* ratio-locked: the width follows the column, the height follows the width */
+.tile {
+  display: block;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* a video sits in a box of the tile's ratio: covering it, or at its Figma frame */
+.videoTile { position: relative; overflow: hidden; }
+.video {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.placeholder {
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  background: #242424;
+  color: #E4E4E4;
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nextArrow path, .backArrow path, .link { animation: none !important; }
+}
+
+/* Not designed yet: below the desktop layout the sidebar simply sits on top. */
+@media (max-width: 1100px) {
+  .scroller { overflow: visible; container-type: normal; }
+  .layout { flex-direction: column; align-items: stretch; }
+  .side { width: auto; border-right: 0; border-bottom: 1px solid var(--ink); }
+  .stack { position: static; height: auto; overflow: visible; }
+  .foot { position: static; }
+  .block { position: static; transform: none !important; }
+  .block { clip-path: none !important; }
+  .media { padding: 16px 0; }
+}
