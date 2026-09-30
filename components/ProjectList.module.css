@@ -79,10 +79,14 @@
   .enter svg { transition: none; }
 }
 
+/*
+ * 176px, unless one tag is longer than that ("DIGITAL EXPERIENCE/"): then it
+ * widens to that tag rather than letting it run under the cover. Breaks come
+ * from the <wbr> after each slash, so it wraps "EDITORIAL/WEB/" + "RESEARCH".
+ */
 .meta {
-  width: 176px;
-  /* breaks come from explicit <wbr> after each slash, so it wraps
-     "EDITORIAL/WEB/" + "RESEARCH" rather than mid-word */
+  width: min-content;
+  min-width: 176px;
   font-family: var(--mono);
   font-size: 16px;
   line-height: 1.3;
@@ -90,6 +94,7 @@
   text-transform: uppercase;
 }
 .meta li { list-style: none; }
+.tag { white-space: nowrap; }
 .meta li + li { margin-top: 16px; }
 
 /* collapsed thumb and open cover are the same element, resized */

@@ -213,7 +213,18 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                 <div className={s.bodyIn}>
                   <div className={s.introBody}>
                     <ul className={s.meta}>
-                      <li>{project.disciplines.join("/")}</li>
+                      <li>
+                        {/* a tag never splits; lines break after a slash */}
+                        {project.disciplines.map((d, k) => (
+                          <span key={d}>
+                            <span className={s.tag}>
+                              {d}
+                              {k < project.disciplines.length - 1 && "\u00a0/"}
+                            </span>
+                            <wbr />
+                          </span>
+                        ))}
+                      </li>
                       <li>{project.year}</li>
                       {project.note && <li>{project.note}</li>}
                     </ul>

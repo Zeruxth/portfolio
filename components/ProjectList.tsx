@@ -59,14 +59,14 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
               <div className={s.revealIn}>
                 <ul className={s.meta}>
                   <li>
+                    {/* a tag never splits ("DIGITAL EXPERIENCE" stays whole); lines break after a slash */}
                     {project.disciplines.map((d, k) => (
                       <span key={d}>
-                        {d}
-                        {k < project.disciplines.length - 1 && (
-                          <>
-                            /<wbr />
-                          </>
-                        )}
+                        <span className={s.tag}>
+                          {d}
+                          {k < project.disciplines.length - 1 && "\u00a0/"}
+                        </span>
+                        <wbr />
                       </span>
                     ))}
                   </li>
