@@ -219,7 +219,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                           <span key={d}>
                             <span className={s.tag}>
                               {d}
-                              {k < project.disciplines.length - 1 && "/"}
+                              {k < project.disciplines.length - 1 && "\u00a0/"}
                             </span>
                             <wbr />
                           </span>

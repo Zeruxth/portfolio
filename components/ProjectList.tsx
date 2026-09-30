@@ -64,7 +64,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                       <span key={d}>
                         <span className={s.tag}>
                           {d}
-                          {k < project.disciplines.length - 1 && "/"}
+                          {k < project.disciplines.length - 1 && "\u00a0/"}
                         </span>
                         <wbr />
                       </span>
