@@ -6,3 +6,7 @@ out/
 next-env.d.ts
 .env*.local
 .claude/settings.local.json
+
+# written by `next dev` on every run
+AGENTS.md
+CLAUDE.md
