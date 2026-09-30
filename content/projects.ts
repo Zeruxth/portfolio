@@ -117,7 +117,7 @@ export const PROJECTS: Project[] = [
     title: "The monster archetype",
     // meta and copy are from the inner page (Figma 2123:4301), thumbnail from 2129:611
     description: MONSTER_SUMMARY,
-    disciplines: ["Editorial", "Web", "Research"],
+    disciplines: ["Editorial Design", "Illustration", "Digital Experience", "Art Direction", "Typography"],
     year: "2026",
     note: "Graduation project",
     image: "/projects/the-monster-archetype/thumb.jpg",

@@ -96,6 +96,7 @@
   letter-spacing: 0.16px;
   text-transform: uppercase;
 }
+.tag { white-space: nowrap; }
 
 .text {
   font-family: var(--mono);
