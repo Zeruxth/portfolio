@@ -12,6 +12,34 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 // the title's rule and the first chapter's rule land on the same pixel once stacked
 const overlap = (i: number) => (i === 0 ? 1 : 0);
 
+/** plays only while on screen, so a long page doesn't decode every video at once */
+function LoopVideo({ src, poster, style }: { src: string; poster?: string; style?: React.CSSProperties }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) v.play().catch(() => {});
+      else v.pause();
+    }, { rootMargin: "200px 0px" });
+    io.observe(v);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <video
+      ref={ref}
+      className={s.video}
+      style={style}
+      src={BASE + src}
+      poster={poster && BASE + poster}
+      preload="metadata"
+      muted
+      loop
+      playsInline
+    />
+  );
+}
+
 function Tile({ media }: { media: Media }) {
   const style = { aspectRatio: String(media.ratio) };
   if (!media.src) {
@@ -22,17 +50,27 @@ function Tile({ media }: { media: Media }) {
     );
   }
   if (media.kind === "video") {
+    const f = media.frame;
     return (
-      <video
-        className={s.tile}
-        style={style}
-        src={BASE + media.src}
-        poster={media.poster && BASE + media.poster}
-        autoPlay
-        muted
-        loop
-        playsInline
-      />
+      <div
+        className={`${s.tile} ${s.videoTile}`}
+        style={{ ...style, background: media.ground }}
+        role="img"
+        aria-label={media.label}
+      >
+        <LoopVideo
+          src={media.src}
+          poster={media.poster}
+          style={
+            f && {
+              left: `${f.left}%`,
+              top: `${f.top}%`,
+              width: `${f.width}%`,
+              height: `${f.height}%`,
+            }
+          }
+        />
+      </div>
     );
   }
   return <img className={s.tile} style={style} src={BASE + media.src} alt={media.label} />;

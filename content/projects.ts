@@ -33,7 +33,23 @@ export interface Project {
  */
 export type Media =
   | { kind: "image"; label: string; ratio: number; src: string | null }
-  | { kind: "video"; label: string; ratio: number; src: string | null; poster?: string };
+  | {
+      kind: "video";
+      label: string;
+      ratio: number;
+      src: string;
+      poster?: string;
+      /** fills the tile around a video that doesn't cover it; match the video's own ground */
+      ground?: string;
+      /**
+       * where the video sits in the tile, in % of the tile (left/width of its
+       * width, top/height of its height), straight from the Figma frame.
+       * Omitted, the video covers the tile.
+       */
+      frame?: Frame;
+    };
+
+export interface Frame { left: number; top: number; width: number; height: number }
 
 /** one or two tiles side by side */
 export type MediaRow = Media[];
@@ -68,7 +84,19 @@ const img = (slug: string) => (label: string, file: string, ratio = 1): Media =>
   src: `/projects/${slug}/${file}`,
 });
 
+/** a looping video tile; `name` is looked up in /public/projects/<slug>/videos/ (.mp4 + .jpg poster) */
+const vid = (slug: string) =>
+  (label: string, name: string, ratio = 1, extra: { ground?: string; frame?: Frame } = {}): Media => ({
+    kind: "video",
+    label,
+    ratio,
+    src: `/projects/${slug}/videos/${name}.mp4`,
+    poster: `/projects/${slug}/videos/${name}.jpg`,
+    ...extra,
+  });
+
 const tma = img("the-monster-archetype");
+const tmaVid = vid("the-monster-archetype");
 
 export const PROJECTS: Project[] = [
   {
@@ -95,11 +123,14 @@ export const PROJECTS: Project[] = [
         "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.",
       // TODO(aki): real URL
       link: { label: "Link to the project", href: "#" },
-      // tiles exported at 2x from Figma; swap a file (or its kind to "video")
-      // when the final version is ready
+      // stills exported at 2x from Figma; videos compressed from the originals,
+      // each framed and grounded as its Figma frame is
       intro: [
         [tma("Glyphs", "glyphs.png", WIDE)],
-        [tma("Rorschach", "rorschach.png"), tma("Emotions", "emotions.png")],
+        [tmaVid("Rorschach", "rorschach", 1, {
+          ground: "#242424",
+          frame: { left: 10, top: 0, width: 80, height: 100 },
+        }), tma("Emotions", "emotions.png")],
       ],
       chapters: [
         {
@@ -108,8 +139,8 @@ export const PROJECTS: Project[] = [
           rows: [
             [tma("Book — cover", "book-cover.jpg", WIDE)],
             [tma("Spread A", "spread-a.jpg"), tma("Spread B", "spread-b.jpg")],
-            [tma("Spread C", "spread-c.jpg"), tma("Spread D", "spread-d.jpg")],
-            [tma("Book — open", "book-open.png", WIDE)],
+            [tmaVid("Spread C", "spread-c"), tma("Spread D", "spread-d.jpg")],
+            [tmaVid("Book — open", "book-open", WIDE, { ground: "#000000" })],
             [tma("Spread E", "spread-e.jpg"), tma("Spread F", "spread-f.jpg")],
           ],
         },
@@ -117,8 +148,17 @@ export const PROJECTS: Project[] = [
           label: "The website",
           text: "The website extends the project into a more personal and interactive experience. A Rorschach-inspired test asks visitors to interpret ambiguous forms, while a visual guide and research section let them explore the monsters, emotions and ideas behind the project in different ways.",
           rows: [
-            [tma("Website", "website.png", WIDE)],
-            [tma("Screen A", "screen-a.png"), tma("Screen B", "screen-b.png")],
+            [tmaVid("Website", "website", WIDE, {
+              ground: "#E5E5E5",
+              frame: { left: 17.78, top: -26.94, width: 64.44, height: 153.88 },
+            })],
+            [tmaVid("Screen A", "screen-a", 1, {
+                ground: "#1F1F1F",
+                frame: { left: 4.03, top: -7.46, width: 91.94, height: 114.93 },
+              }), tmaVid("Screen B", "screen-b", 1, {
+                ground: "#1F1F1F",
+                frame: { left: 8.29, top: -2.13, width: 83.41, height: 104.27 },
+              })],
             [tma("Social preview", "social-preview.png", WIDE)],
           ],
         },
