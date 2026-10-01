@@ -19,7 +19,7 @@ import s from "./ZooSyrups.module.css";
  */
 const LABELS = ["cucumber", "hyssop", "mango"] as const;
 
-const HOLD_MS = 2800;
+const HOLD_MS = 1800;
 const MOVE_MS = 900;
 /** ~15fps, the same held-frame rate as the logo */
 const FRAMES = 14;
