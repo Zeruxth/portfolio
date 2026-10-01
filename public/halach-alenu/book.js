@@ -62,7 +62,10 @@
     const padY = short ? 10 : Math.min(40, H * 0.05);
     // on a short screen the corners hold the controls, so leave them clear
     const padX = short ? 120 : Math.min(48, W * 0.04);
-    ph = Math.floor(Math.min((H - padY * 2) / COVER_SCALE, (W - padX * 2) / (2 * ASPECT * 1.04)));
+    // on a desk-sized screen the book sits at 70% of the room it could fill;
+    // phones need every pixel, so they keep the full size
+    const room = short || W < 760 ? 1 : 0.7;
+    ph = Math.floor(room * Math.min((H - padY * 2) / COVER_SCALE, (W - padX * 2) / (2 * ASPECT * 1.04)));
     pw = Math.round(ph * ASPECT);
     const ov = Math.round(((COVER_SCALE - 1) / 2) * ph);
     book.style.setProperty("--pw", pw + "px");
