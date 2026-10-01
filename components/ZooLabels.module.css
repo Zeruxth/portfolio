@@ -1,0 +1,172 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  /* bare paper, before the first sheet is laid */
+  background: #ebe9e2;
+}
+.defs { position: absolute; }
+.stage { cursor: zoom-in; }
+
+/* everything drawn sits in here, so full screen can size it to the label */
+.canvas { position: absolute; inset: 0; overflow: hidden; }
+
+/* Full screen: the browser forces the stage itself to fill the screen, so the
+   canvas inside is what gets the label's own 306:317 proportions, letterboxed. */
+.stage:fullscreen { cursor: zoom-out; background: #111; }
+/* set into a larger tile: the label sits at the inset, the ground shows round it */
+.stage[data-inset]:not(:fullscreen) .canvas {
+  inset: auto;
+  left: var(--l);
+  top: var(--t);
+  width: var(--w);
+  height: var(--h);
+}
+.stage[data-inset]:fullscreen { background: #111 !important; }
+
+.stage:fullscreen .canvas {
+  inset: 0;
+  margin: auto;
+  width: min(100vw, 100vh * 306 / 317);
+  height: min(100vh, 100vw * 317 / 306);
+}
+
+.label {
+  position: absolute;
+  inset: 0;
+  /* off: hidden whole, so going on is the one-frame cut to the next sheet */
+  clip-path: inset(0 0 0 100%);
+}
+.label svg { display: block; width: 100%; height: 100%; }
+.label[data-state="on"],
+.label[data-state="out"] { clip-path: none; }
+
+/* the line boil — the filter url is swapped at 8fps from JS */
+.label :global(.art) { filter: var(--boil); }
+/* the title's rough ink edge (static; set once on the stage) */
+.label :global(.t path) { filter: var(--edge); }
+
+/* --------------------------------------------------------------------------
+   Final state is the default. "off" hides everything, "on" builds it, "out"
+   takes it apart. Every animation holds each keyframe (steps) rather than
+   tweening — a stop-motion frame rate.
+
+   The unbuild ramps up into the cut and the build eases in after it. Easing
+   shows up twice: in the spacing of the pieces (the stagger) and in the held
+   frames of each line.
+   -------------------------------------------------------------------------- */
+
+.label[data-state="off"] :global(.t),
+.label[data-state="off"] :global(.f),
+.label[data-state="off"] :global(.cw) { opacity: 0; }
+.label[data-state="off"] :global(.l)  { stroke-dashoffset: 1; }
+
+.label :global(.l) { stroke-dasharray: 1 1; }
+.label :global(.t),
+.label :global(.f) { transform-box: fill-box; transform-origin: center; }
+.label :global(.cw) { --r: 1.5deg; transform-box: fill-box; transform-origin: center; }
+.label :global(.p:nth-child(3n + 1) .cw) { --r: -1deg; }
+.label :global(.p:nth-child(3n + 2) .cw) { --r: 0.5deg; }
+
+/* ============================ build: ease in ============================
+   Piece i starts at √(i / n) of the spread: the first few are well apart,
+   the last ones pile in on top of each other. */
+.label[data-state="on"] :global(.p) { --in: sqrt(var(--i) / var(--n)); }
+
+/* stamps: title first, footer last — land off register, knock into place */
+@keyframes stamp {
+  0%   { opacity: 0; transform: translate(3.5px, -2.5px) rotate(-1.2deg); }
+  1%   { opacity: 1; transform: translate(3.5px, -2.5px) rotate(-1.2deg); }
+  50%  { opacity: 1; transform: translate(1.2px, -0.8px) rotate(-0.4deg); }
+  80%, 100% { opacity: 1; transform: none; }
+}
+.label[data-state="on"] :global(.t) { animation: stamp 0.4s steps(1, end) 0.05s both; }
+.label[data-state="on"] :global(.f) { animation: stamp 0.3s steps(1, end) 1.45s both; }
+
+/* ink pass: each piece's line draws itself, back to front; frames spaced to
+   accelerate, so a line creeps out and then whips to its end. The first piece
+   starts drawing on the frame of the cut — the new colour never sits bare.
+   Its first frame is already moving, so the draw is visible right away. */
+@keyframes ink {
+  0%   { stroke-dashoffset: 1; }
+  8%   { stroke-dashoffset: 0.95; }
+  30%  { stroke-dashoffset: 0.88; }
+  55%  { stroke-dashoffset: 0.8; }
+  75%  { stroke-dashoffset: 0.55; }
+  90%  { stroke-dashoffset: 0.25; }
+  100% { stroke-dashoffset: 0; }
+}
+.label[data-state="on"] :global(.l) {
+  animation: ink 0.36s steps(1, end) calc(1s * var(--in)) both;
+}
+
+/* colour pass: flat colour lands under the ink, off register, then snaps in.
+   One print pass has one offset, so every piece shares the direction and
+   only the rotation varies a little. */
+@keyframes land {
+  0%   { opacity: 0; transform: translate(4px, 3px) rotate(var(--r)); }
+  1%   { opacity: 1; transform: translate(4px, 3px) rotate(var(--r)); }
+  50%  { opacity: 1; transform: translate(1.5px, 1px) rotate(calc(var(--r) * 0.4)); }
+  80%, 100% { opacity: 1; transform: none; }
+}
+.label[data-state="on"] :global(.cw) {
+  animation: land 0.3s steps(1, end) calc(0.25s + 1s * var(--in)) both;
+}
+
+/* ====================== unbuild: ramps up into the cut ======================
+   The build in reverse, front to back: footer peels, colour lifts off
+   register, ink un-draws, title goes in the final rush. --k counts from the
+   front piece (0) back; piece k starts at √(k/n) of the spread, so the gaps
+   shrink as it goes, and each piece is also quicker than the one before
+   (durations shrink with --out). It accelerates all the way to the cut.
+   Fits UNBUILD_MS. */
+.label[data-state="out"] :global(.p) {
+  --k: calc(var(--n) - 1 - var(--i));
+  --out: sqrt(var(--k) / var(--n));
+}
+/* frames spaced to accelerate: a nudge, then gone */
+@keyframes peel {
+  0%   { opacity: 1; transform: none; }
+  45%  { opacity: 1; transform: translate(-1px, 0.7px) rotate(0.4deg); }
+  75%  { opacity: 1; transform: translate(-4px, 3px) rotate(1.5deg); }
+  100% { opacity: 0; transform: translate(-4px, 3px) rotate(1.5deg); }
+}
+@keyframes lift {
+  0%   { opacity: 1; transform: none; }
+  45%  { opacity: 1; transform: translate(-1px, -0.7px) rotate(calc(var(--r) * -0.3)); }
+  75%  { opacity: 1; transform: translate(-4px, -3px) rotate(calc(var(--r) * -1)); }
+  100% { opacity: 0; transform: translate(-4px, -3px) rotate(calc(var(--r) * -1)); }
+}
+@keyframes unink {
+  0%   { stroke-dashoffset: 0; }
+  30%  { stroke-dashoffset: -0.06; }
+  55%  { stroke-dashoffset: -0.2; }
+  75%  { stroke-dashoffset: -0.45; }
+  90%  { stroke-dashoffset: -0.75; }
+  100% { stroke-dashoffset: -1; }
+}
+.label[data-state="out"] :global(.f) { animation: peel 0.3s steps(1, end) 0s both; }
+.label[data-state="out"] :global(.cw) {
+  animation: lift calc(0.3s - 0.16s * var(--out)) steps(1, end)
+             calc(0.1s + 0.8s * var(--out)) both;
+}
+.label[data-state="out"] :global(.l) {
+  animation: unink calc(0.4s - 0.22s * var(--out)) steps(1, end)
+             calc(0.25s + 0.75s * var(--out)) both;
+}
+.label[data-state="out"] :global(.t) { animation: peel 0.18s steps(1, end) 0.95s both; }
+
+/* Texturelabs paper over the whole stack, screen-blended as in the Figma file.
+   Sized in screen pixels, not to the label: grain is a property of the paper,
+   so it stays the same size whether the label is a 363px cover or full screen,
+   instead of being blown up with it. */
+.paper {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background-position: center;
+  background-size: auto max(100%, 760px);
+  mix-blend-mode: screen;
+}

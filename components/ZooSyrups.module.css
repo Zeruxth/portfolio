@@ -1,0 +1,22 @@
+/* the 472.5 scene, as in Figma; the label slot is placed in scene percentages */
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+.slot {
+  position: absolute;
+  left: 8.748%;   /* 41.33 / 472.5 */
+  top: 26.427%;   /* 124.87 / 472.5 */
+  width: 82.505%; /* 389.84 / 472.5 */
+  height: 47.146%;/* 222.76 / 472.5 */
+}
+.card {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}

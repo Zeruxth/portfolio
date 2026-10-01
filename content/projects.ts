@@ -47,6 +47,15 @@ export type Media =
        * Omitted, the video covers the tile.
        */
       frame?: Frame;
+    }
+  | {
+      /** an animated piece drawn in code; see LIVE in components/CaseStudy */
+      kind: "live";
+      label: string;
+      ratio: number;
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups";
+      /** where the piece sits in the tile, in % of the tile, from the Figma frame */
+      frame?: Frame;
     };
 
 export interface Frame { left: number; top: number; width: number; height: number }
@@ -100,6 +109,11 @@ const tmaVid = vid("the-monster-archetype");
 
 const MONSTER_SUMMARY =
   "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.";
+
+const ZOO_SUMMARY =
+  "ZOO is an Israeli distillery imagined as a living zoo, where every spirit becomes an animal and every botanical ingredient becomes part of its habitat. The identity builds this world through a restrained system of animal and botanical illustrations, playful language and packaging that turns each bottle into a different resident of the ZOO.";
+
+const zooImg = img("zoo-distillery");
 
 export const PROJECTS: Project[] = [
   {
@@ -174,10 +188,52 @@ export const PROJECTS: Project[] = [
   {
     slug: "zoo-distillery",
     title: "Zoo distillery",
-    description: "PLACEHOLDER — description needed.",
-    disciplines: ["PLACEHOLDER"],
-    year: "PLACEHOLDER",
-    image: null,
+    // meta and copy are from the inner page (Figma 2135:722), thumbnail from 2135:981
+    description: ZOO_SUMMARY,
+    disciplines: ["Branding", "Packaging", "Illustration"],
+    year: "2026",
+    note: "Student project",
+    image: "/projects/zoo-distillery/thumb.jpg",
+    study: {
+      summary: ZOO_SUMMARY,
+      // stills exported at 2x from Figma; the logo, labels and syrups are live
+      intro: [
+        // re-exported from Figma 2137:3174, with more room round the animals
+        [zooImg("Animal illustrations", "animals.jpg", WIDE)],
+        [zooImg("Labels", "labels.png"), zooImg("Tin", "tin.jpg")],
+        [zooImg("Posters", "posters.jpg", WIDE)],
+      ],
+      chapters: [
+        {
+          label: "The visual system",
+          text: "The visual system combines rough animal illustrations with a simple, hand-drawn logo that works almost like a stamp. Each product introduces a different animal, colour palette and composition, while the same drawing style and typographic language keep everything connected. This allows the packaging to change from bottle to bottle without losing the identity of ZOO.",
+          rows: [
+            [
+              // drawn in the 472.5 scene of Figma 2145:6779, so it fills the tile as is
+              { kind: "live", label: "Logo, animated", ratio: 1, piece: "zoo-logo" },
+              zooImg("Tote bag", "tote.jpg"),
+            ],
+            [
+              zooImg("Cans", "cans.jpg"),
+              // the label sits in the tile as the panda can label does in Figma 2137:4848
+              {
+                kind: "live",
+                label: "Labels, animated",
+                ratio: 1,
+                piece: "zoo-labels",
+                frame: { left: 6.535, top: 4.521, width: 86.772, height: 91.089 },
+              },
+            ],
+            [zooImg("Zoo map", "map.jpg", WIDE)],
+            [
+              // drawn in the 472.5 scene of Figma 2137:3355, so it fills the tile as is
+              { kind: "live", label: "Syrup labels, animated", ratio: 1, piece: "zoo-syrups" },
+              zooImg("Bottles", "bottles.jpg"),
+            ],
+          ],
+        },
+      ],
+    },
   },
 ];
 

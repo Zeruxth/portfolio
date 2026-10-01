@@ -5,6 +5,9 @@ import Link from "next/link";
 import type { Media, MediaRow, Project } from "@/content/projects";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
 import { Arrow } from "./icons";
+import ZooLabels from "./ZooLabels";
+import ZooLogo from "./ZooLogo";
+import ZooSyrups from "./ZooSyrups";
 import s from "./CaseStudy.module.css";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -42,10 +45,19 @@ function LoopVideo({ src, poster, style }: { src: string; poster?: string; style
 
 function Tile({ media }: { media: Media }) {
   const style = { aspectRatio: String(media.ratio) };
-  if (!media.src) {
+  if (media.kind !== "live" && !media.src) {
     return (
       <div className={`${s.tile} ${s.placeholder}`} style={style}>
         <span>{media.label}</span>
+      </div>
+    );
+  }
+  if (media.kind === "live") {
+    return (
+      <div className={`${s.tile} ${s.liveTile}`} style={style}>
+        {media.piece === "zoo-labels" && <ZooLabels inset={media.frame} />}
+        {media.piece === "zoo-logo" && <ZooLogo scale={0.8} />}
+        {media.piece === "zoo-syrups" && <ZooSyrups />}
       </div>
     );
   }

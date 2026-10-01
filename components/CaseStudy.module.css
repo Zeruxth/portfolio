@@ -182,7 +182,14 @@
 }
 .chapter { display: flex; flex-direction: column; gap: 16px; }
 
-.row { display: flex; gap: 16px; }
+/* equal columns whatever the tiles hold, so every square in every project
+   comes out the same size; a flex row let a padded placeholder grow wider */
+.row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 16px;
+}
 
 /* ratio-locked: the width follows the column, the height follows the width */
 .tile {
@@ -204,6 +211,8 @@
   height: 100%;
   object-fit: cover;
 }
+
+.liveTile { position: relative; }
 
 .placeholder {
   display: flex;
