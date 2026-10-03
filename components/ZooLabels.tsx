@@ -15,8 +15,8 @@ import s from "./ZooLabels.module.css";
  *     screen-print pass, and jerks into register
  *  4. the footer is stamped
  *
- * Then it takes itself apart, ramping up — slow, then faster and faster into
- * the cut: colour lifts off register, the ink un-draws, the type peels. A
+ * Then it takes itself apart: the build played backwards — footer, colour,
+ * each line retracting into where it started, title last. A
  * one-frame cut to the next colour, and the next build. Timings live in the CSS.
  *
  * Everything moves at a stop-motion frame rate — keyframes hold rather than
@@ -40,7 +40,7 @@ export interface Inset { left: number; top: number; width: number; height: numbe
 /** from a label going "on" to it starting to take itself apart */
 const HOLD_MS = 6000;
 /** the unbuild has to finish before the cut; matches the out-timings in the CSS */
-const UNBUILD_MS = 1200;
+const UNBUILD_MS = 1750;
 const BOIL_FPS = 8;
 
 /** Pages serves the site from a sub-path; public files have to be asked for under it */
