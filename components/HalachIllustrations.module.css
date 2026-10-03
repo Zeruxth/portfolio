@@ -1,0 +1,32 @@
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  /* the pieces are sized in tile heights */
+  container-type: size;
+  background: #fefefe;
+}
+
+/* every piece is pinned to the middle and moved out by transform alone */
+.piece {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  object-fit: contain;
+  user-select: none;
+  /* black and white at rest, like the luminosity blend in the Figma file */
+  filter: grayscale(1);
+  transition:
+    transform 1.4s cubic-bezier(0.65, 0, 0.35, 1),
+    filter 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.piece[data-on] {
+  z-index: 1;
+  filter: grayscale(0);
+}
+.piece[data-jump] { transition: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .piece { transition: none; }
+}
