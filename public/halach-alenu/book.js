@@ -10,7 +10,8 @@
   const $ = (id) => document.getElementById(id);
   const book = $("book"), desk = $("desk");
   const pageL = $("pageL"), pageR = $("pageR"), boardL = $("boardL"), boardR = $("boardR");
-  const btnBack = $("btnBack"), btnRestart = $("btnRestart");
+  const turnNext = $("turnNext"), turnPrev = $("turnPrev");
+  const cta = $("cta");
 
   const data = await fetch("book.json").then((r) => r.json());
   const ASPECT = data.pageAspect;          // page width / height, from the PDF trim box
@@ -22,6 +23,9 @@
   const spreadOf = (n) => (n === 1 ? 2 : Math.floor(n / 2) + 2);
   const START = spreadOf(6);               // the first decision
   const DEATH = spreadOf(206);             // "מתת" — every bad end leads here
+  // pages 170–205 are one outcome each, two to a spread: only the one the
+  // reader was sent to may be followed
+  const isSingle = (n) => n >= 170 && n <= 205;
 
   const pad3 = (n) => String(n).padStart(3, "0");
   const PAPER = { t: "blank" };
@@ -59,21 +63,30 @@
   function layout() {
     const W = desk.clientWidth, H = desk.clientHeight;
     const short = innerHeight <= 520;
-    const padY = short ? 10 : Math.min(40, H * 0.05);
-    // on a short screen the corners hold the controls, so leave them clear
-    const padX = short ? 120 : Math.min(48, W * 0.04);
-    // on a desk-sized screen the book sits at 70% of the room it could fill;
-    // phones need every pixel, so they keep the full size
-    const room = short || W < 760 ? 1 : 0.7;
+    // room under the book for the button, mirrored above so the book stays centred
+    const padY = short ? 34 : 60;
+    // the turn arrows stand outside the book, so leave them a lane on each side
+    const padX = short || W < 760 ? 52 : 88;
+    // it lives in a tile of the portfolio page, so it fills its frame, with a little air
+    const room = short || W < 760 ? 1 : 0.92;
     ph = Math.floor(room * Math.min((H - padY * 2) / COVER_SCALE, (W - padX * 2) / (2 * ASPECT * 1.04)));
     pw = Math.round(ph * ASPECT);
     const ov = Math.round(((COVER_SCALE - 1) / 2) * ph);
     book.style.setProperty("--pw", pw + "px");
     book.style.setProperty("--ph", ph + "px");
     book.style.setProperty("--ov", ov + "px");
-    desk.style.setProperty("--ph", ph + "px");
-    desk.style.setProperty("--pw", pw + "px");
+    for (const el of [desk, $("stage")]) {
+      el.style.setProperty("--ph", ph + "px");
+      el.style.setProperty("--pw", pw + "px");
+      el.style.setProperty("--ov", ov + "px");
+    }
     setEdges();
+    setHalf(cur);
+  }
+  // how far the book reaches from the centre of the desk, for the turn arrows
+  function setHalf(i) {
+    const e = Math.max(3, Math.round(pw * 0.02));
+    desk.style.setProperty("--half", (i === 0 ? pw / 2 + 4 : pw + e + 4) + "px");
   }
   // the block's edge shows equally on both sides, like a book lying open
   function setEdges() {
@@ -93,6 +106,7 @@
     if (src) el.style.backgroundImage = `url("${src}")`;
     else el.classList.add("blank");
     if (d.t === "page") el.setAttribute("aria-label", `עמוד ${d.n}`);
+    const sealed = isSingle(d.t === "page" ? d.n : 0) && reached !== d.n;
     if (d.t === "page" && LINKS[d.n] && el.classList.contains("page")) {
       const wrap = document.createElement("div"); wrap.className = "links";
       for (const l of LINKS[d.n]) {
@@ -104,8 +118,15 @@
         // the extractor padded each hotspot by 6pt sideways and 5pt below the text
         b.style.setProperty("--ix", (6 / (w * PAGE_W_PT)) * 100 + "%");
         b.style.setProperty("--ib", (5 / (h * PAGE_H_PT)) * 100 + "%");
-        inkFor(srcOf(d), l.r).then((ink) => b.style.setProperty("--line", ink));
-        b.addEventListener("click", (e) => { e.stopPropagation(); choose(l.to); });
+        inkFor(srcOf(d), l.r).then(({ ink, paper }) => {
+          b.style.setProperty("--line", ink);
+          b.style.setProperty("--paper-here", paper);
+        });
+        if (sealed) {
+          // the reader wasn't sent here: the option stays on the page, faded and inert
+          b.disabled = true;
+          b.classList.add("off");
+        } else b.addEventListener("click", (e) => { e.stopPropagation(); choose(l.to); });
         wrap.append(b);
       }
       el.append(wrap);
@@ -113,6 +134,7 @@
   }
   // the underline takes the colour of the type it sits under: sample the patch's paper
   const inks = new Map();
+  const FALLBACK = { ink: "#1d1b19", paper: "#fbfaf7" };
   function inkFor(src, [x, y, w, h]) {
     const key = `${src}|${x}|${y}`;
     if (!inks.has(key)) {
@@ -124,11 +146,17 @@
             const g = c.getContext("2d");
             g.drawImage(img, x * img.width, y * img.height, w * img.width, h * img.height, 0, 0, 8, 8);
             const px = g.getImageData(0, 0, 8, 8).data;
-            let sum = 0; for (let i = 0; i < px.length; i += 4) sum += px[i] + px[i + 1] + px[i + 2];
-            done(sum / (px.length / 4) / 3 > 170 ? "#1d1b19" : "#ffffff");
-          } catch { done("#1d1b19"); }
+            // the paper is the lightest (or, on dark pages, darkest) tone in the patch
+            const n = px.length / 4; let sum = 0;
+            const tones = [];
+            for (let i = 0; i < px.length; i += 4) { const t = px[i] + px[i + 1] + px[i + 2]; sum += t; tones.push([t, i]); }
+            const light = sum / n / 3 > 170;
+            tones.sort((a, b) => (light ? b[0] - a[0] : a[0] - b[0]));
+            const p = tones[Math.floor(n * 0.2)][1];
+            done({ ink: light ? "#1d1b19" : "#ffffff", paper: `rgb(${px[p]}, ${px[p + 1]}, ${px[p + 2]})` });
+          } catch { done(FALLBACK); }
         };
-        img.onerror = () => done("#1d1b19");
+        img.onerror = () => done(FALLBACK);
         img.src = src;
       }));
     }
@@ -154,6 +182,7 @@
 
   /* ---------- state ---------- */
   let cur = 0, busy = false;
+  let reached = null;   // the page a choice sent the reader to
   const trail = [];
   let nudged = false;
 
@@ -174,12 +203,16 @@
 
     if (i === START && !nudged) { nudged = true; book.classList.add("nudge"); setTimeout(() => book.classList.remove("nudge"), 5000); }
 
-    btnRestart.classList.toggle("lit", i === DEATH);
+    // around the book: turn arrows while the pages turn freely, and one
+    // "Start over" below, only after a death
+    setHalf(i);
+    turnNext.hidden = i >= START;
+    turnPrev.hidden = !(i >= 1 && i <= START);
+    cta.hidden = i !== DEATH;
 
-    btnBack.disabled = trail.length === 0;
-    btnRestart.disabled = i <= START;
-    const n = nums[0];
-    history.replaceState(null, "", i === 0 ? location.pathname : `#${i === 1 ? "open" : n}`);
+    // the address names the page reached, so a reload keeps the right choice live
+    const n = reached && nums.includes(reached) ? reached : nums[0];
+    history.replaceState(null, "", i === 0 ? location.pathname + location.search : `#${i === 1 ? "open" : n}`);
 
     // fetch where the reader can go next
     for (const d of [s.left, s.right]) for (const l of (d?.t === "page" && LINKS[d.n]) || []) loadSpread(spreadOf(l.to));
@@ -189,12 +222,13 @@
 
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
 
-  async function go(target, { push = true } = {}) {
+  async function go(target, { push = true, page = null } = {}) {
     if (busy || target === cur || target < 0 || target > LAST_SPREAD) return;
     busy = true;
     const from = cur, dir = target > from ? 1 : -1, dist = Math.abs(target - from);
     await within(loadSpread(target), 2500);
-    if (push) trail.push(from);
+    if (push) trail.push({ i: from, page: reached });
+    reached = page;
 
     if (reduced.matches) { cur = target; render(cur); busy = false; return; }
 
@@ -214,6 +248,7 @@
       if (target === 0) { boardR.classList.add("off"); book.classList.add("closed"); }
     }
     for (const el of [pageL, pageR]) el.classList.remove("turn");
+    setHalf(target);
 
     const leaves = [];
     for (let i = 0; i < K; i++) {
@@ -272,16 +307,25 @@
     busy = false;
   }
 
-  function choose(page) { go(spreadOf(page)); }
-  function back() { if (trail.length && !busy) go(trail.pop(), { push: false }); }
+  function choose(page) { go(spreadOf(page), { page }); }
+  function back() {
+    if (!trail.length || busy) return;
+    const t = trail.pop();
+    go(t.i, { push: false, page: t.page });
+  }
   function restart() { if (!busy) { trail.length = 0; go(START, { push: false }); } }
 
   /* ---------- input ---------- */
   boardL.addEventListener("click", () => cur === 0 && go(1));
   pageL.addEventListener("click", () => pageL.classList.contains("turn") && go(cur + 1));
   pageR.addEventListener("click", () => pageR.classList.contains("turn") && back());
-  btnBack.addEventListener("click", back);
-  btnRestart.addEventListener("click", restart);
+  turnNext.addEventListener("click", () => cur < START && go(cur + 1));
+  // a step back through the opening pages, whether or not we came that way
+  turnPrev.addEventListener("click", () => {
+    if (trail.at(-1)?.i === cur - 1) back();
+    else go(cur - 1, { push: false });
+  });
+  cta.addEventListener("click", restart);
   addEventListener("keydown", (e) => {
     if (e.target.closest?.("button") && (e.key === "Enter" || e.key === " ")) return;
     if (e.key === "ArrowLeft" || ((e.key === "Enter" || e.key === " ") && cur < START)) {
@@ -307,6 +351,7 @@
   await within(Promise.all([load("cover-front.webp"), loadSpread(startAt)]), 4000);
   if (startAt < 2) { load("endpaper-l.webp"); load("endpaper-r.webp"); }
   cur = startAt;
+  if (m && isSingle(+m[1])) reached = +m[1];
   layout();
   render(cur);
   requestAnimationFrame(() => book.classList.remove("loading"));
