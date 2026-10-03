@@ -65,6 +65,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 .cta[hidden] { display: none; }
 /* the restart icon (Figma 2177:2611), at its drawn size, in the text colour */
+.cta:not(.over) .cta-icon { display: none; }
 .cta-icon { flex: none; width: 26.863px; height: 27.607px; display: block; fill: currentColor; }
 
 .desk { position: relative; display: grid; place-items: center; min-height: 0; min-width: 0; }
@@ -225,8 +226,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 @keyframes tilt { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
 .rotate button { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
 
-/* small frames (and phones on their side): a tighter foot so the book keeps its height */
-@media (max-height: 520px) {
+/* phones on their side: a tighter foot so the book keeps its height */
+@media (max-height: 520px) and (pointer: coarse) {
   .foot { top: calc(50% + var(--ph) / 2 + var(--ov) + 6px); }
   .cta { font-size: 16px; letter-spacing: .16px; }
   .cta-icon { width: 21.2px; height: 21.8px; }

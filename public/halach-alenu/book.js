@@ -11,7 +11,7 @@
   const book = $("book"), desk = $("desk");
   const pageL = $("pageL"), pageR = $("pageR"), boardL = $("boardL"), boardR = $("boardR");
   const turnNext = $("turnNext"), turnPrev = $("turnPrev");
-  const cta = $("cta");
+  const cta = $("cta"), ctaLabel = $("ctaLabel");
 
   const data = await fetch("book.json").then((r) => r.json());
   const ASPECT = data.pageAspect;          // page width / height, from the PDF trim box
@@ -59,12 +59,14 @@
   const within = (p, ms) => Promise.race([p, new Promise((r) => setTimeout(r, ms))]);
 
   /* ---------- layout ---------- */
+  const PHONE_SIDEWAYS = matchMedia("(max-height: 520px) and (pointer: coarse)");
   let pw = 0, ph = 0;
   function layout() {
     const W = desk.clientWidth, H = desk.clientHeight;
-    const short = innerHeight <= 520;
+    // a phone on its side, not just a short frame: the portfolio tile is short too
+    const short = PHONE_SIDEWAYS.matches;
     // room under the book for the button, mirrored above so the book stays centred
-    const padY = short ? 34 : 60;
+    const padY = short ? 34 : 76;
     // the turn arrows stand outside the book, so leave them a lane on each side
     const padX = short || W < 760 ? 52 : 88;
     // it lives in a tile of the portfolio page, so it fills its frame, with a little air
@@ -204,11 +206,14 @@
     if (i === START && !nudged) { nudged = true; book.classList.add("nudge"); setTimeout(() => book.classList.remove("nudge"), 5000); }
 
     // around the book: turn arrows while the pages turn freely, and one
-    // "Start over" below, only after a death
+    // button below: "Open the book" on the cover (the cover needs no arrow
+    // beside it), "Start over" after a death
     setHalf(i);
-    turnNext.hidden = i >= START;
+    turnNext.hidden = i === 0 || i >= START;
     turnPrev.hidden = !(i >= 1 && i <= START);
-    cta.hidden = i !== DEATH;
+    cta.hidden = !(i === 0 || i === DEATH);
+    cta.classList.toggle("over", i === DEATH);
+    ctaLabel.textContent = i === 0 ? "Open the book" : "Start over";
 
     // the address names the page reached, so a reload keeps the right choice live
     const n = reached && nums.includes(reached) ? reached : nums[0];
@@ -325,7 +330,7 @@
     if (trail.at(-1)?.i === cur - 1) back();
     else go(cur - 1, { push: false });
   });
-  cta.addEventListener("click", restart);
+  cta.addEventListener("click", () => (cur === 0 ? go(1) : restart()));
   addEventListener("keydown", (e) => {
     if (e.target.closest?.("button") && (e.key === "Enter" || e.key === " ")) return;
     if (e.key === "ArrowLeft" || ((e.key === "Enter" || e.key === " ") && cur < START)) {
