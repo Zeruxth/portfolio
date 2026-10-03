@@ -72,6 +72,8 @@ const GAP = 0.3;
 /** one move, then the hold before the next; the move's timing lives in the CSS */
 const MOVE_MS = 1400;
 const HOLD_MS = 1600;
+/** from the tile coming into view to the first move */
+const FIRST_MS = 600;
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
@@ -115,12 +117,21 @@ export default function HalachIllustrations() {
     return () => io.disconnect();
   }, []);
 
+  // coming into view, the middle piece is already at rest, so the first move
+  // goes almost at once; after that, each waits out the move before it and the hold
+  const arriving = useRef(true);
   useEffect(() => {
-    if (!visible || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!visible) {
+      arriving.current = true;
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const wait = arriving.current ? FIRST_MS : MOVE_MS + HOLD_MS;
     const t = setTimeout(() => {
+      arriving.current = false;
       setPrev(k);
       setK((k + 1) % N);
-    }, MOVE_MS + HOLD_MS);
+    }, wait);
     return () => clearTimeout(t);
   }, [visible, k]);
 
