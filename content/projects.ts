@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -114,6 +114,11 @@ const ZOO_SUMMARY =
   "ZOO is an Israeli distillery imagined as a living zoo, where every spirit becomes an animal and every botanical ingredient becomes part of its habitat. The identity builds this world through a restrained system of animal and botanical illustrations, playful language and packaging that turns each bottle into a different resident of the ZOO.";
 
 const zooImg = img("zoo-distillery");
+
+const SCREWED_SUMMARY =
+  "We Are Screwed is an interactive book about bad decisions in history and the comfort of judging them in hindsight. Each case puts the reader back at the moment the decision was made, presenting the original choice alongside an alternative — without promising that choosing differently would have ended any better.";
+
+const screwedImg = img("we-are-screwed");
 
 export const PROJECTS: Project[] = [
   {
@@ -230,6 +235,41 @@ export const PROJECTS: Project[] = [
               { kind: "live", label: "Syrup labels, animated", ratio: 1, piece: "zoo-syrups" },
               zooImg("Bottles", "bottles.jpg"),
             ],
+          ],
+        },
+      ],
+    },
+  },
+  {
+    slug: "we-are-screwed",
+    title: "We are screwed",
+    // meta and copy are from the inner page (Figma 2176:614)
+    description: SCREWED_SUMMARY,
+    disciplines: ["Book design", "Typography"],
+    year: "2025",
+    note: "Student project",
+    image: "/projects/we-are-screwed/thumb.jpg",
+    study: {
+      summary: SCREWED_SUMMARY,
+      // photo tiles flattened from their Figma stacks at 2x; the book and the
+      // illustrations are live
+      intro: [
+        // the book itself, playable, in the first tile
+        [{ kind: "live", label: "The interactive book", ratio: WIDE, piece: "halach-book" }],
+        [screwedImg("Ballade des pendus", "photo-01.jpg"), screwedImg("First decision", "photo-02.jpg")],
+        [screwedImg("Back cover", "photo-03.jpg"), screwedImg("Chapter spread", "photo-04.jpg")],
+      ],
+      chapters: [
+        {
+          label: "The visual system",
+          text: "The visual system combines expressive cutouts and archival fragments with restrained typography. Images are isolated, layered and highlighted to work like clues around each historical decision, drawing attention to specific details and consequences. The typography stays minimal and structured, creating a clear framework around the more expressive image-making and keeping the book consistent throughout.",
+          rows: [
+            [{ kind: "live", label: "Outcome illustrations, animated", ratio: WIDE, piece: "halach-illustrations" }],
+            [screwedImg("Cover", "photo-05.jpg"), screwedImg("Outcome spread", "photo-06.jpg")],
+            [screwedImg("Archival spread", "photo-07.jpg"), screwedImg("Death spread", "photo-08.jpg")],
+            [screwedImg("Endpapers", "endpaper.jpg", WIDE)],
+            [screwedImg("Map spread", "photo-09.jpg"), screwedImg("Outcome page", "photo-10.jpg")],
+            [screwedImg("Collage spread", "photo-11.jpg"), screwedImg("Engraving spread", "photo-12.jpg")],
           ],
         },
       ],

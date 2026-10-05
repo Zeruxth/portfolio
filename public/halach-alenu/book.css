@@ -1,13 +1,10 @@
 :root {
-  --desk: #211f1d;   /* the black of the death spread */
+  --desk: #222222;   /* the portfolio's BLACK */
   --ink: #ece7df;
   --ink-dim: #9a938a;
   --paper: #fbfaf7;
   --board: #e9e6df;
   --accent: #e8d36a;
-  /* the same stacks as the portfolio's globals.css */
-  --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed",
-        "Roboto Condensed", "Arial Narrow", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, monospace;
 
   /* set from JS once the viewport is measured */
@@ -31,32 +28,59 @@ body {
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
 button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.stage { height: 100dvh; display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); overflow: hidden; }
+/* ---------- around the book: just the turn arrows and one button below ---------- */
+.stage { height: 100dvh; }
+.panel {
+  position: relative; height: 100%;
+  display: grid; grid-template-rows: minmax(0, 1fr); grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+}
+/* the button hangs just under the book, whatever size the frame is */
+.foot {
+  direction: ltr; position: absolute; left: 0; right: 0;
+  top: calc(50% + var(--ph) / 2 + var(--ov) + 18px);
+  display: flex; justify-content: center; pointer-events: none;
+}
+.foot > * { pointer-events: auto; }
 
-/* ---------- chrome: set like the portfolio, so it reads as the same site ---------- */
-.bar {
-  direction: ltr;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 14px max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+/* the portfolio's arrow: one stroke, redrawn on hover */
+.arrow {
+  flex: none; width: 30.344px; height: 19.211px; display: block;
+  fill: none; stroke: currentColor; stroke-width: 1.886; stroke-linecap: butt; stroke-linejoin: miter;
 }
-.tools { display: flex; gap: 24px; }
-/* set and underlined like the portfolio's .link: the line is drawn, and redraws left to right on hover */
-.tool {
-  padding-bottom: 4px;
-  font-family: var(--ui); font-size: 14px; line-height: 1.3;
-  letter-spacing: .14px; text-transform: uppercase;
-  color: var(--ink); text-decoration: none;
-  background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat;
-  transition: opacity .18s;
+@keyframes drawArrow {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
 }
-@keyframes drawLine { from { background-size: 0% 1px; } to { background-size: 100% 1px; } }
-.tool:hover:not(:disabled), .tool:focus-visible, .tool.lit {
-  background-size: 100% 1px;
-  animation: drawLine .46s cubic-bezier(.33, 0, .67, 1);
+.flip:hover .arrow path, .flip:focus-visible .arrow path {
+  animation: drawArrow .46s cubic-bezier(.33, 0, .67, 1);
 }
-.tool:disabled { opacity: .3; cursor: default; }
+
+/* the one action, set like the portfolio's "Next project" */
+.cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 4px; border-bottom: 1px solid var(--ink);
+  font-family: var(--mono); font-size: 20px; line-height: 1.3;   /* Figma 2177:2605 */
+  letter-spacing: .2px; text-transform: uppercase; color: var(--ink);
+}
+.cta[hidden] { display: none; }
+/* the restart icon (Figma 2177:2611), at its drawn size, in the text colour */
+.cta:not(.over) .cta-icon { display: none; }
+.cta-icon { flex: none; width: 26.863px; height: 27.607px; display: block; fill: currentColor; }
 
 .desk { position: relative; display: grid; place-items: center; min-height: 0; min-width: 0; }
+
+/* turn arrows hug the book from outside: --half is how far the book reaches from the centre */
+.flip {
+  position: absolute; top: 50%; z-index: 80;
+  width: 56px; height: 56px; display: grid; place-items: center;
+  color: var(--ink); transform: translateY(-50%);
+  transition: left .9s cubic-bezier(.42,.08,.26,1), right .9s cubic-bezier(.42,.08,.26,1), opacity .3s;
+}
+.flip[hidden] { display: grid; opacity: 0; pointer-events: none; }
+.flip.next { right: calc(50% + var(--half) + 12px); }
+.flip.next .arrow { transform: rotate(180deg); }
+.flip.prev { left: calc(50% + var(--half) + 12px); }
 
 /* ---------- the book ---------- */
 .book {
@@ -146,6 +170,9 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 }
 .choice:hover::after, .choice:focus-visible::after { transform: scaleX(1); }
 .choice:not(:hover):not(:focus-visible)::after { transform-origin: 0% 50%; }
+/* an option the reader wasn't sent to: washed back into its own paper */
+.choice.off { cursor: default; background: var(--paper-here, var(--paper)); opacity: .62; }
+.choice.off::after { display: none; }
 .book.nudge .choice::after { animation: nudge 1.6s cubic-bezier(.4,0,.2,1) .5s 2; }
 @keyframes nudge {
   0% { transform: scaleX(0); transform-origin: 100% 50%; }
@@ -188,7 +215,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- portrait phones ---------- */
 .rotate {
-  font-family: var(--ui); font-size: 16px; text-transform: uppercase; letter-spacing: .16px;
+  font-family: var(--mono); font-size: 14px; text-transform: uppercase; letter-spacing: .14px;
   position: fixed; inset: 0; z-index: 100;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
   background: rgba(20,18,16,.94); text-align: center; padding: 24px; line-height: 1.5;
@@ -197,13 +224,13 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .rotate svg { width: 64px; height: 64px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .rotate svg rect { animation: tilt 2.4s ease-in-out infinite; transform-origin: 24px 24px; }
 @keyframes tilt { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
-.rotate button { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; font-family: var(--ui); font-size: 14px; text-transform: uppercase; }
+.rotate button { color: var(--ink-dim); text-decoration: underline; text-underline-offset: 3px; font-family: var(--mono); font-size: 12px; text-transform: uppercase; }
 
-/* phones on their side: the book gets the full height, the chrome floats in the corners */
-@media (max-height: 520px) {
-  .stage { grid-template-rows: 1fr; }
-  .desk { grid-row: 1; grid-column: 1; }
-  .bar { grid-row: 1; grid-column: 1; align-self: start; position: relative; z-index: 70; pointer-events: none; padding-top: 6px; }
-  .bar > * { pointer-events: auto; }
-
+/* phones on their side: a tighter foot so the book keeps its height */
+@media (max-height: 520px) and (pointer: coarse) {
+  .foot { top: calc(50% + var(--ph) / 2 + var(--ov) + 6px); }
+  .cta { font-size: 16px; letter-spacing: .16px; }
+  .cta-icon { width: 21.2px; height: 21.8px; }
+  .arrow { width: 24px; height: 15.2px; }
+  .flip { width: 40px; height: 40px; }
 }

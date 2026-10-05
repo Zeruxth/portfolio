@@ -8,6 +8,8 @@ import { Arrow } from "./icons";
 import ZooLabels from "./ZooLabels";
 import ZooLogo from "./ZooLogo";
 import ZooSyrups from "./ZooSyrups";
+import HalachIllustrations from "./HalachIllustrations";
+import HalachBook from "./HalachBook";
 import s from "./CaseStudy.module.css";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -58,6 +60,8 @@ function Tile({ media }: { media: Media }) {
         {media.piece === "zoo-labels" && <ZooLabels inset={media.frame} />}
         {media.piece === "zoo-logo" && <ZooLogo scale={0.8} />}
         {media.piece === "zoo-syrups" && <ZooSyrups />}
+        {media.piece === "halach-illustrations" && <HalachIllustrations />}
+        {media.piece === "halach-book" && <HalachBook />}
       </div>
     );
   }

@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>הלך עלינו — אקי ימין</title>
 <meta name="description" content="הלך עלינו: על החלטות גרועות בהיסטוריה. ספר בחר־את־הרפתקתך האינטראקטיבי.">
-<!-- the portfolio's own type: Trade Gothic Next Condensed (same Adobe kit) and IBM Plex Mono -->
-<link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
+<!-- the portfolio's own type: IBM Plex Mono -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap">
@@ -15,15 +14,10 @@
 </head>
 <body>
 <div class="stage" id="stage">
-  <header class="bar">
-    <a class="tool" href="../">Back to portfolio</a>
-    <nav class="tools">
-      <button type="button" id="btnBack" class="tool" disabled>Back</button>
-      <button type="button" id="btnRestart" class="tool" disabled>Restart</button>
-    </nav>
-  </header>
-
+<div class="panel">
   <main class="desk" id="desk">
+    <!-- the book reads right to left, so the next page is to the left -->
+    <button type="button" class="flip next" id="turnNext" aria-label="Next page" hidden><svg class="arrow" viewBox="0 0 30.3438 19.2109" aria-hidden="true"><path pathLength="1" d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544"/><path pathLength="1" d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252"/></svg></button>
     <div class="book closed" id="book" aria-live="polite">
       <div class="board left" id="boardL"></div>
       <div class="board right" id="boardR"></div>
@@ -33,7 +27,15 @@
       <div class="page right" id="pageR"></div>
       <div class="spine-shade"></div>
     </div>
+    <button type="button" class="flip prev" id="turnPrev" aria-label="Previous page" hidden><svg class="arrow" viewBox="0 0 30.3438 19.2109" aria-hidden="true"><path pathLength="1" d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544"/><path pathLength="1" d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252"/></svg></button>
   </main>
+
+  <footer class="foot">
+    <!-- "Open the book" on the cover; "Start over" after a death, with the restart icon (Figma 2177:2611) -->
+    <button type="button" class="cta" id="cta" hidden><span id="ctaLabel">Start over</span><svg class="cta-icon" viewBox="0 0 26.8633 27.6074" aria-hidden="true"><path d="M25.5293 1.11621L25.8809 2.2334L18.8262 4.45117L26.0967 8.66504L26.8633 9.10938L26.6436 9.96777L23.5117 22.2021L23.374 22.7373L22.873 22.9717L13.4268 27.3887L12.96 27.6074L12.4824 27.4092L3.46777 23.667L2.95117 23.4531L2.79395 22.916L0.15625 13.9365L0 13.4043L0.3125 12.9463L5.9541 4.68945L6.91992 5.35059L7.88672 6.01074L2.55859 13.8086L4.88184 21.7188L12.9023 25.0488L21.3809 21.085L24.1553 10.2461L17.5215 6.40039L19.3818 13.4258L18.249 13.7256L17.1182 14.0244L14.5977 4.49902L14.3115 3.41895L15.3779 3.08301L25.1777 0L25.5293 1.11621Z"/></svg></button>
+  </footer>
+</div>
+
 
   <div class="rotate" id="rotate" hidden>
     <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="12" y="6" width="24" height="36" rx="3"/><path d="M40 30a12 12 0 0 1-12 12M28 38l0 4 4 0"/></svg>
