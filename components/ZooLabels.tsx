@@ -7,21 +7,20 @@ import s from "./ZooLabels.module.css";
  * The three Zoo Distillery labels (Figma 2137:3167), one after another in a loop,
  * animated the way they were made rather than with a generic reveal.
  *
- * Each label builds itself, easing in — slow to start, then in a rush:
- *  1. the title is stamped, landing slightly out of register
- *  2. the ink pass: every black line draws itself, back to front, so for a
+ * The type is printed and stays put. The illustration builds itself, easing
+ * in — slow to start, then in a rush:
+ *  1. the ink pass: every black line draws itself, back to front, so for a
  *     moment you see the whole drawing, hidden lines included
- *  3. the colour pass: flat colour lands under the ink, misregistered like a
+ *  2. the colour pass: flat colour lands under the ink, misregistered like a
  *     screen-print pass, and jerks into register
- *  4. the footer is stamped
  *
- * Then it takes itself apart: the build played backwards — footer, colour,
- * each line retracting into where it started, title last. A
- * one-frame cut to the next colour, and the next build. Timings live in the CSS.
+ * Then it takes itself apart: the build played backwards — colour, then each
+ * line retracting into where it started. A one-frame cut to the next colour,
+ * and the next build. Timings live in the CSS.
  *
  * Everything moves at a stop-motion frame rate — keyframes hold rather than
- * tween — and the linework boils throughout: the displacement noise is
- * re-seeded at 8fps, the way hand-drawn frames never sit perfectly still.
+ * tween — and the drawing's linework boils throughout: the displacement noise
+ * is re-seeded at 8fps, the way hand-drawn frames never sit perfectly still.
  *
  * Click (or Enter) for full screen — the label is shown whole there, letterboxed,
  * rather than cropped to the cover's square.
@@ -40,7 +39,7 @@ export interface Inset { left: number; top: number; width: number; height: numbe
 /** from a label going "on" to it starting to take itself apart */
 const HOLD_MS = 6000;
 /** the unbuild has to finish before the cut; matches the out-timings in the CSS */
-const UNBUILD_MS = 1750;
+const UNBUILD_MS = 1550;
 const BOIL_FPS = 8;
 
 /** Pages serves the site from a sub-path; public files have to be asked for under it */

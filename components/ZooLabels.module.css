@@ -42,14 +42,16 @@
 .label[data-state="on"],
 .label[data-state="out"] { clip-path: none; }
 
-/* the line boil — the filter url is swapped at 8fps from JS */
-.label :global(.art) { filter: var(--boil); }
+/* the line boil — the filter url is swapped at 8fps from JS. Illustration
+   only: the type sits still, as printed. */
+.label :global(.ill) { filter: var(--boil); }
 /* the title's rough ink edge (static; set once on the stage) */
 .label :global(.t path) { filter: var(--edge); }
 
 /* --------------------------------------------------------------------------
    Final state is the default. "off" hides everything, "on" builds it, "out"
-   takes it apart. Every animation holds each keyframe (steps) rather than
+   takes it apart. Only the illustration moves; the type (.t, .f) is there
+   from the cut to the next cut, untouched. Every animation holds each keyframe (steps) rather than
    tweening — a stop-motion frame rate.
 
    The unbuild ramps up into the cut and the build eases in after it. Easing
@@ -57,14 +59,10 @@
    frames of each line.
    -------------------------------------------------------------------------- */
 
-.label[data-state="off"] :global(.t),
-.label[data-state="off"] :global(.f),
 .label[data-state="off"] :global(.cw) { opacity: 0; }
 .label[data-state="off"] :global(.l)  { stroke-dashoffset: 1; }
 
 .label :global(.l) { stroke-dasharray: 1 1; }
-.label :global(.t),
-.label :global(.f) { transform-box: fill-box; transform-origin: center; }
 .label :global(.cw) { --r: 1.5deg; transform-box: fill-box; transform-origin: center; }
 .label :global(.p:nth-child(3n + 1) .cw) { --r: -1deg; }
 .label :global(.p:nth-child(3n + 2) .cw) { --r: 0.5deg; }
@@ -73,16 +71,6 @@
    Piece i starts at √(i / n) of the spread: the first few are well apart,
    the last ones pile in on top of each other. */
 .label[data-state="on"] :global(.p) { --in: sqrt(var(--i) / var(--n)); }
-
-/* stamps: title first, footer last — land off register, knock into place */
-@keyframes stamp {
-  0%   { opacity: 0; transform: translate(3.5px, -2.5px) rotate(-1.2deg); }
-  1%   { opacity: 1; transform: translate(3.5px, -2.5px) rotate(-1.2deg); }
-  50%  { opacity: 1; transform: translate(1.2px, -0.8px) rotate(-0.4deg); }
-  80%, 100% { opacity: 1; transform: none; }
-}
-.label[data-state="on"] :global(.t) { animation: stamp 0.4s steps(1, end) 0.05s both; }
-.label[data-state="on"] :global(.f) { animation: stamp 0.3s steps(1, end) 1.45s both; }
 
 /* ink pass: each piece's line draws itself, back to front; frames spaced to
    accelerate, so a line creeps out and then whips to its end. The first piece
@@ -116,24 +104,16 @@
 
 /* ===================== unbuild: the build, backwards =====================
    The same keyframes played in reverse, each mirrored in time against the
-   build's 1.75s (start = 1.75s - build start - duration): the footer
-   un-stamps, colour slides back off register, every line retracts into the
-   point it was drawn from, front to back, and the title un-stamps last.
-   Fits UNBUILD_MS. */
+   build's 1.55s (start = 1.55s - build start - duration): colour slides back
+   off register, then every line retracts into the point it was drawn from,
+   front to back. Fits UNBUILD_MS. */
 .label[data-state="out"] :global(.p) { --in: sqrt(var(--i) / var(--n)); }
-.label[data-state="out"] :global(.f) {
-  animation: stamp 0.3s steps(1, end) 0s both reverse;
-}
 .label[data-state="out"] :global(.cw) {
-  animation: land 0.3s steps(1, end) calc(1.2s - 1s * var(--in)) both reverse;
+  animation: land 0.3s steps(1, end) calc(1s - 1s * var(--in)) both reverse;
 }
 .label[data-state="out"] :global(.l) {
-  animation: ink 0.36s steps(1, end) calc(1.39s - 1s * var(--in)) both reverse;
+  animation: ink 0.36s steps(1, end) calc(1.19s - 1s * var(--in)) both reverse;
 }
-.label[data-state="out"] :global(.t) {
-  animation: stamp 0.4s steps(1, end) 1.3s both reverse;
-}
-
 /* Texturelabs paper over the whole stack, screen-blended as in the Figma file.
    Sized in screen pixels, not to the label: grain is a property of the paper,
    so it stays the same size whether the label is a 363px cover or full screen,
