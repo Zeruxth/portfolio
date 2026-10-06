@@ -126,6 +126,7 @@ const HAIFA_SUMMARY =
   "The identity for Haifa International Film Festival draws from camera optics and the experience of looking through a viewfinder. Focus markers, double framing lines and optical forms shape the visual language, while gradients extracted from film imagery introduce blur, light and depth. Together, these elements create a system that shifts between sharpness and distortion while staying rooted in the mechanics of the camera.";
 
 const haifaImg = img("haifa-film-festival");
+const haifaVid = vid("haifa-film-festival");
 
 export const PROJECTS: Project[] = [
   {
@@ -302,16 +303,25 @@ export const PROJECTS: Project[] = [
           { kind: "live", label: "Wristbands, animated", ratio: 1, piece: "festival-bracelets" },
           haifaImg("Daily programmes", "programmes.jpg"),
         ],
-        [haifaImg("Tote bag", "tote.jpg"), haifaImg("Poster", "poster-frame.jpg")],
-        [haifaImg("Website", "website.jpg", WIDE)],
+        [
+          haifaImg("Tote bag", "tote.jpg"),
+          // the motion poster at the poster's height in Figma 2189:3032 (353 of 472.5)
+          haifaVid("Motion poster", "motion-poster", 1, {
+            ground: "#191919",
+            frame: { left: 28.97, top: 12.62, width: 42.06, height: 74.77 },
+          }),
+        ],
+        // the site recording cropped to the browser window, as wide as the screenshot in Figma 2189:3034
+        [haifaVid("Website", "website", WIDE, {
+          ground: "#191919",
+          frame: { left: 16.92, top: 11.91, width: 66.15, height: 76.18 },
+        })],
         [haifaImg("Tickets", "tickets.jpg"), haifaImg("T-shirt", "t-shirt.jpg")],
         [
           haifaImg("Lanyards", "lanyards.jpg"),
           { kind: "live", label: "The daily programme, unfolding", ratio: 1, piece: "festival-zine" },
         ],
         [haifaImg("Invitation", "invitation.jpg", WIDE)],
-        [haifaImg("Catalogue spread A", "catalog-1.jpg"), haifaImg("Catalogue spread B", "catalog-2.jpg")],
-        [haifaImg("Catalogue spread C", "catalog-3.jpg"), haifaImg("Catalogue spread D", "catalog-4.jpg")],
       ],
       chapters: [],
     },
