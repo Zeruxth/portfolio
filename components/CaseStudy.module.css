@@ -124,6 +124,11 @@
 .link:hover,
 .link:focus-visible { animation: drawLine 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
 
+/* the same drawn underline, inside running text */
+.inlineLink { background: linear-gradient(currentColor, currentColor) left 92% / 100% 1px no-repeat; }
+.inlineLink:hover,
+.inlineLink:focus-visible { animation: drawLine 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+
 .label {
   padding: 16px 16px 14px; /* 14 is the gap to the text, and it stays when folded */
   font-family: var(--mono);
@@ -227,7 +232,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nextArrow path, .backArrow path, .link { animation: none !important; }
+  .nextArrow path, .backArrow path, .link, .inlineLink { animation: none !important; }
 }
 
 /* Not designed yet: below the desktop layout the sidebar simply sits on top. */

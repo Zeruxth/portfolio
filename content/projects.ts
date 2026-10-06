@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -77,6 +77,8 @@ export interface CaseStudy {
   /** the long description under the title */
   summary: string;
   link?: { label: string; href: string };
+  /** a line under the summary crediting a collaborator, their handle linked */
+  credit?: { text: string; name: string; href: string };
   /** rows shown beside the title block, before the first chapter */
   intro: MediaRow[];
   chapters: Chapter[];
@@ -119,6 +121,11 @@ const SCREWED_SUMMARY =
   "We Are Screwed is an interactive book about bad decisions in history and the comfort of judging them in hindsight. Each case puts the reader back at the moment the decision was made, presenting the original choice alongside an alternative — without promising that choosing differently would have ended any better.";
 
 const screwedImg = img("we-are-screwed");
+
+const HAIFA_SUMMARY =
+  "The identity for Haifa International Film Festival draws from camera optics and the experience of looking through a viewfinder. Focus markers, double framing lines and optical forms shape the visual language, while gradients extracted from film imagery introduce blur, light and depth. Together, these elements create a system that shifts between sharpness and distortion while staying rooted in the mechanics of the camera.";
+
+const haifaImg = img("haifa-film-festival");
 
 export const PROJECTS: Project[] = [
   {
@@ -273,6 +280,40 @@ export const PROJECTS: Project[] = [
           ],
         },
       ],
+    },
+  },
+  {
+    slug: "haifa-film-festival",
+    title: "Haifa International Film Festival",
+    // meta and copy are from the inner page (Figma 2183:2758), thumbnail from 2183:2844
+    description: HAIFA_SUMMARY,
+    disciplines: ["Festival Branding", "Visual Identity", "Web Design"],
+    year: "2025",
+    note: "Student project",
+    image: "/projects/haifa-film-festival/thumb.jpg",
+    study: {
+      summary: HAIFA_SUMMARY,
+      credit: { text: "The project was done in collaboration with", name: "@liatlaz", href: "https://www.instagram.com/liatlaz/" },
+      // photo tiles flattened from their Figma stacks at 2x; the wristbands and
+      // the programme zine are live
+      intro: [
+        [haifaImg("Posters", "posters.jpg", WIDE)],
+        [
+          { kind: "live", label: "Wristbands, animated", ratio: 1, piece: "festival-bracelets" },
+          haifaImg("Daily programmes", "programmes.jpg"),
+        ],
+        [haifaImg("Tote bag", "tote.jpg"), haifaImg("Poster", "poster-frame.jpg")],
+        [haifaImg("Website", "website.jpg", WIDE)],
+        [haifaImg("Tickets", "tickets.jpg"), haifaImg("T-shirt", "t-shirt.jpg")],
+        [
+          haifaImg("Lanyards", "lanyards.jpg"),
+          { kind: "live", label: "The daily programme, unfolding", ratio: 1, piece: "festival-zine" },
+        ],
+        [haifaImg("Invitation", "invitation.jpg", WIDE)],
+        [haifaImg("Catalogue spread A", "catalog-1.jpg"), haifaImg("Catalogue spread B", "catalog-2.jpg")],
+        [haifaImg("Catalogue spread C", "catalog-3.jpg"), haifaImg("Catalogue spread D", "catalog-4.jpg")],
+      ],
+      chapters: [],
     },
   },
 ];

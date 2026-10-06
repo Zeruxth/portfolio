@@ -10,6 +10,8 @@ import ZooLogo from "./ZooLogo";
 import ZooSyrups from "./ZooSyrups";
 import HalachIllustrations from "./HalachIllustrations";
 import HalachBook from "./HalachBook";
+import FestivalBracelets from "./FestivalBracelets";
+import FestivalZine from "./FestivalZine";
 import s from "./CaseStudy.module.css";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -62,6 +64,8 @@ function Tile({ media }: { media: Media }) {
         {media.piece === "zoo-syrups" && <ZooSyrups />}
         {media.piece === "halach-illustrations" && <HalachIllustrations />}
         {media.piece === "halach-book" && <HalachBook />}
+        {media.piece === "festival-bracelets" && <FestivalBracelets />}
+        {media.piece === "festival-zine" && <FestivalZine />}
       </div>
     );
   }
@@ -245,6 +249,14 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                       {project.note && <li>{project.note}</li>}
                     </ul>
                     <p className={s.text}>{study.summary}</p>
+                    {study.credit && (
+                      <p className={s.text}>
+                        {study.credit.text}{" "}
+                        <a className={s.inlineLink} href={study.credit.href} target="_blank" rel="noreferrer">
+                          {study.credit.name}
+                        </a>
+                      </p>
+                    )}
                     {study.link && (
                       <a
                         className={s.link}

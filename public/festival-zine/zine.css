@@ -1,0 +1,7 @@
+html, body { margin: 0; height: 100%; overflow: hidden; background: #191919; }
+/* the closed cover stands in until the paper is ready, then the paper fades up over it */
+.stage { position: absolute; inset: 0; pointer-events: none; }
+.stage::before { content: ""; position: absolute; inset: 0; background: url(cover.jpg) 50% 50% / auto 70% no-repeat; transition: opacity .6s ease; }
+.stage canvas { position: relative; display: block; opacity: 0; transition: opacity .6s ease; }
+.stage.live::before { opacity: 0; }
+.stage.live canvas { opacity: 1; }
