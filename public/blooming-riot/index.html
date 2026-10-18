@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blooming Riot — Polyflora</title>
+<meta name="description" content="Polyflora: a biodegradable compound engineered from flora-derived polymers, designed to disappear.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&display=swap">
+<link rel="stylesheet" href="br.css">
+<script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+
+<header class="nav" data-intro>
+  <a class="nav-mark" href="#top" aria-label="Blooming Riot, back to top"><img src="svg/mark.svg" alt=""></a>
+  <a class="nav-link" href="#problem">PHASE_01</a>
+  <a class="nav-link" href="#solution">PHASE_02</a>
+  <a class="nav-link" href="#identity">PHASE_03</a>
+</header>
+
+<main>
+
+<!-- HERO: the gradient is drawn live (br.js), the rest is the Figma composition -->
+<section class="hero" id="top" aria-label="Polyflora isn't made to last">
+  <canvas class="hero-gradient" aria-hidden="true"></canvas>
+  <div class="hero-stage">
+    <div class="hero-lockup hero-lockup--a" data-svg="svg/isnt-made.svg" role="img" aria-label="Isn't made"></div>
+    <svg class="hero-frame" viewBox="0 0 449.333 449.333" aria-hidden="true">
+      <rect class="hero-frame-box" pathLength="1" x="0.667" y="0.667" width="448" height="448" rx="7.333"/>
+      <circle class="hero-frame-ring" pathLength="1" cx="224.667" cy="224.667" r="224"/>
+      <circle class="hero-frame-dot" cx="224.667" cy="0" r="4.667"/>
+      <circle class="hero-frame-dot" cx="449.333" cy="224.667" r="4.667"/>
+      <circle class="hero-frame-dot" cx="224.667" cy="449.333" r="4.667"/>
+      <circle class="hero-frame-dot" cx="0" cy="224.667" r="4.667"/>
+    </svg>
+    <div class="hero-lockup hero-lockup--b" data-svg="svg/to-last.svg" role="img" aria-label="to last"></div>
+  </div>
+  <a class="hero-cta" href="#roadmap">execute_phases;</a>
+</section>
+
+<!-- ROADMAP: the line draws itself with the scroll -->
+<section class="roadmap" id="roadmap" data-progress>
+  <p class="side-label">Roadmap</p>
+  <svg class="roadmap-art" viewBox="0 0 1920 794.67" aria-label="Phase 01 initiation, phase 02 exposure, phase 03 residue">
+    <path class="roadmap-line" pathLength="1" d="M391.1 287.89L682.3 304.44L973.52 321L1534.97 476.6"/>
+    <g class="roadmap-phase" style="--at:0">
+      <path d="M391.79 287.2V359.68"/>
+      <circle cx="391.07" cy="287.14" r="4.667"/><circle cx="391.07" cy="359.37" r="4.667"/>
+      <text x="325.07" y="391"><tspan>PHASE_01:</tspan><tspan x="325.07" dy="28.6">INITIATION</tspan></text>
+    </g>
+    <g class="roadmap-phase" style="--at:0.5">
+      <path d="M974.63 248.73V321.3"/>
+      <circle cx="973.7" cy="248.23" r="4.667"/><circle cx="973.7" cy="321.02" r="4.667"/>
+      <text x="918.36" y="205.1"><tspan>PHASE_02:</tspan><tspan x="918.36" dy="28.6">EXPOSURE;</tspan></text>
+    </g>
+    <g class="roadmap-phase" style="--at:1">
+      <path d="M1535.75 476.06V549.02"/>
+      <circle cx="1534.93" cy="475.85" r="4.667"/><circle cx="1534.93" cy="548.77" r="4.667"/>
+      <text x="1474.93" y="576.05"><tspan>PHASE_03:</tspan><tspan x="1474.93" dy="28.6">RESIDUE</tspan></text>
+    </g>
+  </svg>
+</section>
+
+<!-- THE PROBLEM: the plastic collage, every photo on its own depth -->
+<section class="problem" id="problem" data-progress aria-label="The problem">
+  <div class="collage">
+    <img class="shot" style="--x:677.26;--y:138.02;--w:431.84;--h:242.91;--d:-60;--i:3" src="img/p-01.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:1146.6;--y:471.99;--w:461.63;--h:323.14;--d:40;--i:7" src="img/p-02.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:271.95;--y:189.78;--w:402.41;--h:224.6;--d:-90;--i:1" src="img/p-03.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:1081.31;--y:728.51;--w:566.74;--h:316.32;--d:110;--i:9" src="img/p-04.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:491.14;--y:259.47;--w:269.64;--h:359.97;--d:-30;--i:4" src="img/p-05.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:298.8;--y:500.83;--w:384.69;--h:256.59;--d:70;--i:6" src="img/p-06.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:720.52;--y:259.47;--w:477.76;--h:656.92;--d:0;--i:0" src="img/p-07.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:518.79;--y:554.32;--w:293.43;--h:321.27;--d:90;--i:8" src="img/p-08.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:652.7;--y:50.18;--w:216.16;--h:326.94;--d:-120;--i:2" src="img/p-09.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:1065.28;--y:91.29;--w:480.03;--h:267.93;--d:-80;--i:5" src="img/p-10.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:1146.6;--y:292;--w:277.04;--h:359.98;--d:30;--i:10" src="img/p-11.jpg" alt="" loading="lazy">
+    <img class="shot" style="--x:665.5;--y:843.87;--w:455.35;--h:254.15;--d:130;--i:11" src="img/p-12.jpg" alt="" loading="lazy">
+  </div>
+</section>
+
+<!-- THE SOLUTION -->
+<section class="solution" id="solution">
+  <div class="note note--down" data-reveal>
+    <p>Made from unstable plant-based compounds, Polyflora mimics plastic but rejects permanence. It stiffens, bonds, and scents—only to collapse, unravel, and fade. What’s left is trace dust and the memory of form.</p>
+    <span class="stem" aria-hidden="true"></span>
+  </div>
+  <h2 class="statement" data-reveal>
+    <span class="line"><span><em class="boxed boxed--a">POLYFLORA</em> IS A BIODEGRADABLE COMPOUND</span></span>
+    <span class="line"><span>ENGINEERED FROM FLORA-DERIVED</span></span>
+    <span class="line"><span>POLYMERS, DESIGNED TO DISAPPEAR, AND</span></span>
+    <span class="line"><span>CREATED FOR THE FUTURE OF DAILY USE,</span></span>
+    <span class="line"><span>CO-CREATED WITH <em class="boxed boxed--b">ARTIFICIAL INTELLIGENCE.</em></span></span>
+  </h2>
+  <div class="note note--up" data-reveal>
+    <span class="stem" aria-hidden="true"></span>
+    <p>Prompt: “made of a semi-transparent green biomaterial with visible plant-vein structures, micro-cracks resembling dried chlorophyll, and a leaf-like organic texture that suggests slow decomposition”</p>
+  </div>
+</section>
+
+<!-- VIDEO: opens up as it scrolls in -->
+<section class="drift" data-progress aria-label="A Polyflora bag dissolving in the sea">
+  <div class="drift-window">
+    <img src="img/bag-sea.jpg" alt="" loading="lazy">
+    <!-- PROTOCOL//POLYFLORA on Vimeo, muted and looping behind the still; src set by br.js once near -->
+    <button class="drift-sound" type="button" aria-pressed="false" hidden>unmute;</button>
+    <iframe class="drift-video" data-src="https://player.vimeo.com/video/1103184489?background=1&autoplay=1&muted=1&loop=1&autopause=0&title=0&byline=0&portrait=0&dnt=1" title="PROTOCOL//POLYFLORA" allow="autoplay; fullscreen; picture-in-picture" tabindex="-1"></iframe>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="products" aria-label="Our products">
+  <div class="products-intro" data-reveal>
+    <h2>OUR PRODUCTS</h2>
+    <p>These products define the material’s visual, functional, and conceptual language. Each one demonstrates how Polyflora exists in context: minimal form, active surface, constant transformation. They serve as design anchors — a reference for texture, tone, and use. Future applications should maintain this balance between clarity and decay, control and change.</p>
+  </div>
+  <figure class="product product--tray" data-reveal style="--i:1">
+    <div class="product-media"><img src="img/product-tray.jpg" alt="A serving tray, glasses and bowls in green Polyflora" loading="lazy"></div>
+    <figcaption>01</figcaption>
+    <div class="product-info"><h3>TRAY SET</h3><p>A serving tray, glasses and bowls in semi-translucent Polyflora. Built for daily use, made to soften back into the ground.</p></div>
+  </figure>
+  <figure class="product product--bag" data-reveal style="--i:2">
+    <div class="product-media"><img src="img/product-bag.jpg" alt="A Polyflora paper bag with leaf veins" loading="lazy"></div>
+    <figcaption>02</figcaption>
+    <div class="product-info"><h3>CARRIER BAG</h3><p>Paper-thin and veined like the leaf it came from. It holds its shape for one cycle, then unravels.</p></div>
+  </figure>
+  <figure class="product product--cup" data-reveal style="--i:3">
+    <div class="product-media"><img src="img/product-cup.jpg" alt="A Polyflora drinking cup with lemon water" loading="lazy"></div>
+    <figcaption>03</figcaption>
+    <div class="product-info"><h3>CUP</h3><p>Micro-cracks like dried chlorophyll. Clear at first, clouding as it begins to fade.</p></div>
+  </figure>
+  <figure class="product product--bottle" data-reveal style="--i:4">
+    <div class="product-media"><img src="img/product-bottle.jpg" alt="A hand taking a Polyflora bottle from a fridge" loading="lazy"></div>
+    <figcaption>04</figcaption>
+    <div class="product-info"><h3>BOTTLE</h3><p>Rigid on the shelf and in the fridge. When it is done, only trace dust is left.</p></div>
+  </figure>
+</section>
+
+<!-- THE DESIGNER -->
+<section class="designer" aria-label="The designer">
+  <div class="designer-photo" data-reveal>
+    <img src="img/designer.jpg" alt="The Designer, a projected figure in a green Polyflora top, working in a plant lab" loading="lazy">
+  </div>
+  <span class="track track--face" aria-hidden="true"></span>
+  <span class="track track--hand" aria-hidden="true"></span>
+  <span class="lead lead--title" aria-hidden="true"></span>
+  <span class="lead lead--text" aria-hidden="true"></span>
+  <h2 class="designer-title" data-reveal>THE<br>DESIGNER</h2>
+  <p class="designer-text">The Designer is a projected presence of Polyflora — built to handle, show, and behave. She appears selectively, in moments where the system needs a human proxy.  Not as a user, but as an extension of the product itself. Her movements demonstrate the logic of the material: how it folds, resists, adapts. She does not speak. She performs. She is part of the interface. Use her as reference for interaction, proportion, and tone.</p>
+</section>
+
+<!-- POSTERS -->
+<section class="posters" data-progress aria-label="Posters">
+  <div class="poster-row">
+    <!-- the motion posters, web copies of exports/blooming-riot/poster-originals -->
+    <video class="poster" data-reveal style="--i:0;--p:1" data-src="videos/poster-1.mp4" poster="videos/poster-1.jpg" muted loop playsinline preload="none" aria-label="Motion poster: isn't made to last"></video>
+    <video class="poster" data-reveal style="--i:1;--p:-1" data-src="videos/poster-2.mp4" poster="videos/poster-2.jpg" muted loop playsinline preload="none" aria-label="Motion poster: watch closely, it won't stay"></video>
+    <video class="poster" data-reveal style="--i:2;--p:1" data-src="videos/poster-3.mp4" poster="videos/poster-3.jpg" muted loop playsinline preload="none" aria-label="Motion poster: composable, functional, gone when you're done"></video>
+  </div>
+</section>
+
+<!-- LOGO: the construction draws first, then the marks settle onto it -->
+<section class="identity" id="identity" aria-label="The logo">
+  <div class="construction" data-svg="svg/construction.svg" aria-hidden="true"></div>
+  <div class="logo-lockup" data-reveal>
+    <img class="logo-symbol" src="svg/symbol.svg" alt="Blooming Riot symbol">
+    <div class="logo-word" role="img" aria-label="Blooming Riot //Polyflora">
+      <img class="logo-brackets" src="svg/brackets.svg" alt="">
+      <img class="logo-blooming" src="svg/blooming.svg" alt="">
+      <div class="logo-row">
+        <img class="logo-riot" src="svg/riot.svg" alt="">
+        <span class="logo-sub">//POLYFLORA</span>
+      </div>
+    </div>
+  </div>
+  <div class="identity-notes">
+    <div data-reveal style="--i:0"><h3>THE LOGO</h3><p>the standalone symbol — represents the core duality of Polyflora: the meeting point between the organic and the synthetic. Built from modular geometry and interrupted by curved, irregular growths, it reflects the product’s nature — structured, but constantly shifting.</p></div>
+    <div data-reveal style="--i:1"><h3>THE LOGOTYPE</h3><p>the wordmark — expresses that same principle through typography. Clean, constructed letterforms are partially deformed: the broken “O”, the glitched “N”, the rigid framing. It’s language under tension, shaped by the material it names.</p></div>
+    <div data-reveal style="--i:2"><h3>TOGETHER</h3><p>Both elements are designed to function as part of the same system — but may operate independently when context requires.</p></div>
+  </div>
+</section>
+
+<!-- TYPOGRAPHY -->
+<section class="type" aria-label="Typography">
+  <div class="type-spec type-spec--sans" data-reveal><span class="rule"></span><p>HELVETICA, REGULAR</p></div>
+  <div class="type-spec type-spec--mono" data-reveal style="--i:1"><span class="rule"></span><p>IBM Plex Mono, REGULAR</p></div>
+  <p class="type-heading" data-reveal>HEADING ONE</p>
+  <p class="type-body" data-reveal style="--i:1">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur  pulvinar non enim id bibendum. Morbi bibendum diam vitae nisl gravida,  quis euismod massa convallis. Integer sapien metus, tempor eget  fringilla sed, ullamcorper sit amet justo. Nam faucibus hendrerit turpis sit amet semper. Donec quis arcu sit amet quam facilisis suscipit sit  amet </p>
+</section>
+
+<!-- COLOUR: click a swatch to copy its hex -->
+<section class="palette" aria-label="Colour palette">
+  <div class="swatches">
+    <button class="swatch" data-reveal style="--i:0;--bg:#F5F7F5;--fg:#292929" data-hex="#F5F7F5"><span class="hex">#F5F7F5</span><span>RGB(245, 247, 245)<br>CMYK(1, 0, 1, 3)<br>Pantone 663 C</span></button>
+    <button class="swatch" data-reveal style="--i:1;--bg:#CDFF54;--fg:#498643" data-hex="#CDFF54"><span class="hex">#CDFF54</span><span>RGB(205, 255, 84)<br>CMYK(20, 0, 67, 0)<br>Pantone 381 C</span></button>
+    <button class="swatch swatch--narrow" data-reveal style="--i:2;--bg:#292929;--fg:#F5F7F5" data-hex="#292929"><span class="hex">#292929</span><span>RGB(41, 41, 41)<br>CMYK(0, 0, 0, 84)<br>Pantone Black 7 C</span></button>
+    <button class="swatch swatch--short" data-reveal style="--i:3;--bg:#C6C6C6;--fg:#CDFF54" data-hex="#C6C6C6"><span class="hex">#C6C6C6</span><span>RGB(198, 198, 198)<br>CMYK(0, 0, 0, 22)<br>Pantone Cool Gray 3 C</span></button>
+    <button class="swatch swatch--short" data-reveal style="--i:4;--bg:#498643;--fg:#D1E3D5" data-hex="#498643"><span class="hex">#498643</span><span>RGB(73, 134, 67)<br>CMYK(46, 0, 50, 47)<br>Pantone 7739 C</span></button>
+    <button class="swatch swatch--short swatch--narrow" data-reveal style="--i:5;--bg:#D1E3D5;--fg:#498643" data-hex="#D1E3D5"><span class="hex">#D1E3D5</span><span>RGB(209, 227, 213)<br>CMYK(8, 0, 6, 11)<br>Pantone 621 C</span></button>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <p class="foot-name">BLOOMING<br>RIOT © 2025</p>
+  <p class="foot-contact">CONTACT: <a href="mailto:bloom@riot.studio">BLOOM@RIOT.STUDIO</a></p>
+  <ul class="foot-social">
+    <li><a href="#">INSTAGRAM</a></li>
+    <li><a href="#">VIMEO</a></li>
+    <li><a href="#">TIKTOK</a></li>
+    <li><a href="#">YOUTUBE</a></li>
+    <li><a href="#">LINKEDIN</a></li>
+    <li><a href="#">BEHANCE</a></li>
+  </ul>
+</footer>
+
+<script src="br.js"></script>
+</body>
+</html>

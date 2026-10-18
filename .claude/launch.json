@@ -4,8 +4,31 @@
     {
       "name": "portfolio",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
       "port": 3000
+    },
+    {
+      "name": "halach-alenu",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const R='public/halach-alenu',T={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.webp':'image/webp'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u.endsWith('/'))u+='index.html';f.readFile(p.join(R,u),(e,b)=>{if(e){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':T[p.extname(u)]||'application/octet-stream'});s.end(b)})}).listen(process.env.PORT||4317)"
+      ],
+      "port": 4317,
+      "autoPort": true
+    },
+    {
+      "name": "festival-zine",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const R='public/festival-zine',T={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u.endsWith('/'))u+='index.html';f.readFile(p.join(R,u),(e,b)=>{if(e){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':T[p.extname(u)]||'application/octet-stream'});s.end(b)})}).listen(process.env.PORT||4318)"
+      ],
+      "port": 4318,
+      "autoPort": true
     }
   ]
 }

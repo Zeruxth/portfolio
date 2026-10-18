@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine" | "riot-lockups" | "riot-logo" | "polyflora-film";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -127,6 +127,21 @@ const HAIFA_SUMMARY =
 
 const haifaImg = img("haifa-film-festival");
 const haifaVid = vid("haifa-film-festival");
+
+const SEA_SUMMARY =
+  "In Front of the Sea is a boutique hospitality brand in Caesarea, shaped by the visual character of its surroundings. The identity draws from ancient mosaics, worn stone, sand and the Mediterranean landscape, translating these references into a quiet, contemporary visual language built around texture, pattern and a soft natural palette.";
+
+const seaImg = img("in-front-of-the-sea");
+const seaVid = vid("in-front-of-the-sea");
+
+const RIOT_SUMMARY =
+  "Polyflora is a speculative, plant-based alternative to conventional plastics, designed to disappear when no longer needed. Built around the idea “Isn't Made to Last,” the project explores a different approach to everyday materials, combining organic textures, translucent forms, and structured typography to balance the natural and the engineered.";
+
+const riotImg = img("blooming-riot");
+const riotVid = vid("blooming-riot");
+
+/** the landing page lives at public/blooming-riot/, outside the app's routes */
+const RIOT_PAGE = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/blooming-riot/index.html`;
 
 export const PROJECTS: Project[] = [
   {
@@ -322,6 +337,56 @@ export const PROJECTS: Project[] = [
           { kind: "live", label: "The daily programme, unfolding", ratio: 1, piece: "festival-zine" },
         ],
         [haifaImg("Invitation", "invitation.jpg", WIDE)],
+      ],
+      chapters: [],
+    },
+  },
+  {
+    slug: "in-front-of-the-sea",
+    title: "In front of the sea Caesarea",
+    // meta and copy are from the inner page (Figma 2196:667), thumbnail from 2196:783
+    description: SEA_SUMMARY,
+    disciplines: ["Brand Identity", "Web Design"],
+    year: "2025",
+    image: "/projects/in-front-of-the-sea/thumb.jpg",
+    study: {
+      summary: SEA_SUMMARY,
+      link: { label: "Link to the project", href: "https://infrontofthesea.com/" },
+      // photo tiles flattened from their Figma stacks at 2x; the tile video is the
+      // sea, sand and Caesarea footage redrawn in the mosaic tiles
+      // (exports/caesarea-mosaic/render_zoom.py), cropped to the wide tile
+      intro: [
+        [seaVid("Website", "website", WIDE)],
+        [seaImg("Towel", "towel.jpg"), seaImg("Invitation", "invitation.jpg")],
+        [seaImg("Tote bag", "tote.jpg"), seaImg("Logo", "logo.jpg")],
+        [seaVid("Mosaic tiles over sea, sand and Caesarea", "tiles", WIDE)],
+        [seaImg("Poster", "poster.jpg"), seaImg("Instagram", "instagram.jpg")],
+      ],
+      chapters: [],
+    },
+  },
+  {
+    slug: "blooming-riot",
+    title: "Blooming Riot",
+    // meta and copy are from the inner page (Figma 2210:2076), thumbnail the poster's leaf
+    description: RIOT_SUMMARY,
+    disciplines: ["Brand Identity", "Visual Design", "Web Design"],
+    year: "2025",
+    image: "/projects/blooming-riot/thumb.jpg",
+    study: {
+      summary: RIOT_SUMMARY,
+      link: { label: "Link to the project", href: RIOT_PAGE },
+      credit: { text: "The project was done in collaboration with", name: "@gyozan", href: "https://www.instagram.com/gyozan/" },
+      // stills from their Figma fills at 2x; the film, the lockups, the logo, the
+      // posters and the site are live or video (the site recording: exports/blooming-riot)
+      intro: [
+        [{ kind: "live", label: "PROTOCOL//POLYFLORA, the film", ratio: WIDE, piece: "polyflora-film" }],
+        [riotImg("Tray set", "tray.jpg"), { kind: "live", label: "Lockups, animated", ratio: 1, piece: "riot-lockups" }],
+        [{ kind: "live", label: "The logo, built", ratio: 1, piece: "riot-logo" }, riotImg("Leaf texture", "leaf.jpg")],
+        [riotVid("Motion posters", "posters", WIDE, { ground: "#C6C6C6" })],
+        // still being made
+        [{ kind: "image", label: "Packaging", ratio: 1, src: null }, { kind: "image", label: "Product UI", ratio: 1, src: null }],
+        [riotVid("The landing page", "website", WIDE, { ground: "#F5F7F5" })],
       ],
       chapters: [],
     },

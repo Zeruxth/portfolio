@@ -10,3 +10,9 @@ next-env.d.ts
 # written by `next dev` on every run
 AGENTS.md
 CLAUDE.md
+
+# the poster videos as delivered (web copies live in public/blooming-riot/videos)
+exports/blooming-riot/poster-originals/
+# the raw capture and preview renders (capture.py, composite.sh); the web copy goes in public/
+exports/blooming-riot/window.mp4
+exports/blooming-riot/out/

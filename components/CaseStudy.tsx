@@ -12,6 +12,9 @@ import HalachIllustrations from "./HalachIllustrations";
 import HalachBook from "./HalachBook";
 import FestivalBracelets from "./FestivalBracelets";
 import FestivalZine from "./FestivalZine";
+import PolyfloraFilm from "./PolyfloraFilm";
+import RiotLockups from "./RiotLockups";
+import RiotLogo from "./RiotLogo";
 import s from "./CaseStudy.module.css";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -66,6 +69,9 @@ function Tile({ media }: { media: Media }) {
         {media.piece === "halach-book" && <HalachBook />}
         {media.piece === "festival-bracelets" && <FestivalBracelets />}
         {media.piece === "festival-zine" && <FestivalZine />}
+        {media.piece === "polyflora-film" && <PolyfloraFilm />}
+        {media.piece === "riot-lockups" && <RiotLockups />}
+        {media.piece === "riot-logo" && <RiotLogo />}
       </div>
     );
   }
