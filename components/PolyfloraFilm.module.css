@@ -1,0 +1,35 @@
+/* the sound toggle sits in the film's corner, in the portfolio's own arrow hand */
+.sound {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1;
+  display: flex;
+  padding: 8px;
+  margin: -8px;
+  border: 0;
+  background: none;
+  color: #F5F7F5;
+  /* inverts against the frame behind it, so it reads on the film's bright shots too */
+  mix-blend-mode: difference;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.sound.ready { opacity: 1; }
+.sound:focus-visible { outline: 1px solid #F5F7F5; outline-offset: 2px; }
+.icon { width: 30.344px; height: 19.211px; display: block; }
+
+/* the waves (or the cross) draw on when the state changes and on hover, as the arrow does */
+@keyframes draw {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+.icon [data-mark] path { animation: draw 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+.icon [data-mark] path + path { animation-delay: 0.08s; animation-fill-mode: backwards; }
+.sound:hover .icon path,
+.sound:focus-visible .icon path { animation: draw 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .icon path { animation: none !important; }
+}

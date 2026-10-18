@@ -39,6 +39,40 @@ export function Arrow({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Sound on / off, drawn in the arrow's hand: the same stroke, butt ends and
+ * mitred kinks, on the arrow's own 30.344 x 19.211 box. The speaker is a hard
+ * outline; "on" is two chevrons, the outer one the arrow's head itself; "off"
+ * crosses them out. Every stroke has pathLength 1, so the arrow's draw-on
+ * animation works on these too.
+ */
+export function Sound({ on, className }: { on: boolean; className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 30.3438 19.2109"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <g stroke="currentColor" strokeWidth={ARROW_STROKE} strokeLinecap="butt" strokeLinejoin="miter">
+        <path pathLength={1} d="M0.943 6.62H5.62L11.62 1.56V17.65L5.62 12.59H0.943Z" />
+        {on ? (
+          <g data-mark>
+            <path pathLength={1} d="M15.43 5.06L19.72 9.25L15.43 13.84" />
+            <path pathLength={1} d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252" />
+          </g>
+        ) : (
+          <g data-mark>
+            <path pathLength={1} d="M17.06 4.78L27.06 14.43" />
+            <path pathLength={1} d="M27.06 4.78L17.06 14.43" />
+          </g>
+        )}
+      </g>
+    </svg>
+  );
+}
+
 const LOGO_PATHS = [
   "M15.2354 27.3783L8.05012 24.897L4.89687 22.1056L3.50116 14.145L4.98075 10.9464L5.79145 9.1939L7.01627 6.54613L8.75867 5.19849L10.9406 3.51087L13.6329 1.42854H23.8164L26.1535 3.52746L28.5702 5.69789L31.9322 8.71722L32.0161 9.02009L32.5636 10.9958L34.31 17.2982L31.1051 23.7081L28.8532 24.627L22.1105 27.3783H15.2354Z",
   "M23.1444 7.42489L25.2638 6.59781L27.3832 7.42489",
