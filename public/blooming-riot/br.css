@@ -1,11 +1,12 @@
 /*
  * Blooming Riot / Polyflora landing page, built from Figma 2208:1652.
- * Every measurement is in Figma pixels of the 1920 frame, times --u
- * (one Figma pixel at the current window width; br.js keeps it exact,
- * the 100vw fallback below is for the first paint).
+ * Every measurement is in Figma pixels of the 1920 frame, times --u. On
+ * desktop the frame is 70% of the window, centred, with the hero's gradient
+ * and the footer running full width, like the original site seen at 1920;
+ * br.js keeps --u exact, the fallback below is for the first paint.
  */
 :root {
-  --u: calc(100vw / 1920);
+  --u: calc(100vw * 0.7 / 1920);
   --grey: #c6c6c6;
   --light: #f5f7f5;
   --neon: #cdff54;
@@ -34,6 +35,8 @@ em { font-style: normal; }
 
 main { display: flex; flex-direction: column; gap: calc(var(--u) * 13.333); }
 main > section { position: relative; width: 100%; overflow: clip; }
+/* the frame's column; the hero keeps the full width for its gradient */
+main > section:not(.hero) { width: calc(var(--u) * 1920); margin-inline: auto; }
 
 /* reveal: elements wait below the fold, br.js adds .in as they arrive */
 [data-reveal] {
@@ -83,7 +86,7 @@ main > section { position: relative; width: 100%; overflow: clip; }
     var(--grey);
 }
 .hero-gradient.is-live { background: var(--grey); }
-.hero-stage { position: absolute; inset: 0; }
+.hero-stage { position: absolute; top: 0; bottom: 0; left: 50%; width: calc(var(--u) * 1920); translate: -50% 0; }
 .hero-stage > * { position: absolute; will-change: transform; }
 
 .hero-lockup svg { width: 100%; height: 100%; overflow: visible; }
@@ -497,9 +500,10 @@ main > section { position: relative; width: 100%; overflow: clip; }
   background: var(--neon); color: var(--green);
   font-family: var(--sans); line-height: 1;
 }
-.foot-name { position: absolute; left: calc(var(--u) * 32); top: calc(var(--u) * 16.67); width: calc(var(--u) * 504.893); font-size: calc(var(--u) * 80); }
-.foot-contact { position: absolute; left: calc(var(--u) * 803.56); top: calc(var(--u) * 33.33); width: calc(var(--u) * 604); font-size: calc(var(--u) * 37.333); }
-.foot-social { position: absolute; right: calc(var(--u) * 25.77); top: calc(var(--u) * 30.67); list-style: none; text-align: right; font-size: calc(var(--u) * 37.333); }
+.foot { --gutter: calc((100% - var(--u) * 1920) / 2); }
+.foot-name { position: absolute; left: calc(var(--gutter) + var(--u) * 32); top: calc(var(--u) * 16.67); width: calc(var(--u) * 504.893); font-size: calc(var(--u) * 80); }
+.foot-contact { position: absolute; left: calc(var(--gutter) + var(--u) * 803.56); top: calc(var(--u) * 33.33); width: calc(var(--u) * 604); font-size: calc(var(--u) * 37.333); }
+.foot-social { position: absolute; right: calc(var(--gutter) + var(--u) * 25.77); top: calc(var(--u) * 30.67); list-style: none; text-align: right; font-size: calc(var(--u) * 37.333); }
 /* the brand's emphasis is the oblique, so links lean on hover */
 .foot a { display: inline-block; transition: transform 0.35s var(--ease); }
 .foot a:hover { font-style: oblique; }
@@ -514,7 +518,9 @@ main > section { position: relative; width: 100%; overflow: clip; }
 /* ---------- phones: the composition restacks, measured in its own unit ---------- */
 
 @media (max-width: 760px) {
-  :root { --m: calc(100vw / 390); }
+  :root { --m: calc(100vw / 390); --u: calc(100vw / 1920); }
+  main > section:not(.hero) { width: 100%; }
+  .hero-stage { left: 0; width: 100%; translate: none; }
   .nav { height: calc(var(--m) * 64); gap: calc(var(--m) * 28); font-size: calc(var(--m) * 11); }
   .nav-mark img { width: calc(var(--m) * 22); height: calc(var(--m) * 20); }
   main { gap: calc(var(--m) * 8); }

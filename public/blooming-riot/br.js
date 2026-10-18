@@ -13,10 +13,14 @@
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 
-  /* one Figma pixel, measured without the scrollbar so nothing overflows */
+  /* one Figma pixel, measured without the scrollbar so nothing overflows. On
+     desktop the 1920 frame fills 70% of the window, centred, as the original
+     site sat at 1920; phones restack on their own unit */
+  const SCALE = 0.7;
   let u = 1, vh = innerHeight;
   const measure = () => {
-    u = root.clientWidth / 1920;
+    const w = root.clientWidth;
+    u = (w > 760 ? w * SCALE : w) / 1920;
     vh = innerHeight;
     root.style.setProperty("--u", `${u}px`);
   };
@@ -124,6 +128,8 @@
         col = blob(col, p, vec2(0.09, -0.12) + orbit(t, 1.0, 0.06), 0.2 * g, vec3(0.85, 1.0, 0.4), 0.85 * f);
         col = blob(col, p, vec2(0.16, 0.28) + orbit(t, 3.3, 0.06), 0.26 * g, vec3(0.93, 0.915, 0.965), 0.85 * f);
         col = blob(col, p, vec2(0.04, 0.1) + orbit(t, 5.0, 0.045), 0.14 * g, vec3(0.965, 0.97, 0.94), 0.75 * f);
+        // settle back to the page grey along the bottom, so the hero has no edge
+        col = mix(vec3(0.776), col, smoothstep(0.0, 0.22, uv.y));
         col += (hash(gl_FragCoord.xy) - 0.5) * (3.0 / 255.0);
         gl_FragColor = vec4(col, 1.0);
       }`;
