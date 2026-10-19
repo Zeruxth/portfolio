@@ -11,7 +11,6 @@ import ZooSyrups from "./ZooSyrups";
 import HalachIllustrations from "./HalachIllustrations";
 import HalachBook from "./HalachBook";
 import FestivalBracelets from "./FestivalBracelets";
-import FestivalZine from "./FestivalZine";
 import PolyfloraFilm from "./PolyfloraFilm";
 import RiotProductCard from "./RiotProductCard";
 import RiotLockups from "./RiotLockups";
@@ -69,7 +68,6 @@ function Tile({ media }: { media: Media }) {
         {media.piece === "halach-illustrations" && <HalachIllustrations />}
         {media.piece === "halach-book" && <HalachBook />}
         {media.piece === "festival-bracelets" && <FestivalBracelets />}
-        {media.piece === "festival-zine" && <FestivalZine />}
         {media.piece === "polyflora-film" && <PolyfloraFilm />}
         {media.piece === "riot-product" && <RiotProductCard />}
         {media.piece === "riot-lockups" && <RiotLockups />}

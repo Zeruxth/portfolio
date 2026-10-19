@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine" | "riot-lockups" | "riot-logo" | "polyflora-film" | "riot-product";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "riot-lockups" | "riot-logo" | "polyflora-film" | "riot-product";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -334,7 +334,7 @@ export const PROJECTS: Project[] = [
         [haifaImg("Tickets", "tickets.jpg"), haifaImg("T-shirt", "t-shirt.jpg")],
         [
           haifaImg("Lanyards", "lanyards.jpg"),
-          { kind: "live", label: "The daily programme, unfolding", ratio: 1, piece: "festival-zine" },
+          haifaImg("Daily programme", "programme.jpg"),
         ],
         [haifaImg("Invitation", "invitation.jpg", WIDE)],
       ],
