@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 /**
  * The Blooming Riot mark built from its parts (Figma 2210:2136, the logo
  * Instagram post): two rounded squares and a leaf sit apart and drift into
- * place; a line draws across each gap between them, the joins fill in
- * straight, and then the straight joins bend into the logo's rounded
- * corners. Then its construction draws itself over it: the guide lines, then
+ * place; the fill sweeps across each gap between them as a straight join,
+ * and then the straight joins bend into the logo's rounded corners. Then its construction draws itself over it: the guide lines, then
  * the circles. It holds, the drawing lifts off, and the mark comes apart the
  * way it came together, since it isn't made to last.
  *
@@ -183,21 +182,21 @@ const RINGS = [
 /** the pieces only rest apart for a breath before they start to drift */
 const APART_HOLD = 250;
 /** the pieces drift in, the joins draw, fill and bend round */
-const BOND = 4600;
+const BOND = 3600;
 /** the drawing starts this long before the joins have quite settled */
-const DRAW_OVERLAP = 600;
+const DRAW_OVERLAP = 500;
 const LINE_STAGGER = 140;
 const LINE_DRAW = 1200;
 /** the circles start this long after the first line */
 const RINGS_AFTER = 700;
 const RING_STAGGER = 70;
 const RING_DRAW = 1300;
-const HOLD = 2600;
+const HOLD = 2400;
 /** the drawing lifts off */
-const LIFT = 1100;
+const LIFT = 800;
 /** and the mark comes apart, starting while the drawing is still lifting */
-const UNBOND = 3800;
-const UNBOND_AFTER = 400;
+const UNBOND = 3000;
+const UNBOND_AFTER = 300;
 
 const DRAWN = RINGS_AFTER + RING_STAGGER * (RINGS.length - 1) + RING_DRAW;
 const AT_BOND = APART_HOLD;
@@ -208,17 +207,24 @@ const CYCLE = AT_UNBOND + UNBOND;
 
 /** quintic: a long, soft start and a long, soft landing */
 const ease = (t: number) => (t < 0.5 ? 16 * t ** 5 : 1 - (-2 * t + 2) ** 5 / 2);
+/** quintic out: off the mark at once, then a long, soft landing */
+const easeOut = (t: number) => 1 - (1 - t) ** 5;
 const clamp = (t: number) => Math.min(1, Math.max(0, t));
 const span = (t: number, from: number, to: number) => clamp((t - from) / (to - from));
 const f = (v: number) => v.toFixed(3);
 /** smoothstep: for the fills, gentler than the moves */
 const smooth = (t: number) => t * t * (3 - 2 * t);
 
+/** the band each join's fill sweeps across in: wide enough to cover the
+ * whole join, in logo units (half of it falls outside the logo, past its edge) */
+const JOIN_BAND = 130;
+
 const reduced = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export default function RiotLogo() {
   const root = useRef<SVGSVGElement>(null);
+  const id = useId().replace(/:/g, "");
 
   useEffect(() => {
     const svg = root.current;
@@ -234,36 +240,38 @@ export default function RiotLogo() {
     /** b: 0 is the pieces apart, 1 the bonded logo */
     const bond = (b: number) => {
       // the pieces drift into place
-      const near = ease(span(b, 0, 0.38));
+      const near = easeOut(span(b, 0, 0.55));
       pieces.forEach((p, k) =>
         p.setAttribute("transform", `translate(${f(APART[k].x * (1 - near))} ${f(APART[k].y * (1 - near))})`),
       );
-      // a line draws across each gap, one after another, as they settle
-      joins.forEach((j, k) => j.setAttribute("stroke-dashoffset", f(1 - ease(span(b, 0.33 + k * 0.035, 0.49 + k * 0.035)))));
-      // the joins fill in, straight, from the lines; the logo's path lies over
-      // the pieces exactly, so only the joins show it arriving
-      const fill = smooth(span(b, 0.5, 0.62));
-      logo.setAttribute("opacity", f(fill));
-      piecesGroup.setAttribute("display", fill < 1 ? "inline" : "none");
-      // the lines go once the fill holds the edge, before it bends
-      joins.forEach((j) => j.setAttribute("opacity", f(1 - smooth(span(b, 0.6, 0.64)))));
+      // the joins are the logo's own fill, seen through a band along each gap
+      // that sweeps across from one piece to the next, one after another, as
+      // the pieces settle
+      const sweeps = joins.map((_, k) => ease(span(b, 0.3 + k * 0.05, 0.64 + k * 0.05)));
+      joins.forEach((j, k) => j.setAttribute("stroke-dashoffset", f(1 - sweeps[k])));
+      // filled: the logo stands on its own, and lies over the pieces exactly
+      const filled = sweeps.every((v) => v >= 1);
+      if (filled) logo.removeAttribute("mask");
+      else logo.setAttribute("mask", `url(#${id}-joins)`);
+      piecesGroup.setAttribute("display", filled ? "none" : "inline");
       // and the straight joins bend into the rounded corners
-      logo.setAttribute("d", bent(ease(span(b, 0.62, 1))));
+      logo.setAttribute("d", bent(easeOut(span(b, 0.8, 1))));
     };
 
     /** d: how far into the drawing, in ms */
     const draw = (d: number) => {
-      lines.forEach((l, k) => l.setAttribute("stroke-dashoffset", f(1 - ease(span(d, k * LINE_STAGGER, k * LINE_STAGGER + LINE_DRAW)))));
+      lines.forEach((l, k) => l.setAttribute("stroke-dashoffset", f(1 - easeOut(span(d, k * LINE_STAGGER, k * LINE_STAGGER + LINE_DRAW)))));
       rings.forEach((r, k) => {
         const from = RINGS_AFTER + k * RING_STAGGER;
-        r.setAttribute("stroke-dashoffset", f(1 - ease(span(d, from, from + RING_DRAW))));
+        r.setAttribute("stroke-dashoffset", f(1 - easeOut(span(d, from, from + RING_DRAW))));
       });
     };
 
     const frame = (t: number) => {
       const u = ((t % CYCLE) + CYCLE) % CYCLE;
       if (u < AT_UNBOND) bond(span(u, AT_BOND, AT_BOND + BOND));
-      else bond(1 - span(u, AT_UNBOND, CYCLE));
+      // coming apart eases out too, so the pieces drift off and come to rest
+      else bond(1 - easeOut(span(u, AT_UNBOND, CYCLE)));
       draw(u < AT_DRAW || u > AT_LIFT + LIFT ? 0 : u - AT_DRAW);
       drawing.setAttribute("opacity", f(1 - ease(span(u, AT_LIFT, AT_LIFT + LIFT))));
     };
@@ -293,7 +301,7 @@ export default function RiotLogo() {
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [id]);
 
   return (
     <div style={{ position: "absolute", inset: 0, background: GROUND }}>
@@ -313,23 +321,24 @@ export default function RiotLogo() {
                 <rect key={k} data-piece x={q.x} y={q.y} width={q.w} height={q.h} rx={CORNER} />
               ))}
             </g>
-            <path data-logo d={bent(0)} opacity={0} />
-            {JOINS.map(([a, b], k) => (
-              <line
-                key={k}
-                data-join
-                x1={a[0]}
-                y1={a[1]}
-                x2={b[0]}
-                y2={b[1]}
-                stroke={INK}
-                strokeWidth={1.5}
-                strokeLinecap="round"
-                pathLength={1}
-                strokeDasharray="1 1"
-                strokeDashoffset={1}
-              />
-            ))}
+            <mask id={`${id}-joins`} maskUnits="userSpaceOnUse" x="0" y="0" width={SIZE} height={SIZE}>
+              {JOINS.map(([a, b], k) => (
+                <line
+                  key={k}
+                  data-join
+                  x1={a[0]}
+                  y1={a[1]}
+                  x2={b[0]}
+                  y2={b[1]}
+                  stroke="#fff"
+                  strokeWidth={JOIN_BAND}
+                  pathLength={1}
+                  strokeDasharray="1 1"
+                  strokeDashoffset={1}
+                />
+              ))}
+            </mask>
+            <path data-logo d={bent(0)} mask={`url(#${id}-joins)`} />
           </g>
         </g>
         <g data-drawing fill="none" strokeWidth={1}>
