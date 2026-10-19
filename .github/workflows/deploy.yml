@@ -25,9 +25,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # served from the root of akiwip.work (public/CNAME), so no base path
       - run: npm run build
-        env:
-          NEXT_PUBLIC_BASE_PATH: /portfolio
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

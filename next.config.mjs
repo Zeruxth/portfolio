@@ -1,7 +1,7 @@
 /**
- * GitHub Pages serves this repo from /portfolio, not the domain root, so the
- * base path has to be baked in at build time. It comes from an env var rather
- * than being hardcoded, so `npm run dev` still serves from / locally.
+ * The site lives at the root of akiwip.work, so the base path is empty. It stays
+ * an env var so a build can still be served from a subpath (e.g. a bare
+ * github.io/portfolio deploy) without touching the code.
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 

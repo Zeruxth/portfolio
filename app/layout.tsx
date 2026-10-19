@@ -14,6 +14,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://akiwip.work"),
   title: "AKI_WIP",
   description:
     "Aki Yamin — multidisciplinary visual designer. Print, screen, motion and objects.",
