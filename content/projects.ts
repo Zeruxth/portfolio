@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine" | "riot-lockups" | "riot-logo" | "polyflora-film";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "festival-zine" | "riot-lockups" | "riot-logo" | "polyflora-film" | "riot-product";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -384,8 +384,8 @@ export const PROJECTS: Project[] = [
         [riotImg("Tray set", "tray.jpg"), { kind: "live", label: "Lockups, animated", ratio: 1, piece: "riot-lockups" }],
         [{ kind: "live", label: "The logo, built", ratio: 1, piece: "riot-logo" }, riotImg("Leaf texture", "leaf.jpg")],
         [riotVid("Motion posters", "posters", WIDE, { ground: "#C6C6C6" })],
-        // still being made
-        [{ kind: "image", label: "Packaging", ratio: 1, src: null }, { kind: "image", label: "Product UI", ratio: 1, src: null }],
+        // the product card opens on hover (Figma 2211:3717 → 2211:3554)
+        [riotImg("Packaging: the cutlery set", "cutlery.jpg"), { kind: "live", label: "Product UI: the food bag card", ratio: 1, piece: "riot-product" }],
         [riotVid("The landing page", "website", WIDE, { ground: "#F5F7F5" })],
       ],
       chapters: [],
