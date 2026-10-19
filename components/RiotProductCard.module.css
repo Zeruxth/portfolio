@@ -1,3 +1,13 @@
+/* --c is how much of the card is folded away below the header: --cut when
+   closed, 0 when open. Registered so it can transition, and everything that
+   opens (the card's clip, its slide, the frame's outline) reads the same value,
+   so they move as one. */
+@property --c {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 /* the post is 473 units square; --k is one unit at the tile's size */
 .tile {
   position: absolute;
@@ -8,16 +18,26 @@
   cursor: default;
   --k: calc(100cqw / 473);
   --ink: #02390E;
+  /* one hairline for every stroke: exactly one device pixel, so where neighbouring
+     boxes overlap their borders they land on the same pixel and read as one line */
+  --b: 1px;
   --ease: cubic-bezier(0.83, 0, 0.17, 1);
 }
 .tile p { margin: 0; }
+@media (min-resolution: 2dppx) { .tile { --b: 0.5px; } }
+@media (min-resolution: 3dppx) { .tile { --b: calc(1px / 3); } }
 
-/* the card stays centred in the tile, so it opens up and down at once */
+/* the card stays centred in the tile, so it opens up and down at once. It is
+   always laid out open: closed, it is clipped to its header and slid down by
+   half of what is hidden, which keeps the header centred */
 .card {
+  --c: var(--cut, 0px);
   position: absolute;
   left: calc(var(--k) * 128.87);
   top: 50%;
-  translate: 0 -50%;
+  translate: 0 calc(-50% + var(--c) / 2);
+  clip-path: inset(0 0 var(--c) 0 round calc(var(--k) * 4.992));
+  transition: --c 0.8s var(--ease);
   width: calc(var(--k) * 214.755);
   padding: calc(var(--k) * 7.607);
   border-radius: calc(var(--k) * 4.992);
@@ -25,14 +45,30 @@
   color: var(--ink);
   text-transform: uppercase;
 }
+.open .card { --c: 0px; transition-duration: 1s; }
+.card:not([data-ready]) { transition: none; }
+
+/* the frame's contents stop at its outline's inner edge, never at the card's */
 .frame {
+  position: relative;
   display: flex;
   flex-direction: column;
-  border: calc(var(--k) * 0.238) solid var(--ink);
   border-radius: calc(var(--k) * 2.615);
+  clip-path: inset(0 0 var(--c) 0 round calc(var(--k) * 2.615));
+}
+/* the frame's stroke is its own layer on top, a whole rounded box whose bottom
+   edge travels down with the opening, so it is never sliced */
+.outline {
+  position: absolute;
+  inset: 0 0 var(--c) 0;
+  border: var(--b) solid var(--ink);
+  border-radius: calc(var(--k) * 2.615);
+  pointer-events: none;
+  z-index: 1;
 }
 
-.head { display: flex; align-items: flex-start; justify-content: flex-end; }
+/* the mark and the arrow stack down the full height of the header */
+.head { display: flex; align-items: stretch; justify-content: flex-end; }
 .name {
   flex: 1 0 0;
   min-width: 0;
@@ -40,7 +76,7 @@
   flex-direction: column;
   gap: calc(var(--k) * 1.902);
   padding: calc(var(--k) * 3.803);
-  border: calc(var(--k) * 0.238) solid var(--ink);
+  border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 2.377);
 }
 .kind {
@@ -58,15 +94,23 @@
   letter-spacing: calc(var(--k) * 0.1758);
   white-space: nowrap;
 }
-.side { display: flex; flex-direction: column; flex: none; }
-.mark { display: block; width: calc(var(--k) * 21.04); height: calc(var(--k) * 19.729); }
-.go {
+.side { display: flex; flex-direction: column; flex: none; width: calc(var(--k) * 21.217); }
+.markBox {
+  flex: 1 1 0;
   display: grid;
   place-items: center;
-  width: calc(var(--k) * 21.217);
-  height: calc(var(--k) * 19.905);
+  min-height: calc(var(--k) * 19.49);
+  border: var(--b) solid var(--ink);
+  border-radius: calc(var(--k) * 2.075);
+}
+.mark { display: block; width: calc(var(--k) * 14.161); height: calc(var(--k) * 12.849); }
+.go {
+  flex: 1 1 0;
+  display: grid;
+  place-items: center;
+  min-height: calc(var(--k) * 19.905);
   background: #CDFF54;
-  border: calc(var(--k) * 0.239) solid var(--ink);
+  border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 2.075);
 }
 .arrow {
@@ -76,21 +120,16 @@
   rotate: -45deg;
   transition: translate 0.5s var(--ease);
 }
-.open .arrow { translate: calc(var(--k) * 0.8) calc(var(--k) * -0.8); }
+/* the arrow leans out towards where it points as the card opens; its box stays put */
+.open .arrow { translate: calc(var(--k) * 0.8) calc(var(--k) * -0.8); transition-duration: 0.7s; transition-delay: 0.35s; }
 
-/* the body opens as a grid row from 0fr to 1fr, so the card's height eases with it */
-.more {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.6s var(--ease);
-}
-.open .more { grid-template-rows: 1fr; transition-duration: 0.95s; }
-.moreInner { min-height: 0; overflow: hidden; }
+/* the body is always there; the card's clip reveals it */
+.more { display: block; }
 
 .photo {
   height: calc(var(--k) * 287.524);
   padding: calc(var(--k) * 7.607);
-  border: calc(var(--k) * 0.238) solid var(--ink);
+  border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 2.377);
 }
 .photo img {
@@ -101,7 +140,8 @@
   border-radius: calc(var(--k) * 3.091);
   clip-path: inset(0 0 100% 0 round calc(var(--k) * 3.091));
   scale: 1.06;
-  transition: clip-path 0.4s var(--ease), scale 0.4s var(--ease);
+  /* closing, the photo stays until the card has folded over it, then resets */
+  transition: clip-path 0s linear 0.8s, scale 0s linear 0.8s;
 }
 .open .photo img {
   clip-path: inset(0 0 0 0 round calc(var(--k) * 3.091));
@@ -115,7 +155,7 @@
   flex-direction: column;
   gap: calc(var(--k) * 1.465);
   padding: calc(var(--k) * 3.803);
-  border: calc(var(--k) * 0.239) solid var(--ink);
+  border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 1.832);
 }
 .specFirst { flex: none; }
@@ -143,7 +183,7 @@
 .tags { display: flex; gap: calc(var(--k) * 4.218); }
 .tags span {
   padding: calc(var(--k) * 2.812);
-  border: calc(var(--k) * 0.234) solid var(--ink);
+  border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 17.574);
   font-family: Helvetica, Arial, sans-serif;
   font-size: calc(var(--k) * 6.834);
@@ -159,16 +199,48 @@
   white-space: nowrap;
 }
 
-/* the specs, then the tags, settle in after the photo; on the way out they leave first */
-.specs, .foot {
+/* the specs, then the tags, settle in once the photo is showing: the words rise
+   into their boxes while the boxes' strokes stay where they are. Closing, they
+   stay until the card has folded over them */
+.spec > *, .tags span, .note {
   opacity: 0;
   translate: 0 calc(var(--k) * 4);
-  transition: opacity 0.2s, translate 0.3s var(--ease);
+  transition: opacity 0s linear 0.8s, translate 0s linear 0.8s;
 }
-.open .specs, .open .foot { opacity: 1; translate: 0 0; }
-.open .specs { transition: opacity 0.5s ease 0.55s, translate 0.7s var(--ease) 0.55s; }
-.open .foot { transition: opacity 0.5s ease 0.7s, translate 0.7s var(--ease) 0.7s; }
+.tags span { translate: none; }
+.open .spec > *, .open .tags span, .open .note { opacity: 1; translate: 0 0; }
+.open .spec > * { transition: opacity 0.5s ease 0.55s, translate 0.7s var(--ease) 0.55s; }
+.open .specWide > * { transition-delay: 0.62s; }
+.open .tags span { transition: opacity 0.45s ease 0.7s; }
+.open .tags span + span { transition-delay: 0.76s; }
+.open .tags span + span + span { transition-delay: 0.82s; }
+.open .note { transition: opacity 0.5s ease 0.85s, translate 0.7s var(--ease) 0.85s; }
+
+/* the demo cursor: the neon square from the site recording */
+.cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(var(--k) * 11);
+  height: calc(var(--k) * 11);
+  margin: calc(var(--k) * -5.5) 0 0 calc(var(--k) * -5.5);
+  background: #CDFF54;
+  pointer-events: none;
+  opacity: 0;
+  translate: calc(var(--k) * 520) calc(var(--k) * 400);
+  transition: opacity 0.3s;
+  z-index: 2;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .tile * { transition-duration: 0s !important; transition-delay: 0s !important; }
 }
+
+/* boxes sit flush inside the frame, as in Figma, so their outer strokes fall on
+   the outline's; where two boxes meet, the later one overlaps the earlier's
+   stroke by exactly that stroke, so the edge is one line, not two */
+.side { margin-left: calc(var(--b) * -1); }
+.go { margin-top: calc(var(--b) * -1); }
+.photo { margin-top: calc(var(--b) * -1); }
+.specs { margin-top: calc(var(--b) * -1); }
+.spec + .spec { margin-left: calc(var(--b) * -1); }
