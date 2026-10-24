@@ -205,9 +205,10 @@ export const PROJECTS: Project[] = [
           label: "The website",
           text: "The website extends the project into a more personal and interactive experience. A Rorschach-inspired test asks visitors to interpret ambiguous forms, while a visual guide and research section let them explore the monsters, emotions and ideas behind the project in different ways.",
           rows: [
+            // the browser window as wide as Blooming Riot's: 65.05% of the tile, centred
             [tmaVid("Website", "website", WIDE, {
               ground: "#E5E5E5",
-              frame: { left: 17.78, top: -26.94, width: 64.44, height: 153.88 },
+              frame: { left: 11.98, top: -39.33, width: 76.03, height: 181.35 },
             })],
             [tmaVid("Screen A", "screen-a", 1, {
                 ground: "#1F1F1F",
@@ -335,10 +336,10 @@ export const PROJECTS: Project[] = [
             frame: { left: 28.97, top: 12.62, width: 42.06, height: 74.77 },
           }),
         ],
-        // the site recording cropped to the browser window, as wide as the screenshot in Figma 2189:3034
+        // the site recording cropped to the browser window, as wide as Blooming Riot's: 65.05% of the tile, centred
         [haifaVid("Website", "website", WIDE, {
           ground: "#191919",
-          frame: { left: 16.92, top: 11.91, width: 66.15, height: 76.18 },
+          frame: { left: 17.47, top: 12.54, width: 65.05, height: 74.91 },
         })],
         [haifaImg("Tickets", "tickets.jpg"), haifaImg("T-shirt", "t-shirt.jpg")],
         [
@@ -381,6 +382,7 @@ export const PROJECTS: Project[] = [
     description: RIOT_SUMMARY,
     disciplines: ["Brand Identity", "Visual Design", "Web Design"],
     year: "2025",
+    note: "Student project",
     image: "/projects/blooming-riot/thumb.jpg",
     study: {
       summary: RIOT_SUMMARY,
