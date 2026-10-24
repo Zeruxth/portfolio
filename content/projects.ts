@@ -373,6 +373,7 @@ export const PROJECTS: Project[] = [
     description: RIOT_SUMMARY,
     disciplines: ["Brand Identity", "Visual Design", "Web Design"],
     year: "2025",
+    note: "Student project",
     image: "/projects/blooming-riot/thumb.jpg",
     study: {
       summary: RIOT_SUMMARY,

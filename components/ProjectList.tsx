@@ -11,10 +11,10 @@ import s from "./ProjectList.module.css";
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export default function ProjectList({ projects }: { projects: Project[] }) {
-  // the page opens with every row closed; one opens at a time on hover, and it
-  // stays on the last row you touched rather than collapsing on leave, so
-  // crossing the list doesn't thrash the layout
+  // the page opens with every row closed; a click opens one at a time, and a
+  // second click on the same row closes it again
   const [open, setOpen] = useState<string | null>(null);
+  const toggle = (slug: string) => setOpen((o) => (o === slug ? null : slug));
 
   return (
     <div className={s.list}>
@@ -28,8 +28,15 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             data-open={isOpen}
             tabIndex={0}
             aria-expanded={isOpen}
-            onPointerEnter={() => setOpen(project.slug)}
-            onFocus={() => setOpen(project.slug)}
+            role="button"
+            onClick={() => toggle(project.slug)}
+            onKeyDown={(e) => {
+              if (e.target !== e.currentTarget) return;
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggle(project.slug);
+              }
+            }}
           >
             <div className={s.main}>
               <div>
@@ -47,6 +54,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                     href={`/projects/${project.slug}`}
                     className={s.enter}
                     tabIndex={isOpen ? 0 : -1}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     Enter
                     <Arrow />
