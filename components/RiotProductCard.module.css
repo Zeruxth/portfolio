@@ -1,8 +1,8 @@
-/* --c is how much of the card is folded away below the header: --cut when
+/* --fold is how much of the card is folded away below the header: --cut when
    closed, 0 when open. Registered so it can transition, and everything that
    opens (the card's clip, its slide, the frame's outline) reads the same value,
    so they move as one. */
-@property --c {
+@property --fold {
   syntax: "<length>";
   inherits: true;
   initial-value: 0px;
@@ -31,13 +31,13 @@
    always laid out open: closed, it is clipped to its header and slid down by
    half of what is hidden, which keeps the header centred */
 .card {
-  --c: var(--cut, 0px);
+  --fold: var(--cut, 0px);
   position: absolute;
   left: calc(var(--k) * 128.87);
   top: 50%;
-  translate: 0 calc(-50% + var(--c) / 2);
-  clip-path: inset(0 0 var(--c) 0 round calc(var(--k) * 4.992));
-  transition: --c 0.8s var(--ease);
+  translate: 0 calc(-50% + var(--fold) / 2);
+  clip-path: inset(0 0 var(--fold) 0 round calc(var(--k) * 4.992));
+  transition: --fold 0.8s var(--ease);
   width: calc(var(--k) * 214.755);
   padding: calc(var(--k) * 7.607);
   border-radius: calc(var(--k) * 4.992);
@@ -45,7 +45,7 @@
   color: var(--ink);
   text-transform: uppercase;
 }
-.open .card { --c: 0px; transition-duration: 1s; }
+.open .card { --fold: 0px; transition-duration: 1s; }
 .card:not([data-ready]) { transition: none; }
 
 /* the frame's contents stop at its outline's inner edge, never at the card's */
@@ -54,13 +54,13 @@
   display: flex;
   flex-direction: column;
   border-radius: calc(var(--k) * 2.615);
-  clip-path: inset(0 0 var(--c) 0 round calc(var(--k) * 2.615));
+  clip-path: inset(0 0 var(--fold) 0 round calc(var(--k) * 2.615));
 }
 /* the frame's stroke is its own layer on top, a whole rounded box whose bottom
    edge travels down with the opening, so it is never sliced */
 .outline {
   position: absolute;
-  inset: 0 0 var(--c) 0;
+  inset: 0 0 var(--fold) 0;
   border: var(--b) solid var(--ink);
   border-radius: calc(var(--k) * 2.615);
   pointer-events: none;
