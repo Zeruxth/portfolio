@@ -1,0 +1,733 @@
+/*
+ * Index Gallery, built from Figma "עיצוב במרחב" (website page, 2398:218).
+ * Every length is Figma px times --u. On Home and About the artwork (titles,
+ * bands) covers the window and runs off its edges, while the tabs and text
+ * sit on the 1920x1080 slide fitted inside it. The archive scrolls at 1920
+ * wide and the exhibition pages at their own 1732. ig.js keeps --vw at the
+ * width without the scrollbar.
+ */
+@font-face { font-family: "Ratzif"; src: url(fonts/Ratzif22-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Ratzif"; src: url(fonts/Ratzif22-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Ratzif"; src: url(fonts/Ratzif22-Bold.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Editor Serif"; src: url(fonts/EditorSerif-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Editor Serif"; src: url(fonts/EditorSerif-BookItalic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Alfa Bravo"; src: url(fonts/AlfaBravo-RegularItalic.woff2) format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+
+:root {
+  --vw: 100vw;
+  --u: calc(var(--vw) / 1920);
+  --fit: min(calc(var(--vw) / 1920), calc(100dvh / 1080));
+  /* covers any desktop window; on tall ones it stops growing at 1.8x the slide */
+  --cover: min(max(calc(var(--vw) / 1920), calc(100dvh / 1080)), calc(var(--fit) * 1.8));
+  --blue: #2a58cd;
+  --grey-blue: #dde2ec;
+  --orange: #e65126;
+  --ink: #27375f;
+  --paper: #f6f7f8;
+  --line: 1px solid var(--blue);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--blue);
+  color: var(--blue);
+  font-family: "Ratzif", system-ui, sans-serif;
+  line-height: normal;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+body[data-view="about"] { background: var(--orange); }
+body[data-view="archive"] { background: var(--grey-blue); }
+body[data-view="exhibition"] { background: var(--paper); }
+img, svg { display: block; }
+a { color: inherit; text-decoration: none; }
+b { font-weight: 700; }
+i { font-style: normal; }
+/* Figma trims every text box to cap height and baseline */
+p { text-box: trim-both cap alphabetic; }
+[dir="rtl"] { text-align: right; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Figma sizes passed in from the markup */
+[style*="--w:"] { width: calc(var(--u) * var(--w)); flex-shrink: 0; }
+[style*="--h:"] { height: calc(var(--u) * var(--h)); flex-shrink: 0; }
+
+/* ---------- views ---------- */
+
+.js .view[hidden] { display: none; }
+/* the colour the window fades through between pages (ig.js sets it) */
+.veil {
+  position: fixed; inset: 0; z-index: 20;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.45s ease;
+}
+.veil.on { opacity: 1; pointer-events: auto; transition-duration: 0.3s; }
+
+/* things that rise into place when their view opens; --i staggers them */
+.js [data-in] {
+  opacity: 0;
+  transform: translateY(calc(var(--u) * 22));
+}
+.view.in [data-in] {
+  opacity: 1; transform: none;
+  transition:
+    opacity 0.9s var(--ease) calc(0.3s + var(--i, 0) * 0.07s),
+    transform 1.1s var(--ease) calc(0.3s + var(--i, 0) * 0.07s);
+}
+
+/* the slides: artwork covers, the slide itself fits */
+.home, .about {
+  --u: var(--fit);
+  height: 100dvh;
+  display: grid;
+  place-items: center;
+  overflow: clip;
+  position: relative;
+}
+.stage { position: relative; width: calc(var(--u) * 1920); height: calc(var(--u) * 1080); }
+.art, .about-bands-wrap {
+  --u: var(--cover);
+  position: absolute; left: 50%; top: 50%;
+  width: calc(var(--u) * 1920); height: calc(var(--u) * 1080);
+  translate: -50% -50%;
+  pointer-events: none;
+}
+/* the titles fit the slide like the tabs do, so their words are never cut */
+.art { --u: var(--fit); }
+
+/* ---------- home ---------- */
+
+.home { background: var(--blue); }
+
+/* the outlined titles */
+.title {
+  position: absolute;
+  opacity: 0;
+  /* ig.js fits each title into the window (see fitTitles) */
+  transform-origin: var(--ox, 50%) var(--oy, 50%);
+  translate: var(--tx, 0) var(--ty, 0);
+  scale: var(--k, 1);
+  transition: opacity 0.35s ease;
+}
+.title svg { width: 100%; height: auto; overflow: visible; }
+.title path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  stroke-linejoin: round;
+  /* reset only once the title has faded out */
+  transition: stroke-dashoffset 0s linear 0.4s;
+}
+.t-home { left: calc(var(--u) * 120); top: 0; width: calc(var(--u) * 1682); }
+.t-exhibition { left: 0; top: calc(var(--u) * 36.116); width: calc(var(--u) * 1920); }
+.t-about { left: 0; top: calc(var(--u) * 134.158); width: calc(var(--u) * 1920); }
+.t-archive { left: calc(var(--u) * 117.255); top: calc(var(--u) * 45.81); width: calc(var(--u) * 1686); }
+
+/* drawn: the home title once the page opens, the others while their tab is hovered */
+.home.in .t-home,
+.home:has(.tab-exhibition:is(:hover, :focus-visible)) .t-exhibition,
+.home:has(.tab-about:is(:hover, :focus-visible)) .t-about,
+.home:has(.tab-archive:is(:hover, :focus-visible)) .t-archive {
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+.home.in .t-home path,
+.home:has(.tab-exhibition:is(:hover, :focus-visible)) .t-exhibition path,
+.home:has(.tab-about:is(:hover, :focus-visible)) .t-about path,
+.home:has(.tab-archive:is(:hover, :focus-visible)) .t-archive path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.6s var(--ease-io) calc(var(--d) * 0.45);
+}
+/* the home title steps aside while another one draws, and comes back whole */
+.home:has(.tab:is(:hover, :focus-visible)) .t-home { opacity: 0; transition: opacity 0.15s ease; }
+
+/* the tabs: the grey-blue card folds into Figma's grey-blue arrow square */
+.tab {
+  position: absolute;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y));
+  width: calc(var(--u) * var(--tw)); height: calc(var(--u) * var(--th));
+  outline: none;
+}
+.tab-exhibition { --x: 235; --y: 102.39; --th: 290.303; --tw: 98.061; }
+.tab-archive { --x: 589.51; --y: 600.4; --th: 275; --tw: 70; }
+.tab-about { --x: 1511; --y: 259.19; --th: 219; --tw: 70; }
+
+.tab-card {
+  position: absolute; left: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: calc(var(--u) * 12);
+  width: calc(var(--u) * var(--tw)); height: calc(var(--u) * var(--th));
+  padding: calc(var(--u) * 18);
+  background: var(--grey-blue);
+  overflow: clip;
+  transition:
+    width 0.3s var(--ease), height 0.3s var(--ease),
+    background-color 0.2s ease;
+}
+/* the current exhibition hangs from the top, the others stand on their base */
+.tab-exhibition .tab-card { top: 0; bottom: auto; }
+.tab-line {
+  display: block; flex: none;
+  width: calc(var(--u) * (var(--tw) - 36));
+  border-top: calc(var(--u) * 1.434) solid var(--blue);
+  transform-origin: 50% 50%;
+  transition: opacity 0.15s ease, transform 0.25s var(--ease);
+}
+.tab-label {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  width: calc(var(--u) * 34); height: calc(var(--u) * 70.465);
+  transition: opacity 0.15s ease;
+}
+.tab-label span {
+  display: block; flex: none;
+  transform: rotate(-90deg);
+  font: 500 calc(var(--u) * 21.112) / normal "Editor Serif", serif;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.tab-exhibition .tab-label span { width: calc(var(--u) * 70.465); white-space: normal; }
+.tab-arrow {
+  position: absolute; left: 0; top: 0;
+  width: calc(var(--u) * 148.674); height: calc(var(--u) * 150.76);
+  fill: var(--blue);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.tab:is(:hover, :focus-visible) .tab-card {
+  width: calc(var(--u) * 148.674); height: calc(var(--u) * 150.76);
+}
+.tab:is(:hover, :focus-visible) :is(.tab-line, .tab-label) { opacity: 0; }
+.tab:is(:hover, :focus-visible) .tab-line { transform: scaleX(0); }
+.tab:is(:hover, :focus-visible) .tab-arrow {
+  opacity: 1;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+/* the tabs and badge arrive after the title has started drawing */
+.js .home :is(.tab, .badge) { opacity: 0; translate: 0 calc(var(--u) * 26); }
+.home.in :is(.tab, .badge) {
+  opacity: 1; translate: 0 0;
+  transition: opacity 0.7s ease calc(0.55s + var(--i, 3) * 0.09s), translate 1s var(--ease) calc(0.55s + var(--i, 3) * 0.09s);
+}
+
+/* the badge keeps to the window's top right corner */
+.badge {
+  position: absolute;
+  top: calc(var(--u) * 48.61); right: calc(var(--u) * 63.81);
+  width: calc(var(--u) * 110); height: calc(var(--u) * 73);
+}
+
+/* ---------- exhibition pages ---------- */
+
+.exhibition { --u: calc(var(--vw) / 1732); background: var(--paper); }
+.ex-page { position: relative; height: calc(var(--u) * var(--page)); }
+.ex-img {
+  position: absolute;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y));
+  overflow: hidden;
+}
+/* archive photographs uncover from below as they scroll in */
+.ex-img img, .pic img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.ex-frame {
+  position: sticky; top: 0; z-index: 1;
+  height: min(calc(var(--u) * 980), 100dvh);
+  padding: calc(var(--u) * 32);
+  pointer-events: none;
+}
+.ex-frame a { pointer-events: auto; }
+.ex-box {
+  height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border: var(--line);
+}
+
+.ex-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: var(--line); }
+.ex-curator {
+  align-self: stretch;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+  gap: calc(var(--u) * 21.654); padding: calc(var(--u) * 21.654);
+  border-right: var(--line);
+  font-size: calc(var(--u) * 21.654);
+}
+.ex-curator .fill { width: min-content; min-width: 100%; }
+.nowrap { white-space: nowrap; }
+.ex-about { width: calc(var(--u) * 979.962); display: flex; flex-direction: column; align-items: flex-end; }
+.ex-title, .ex-desc {
+  display: flex; justify-content: flex-end; align-items: flex-start;
+  gap: calc(var(--u) * 21.654); padding: calc(var(--u) * 21.654);
+  border-left: var(--line);
+}
+.ex-title { font-size: calc(var(--u) * 32.482); }
+.ex-title p:not([style]) { white-space: nowrap; }
+.ex-desc { width: 100%; border-top: var(--line); font-size: calc(var(--u) * 21.654); }
+
+.ex-foot { display: flex; justify-content: space-between; align-items: flex-end; border-top: var(--line); }
+/* the back button grows to fill its cell up to the footer's top line */
+.ex-nav { align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; }
+.ex-back {
+  flex: 1 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  width: calc(var(--u) * 121.806); min-height: calc(var(--u) * 64.061);
+  border-right: var(--line);
+}
+.ex-back .back-arrow { width: calc(var(--u) * 120.904); height: calc(var(--u) * 64.061); }
+.ex-logo { width: calc(var(--u) * 121); height: calc(var(--u) * 80); }
+.ex-reading {
+  display: flex; align-items: flex-end;
+  gap: calc(var(--u) * 57.745); padding: calc(var(--u) * 21.654);
+  border-left: var(--line);
+  white-space: nowrap;
+}
+.ex-books { display: flex; align-items: flex-start; gap: calc(var(--u) * 24.652); font-size: calc(var(--u) * 18.489); }
+.ex-books > div { display: flex; flex-direction: column; gap: calc(var(--u) * 16.435); }
+.ex-reading-head {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: calc(var(--u) * 21.654);
+  font-size: calc(var(--u) * 32.482);
+}
+
+/* the frame draws itself when a page opens: ig.js lays its lines out as an
+   svg and draws them, then hands back to the real borders and the text fades in */
+.ex-box { position: relative; }
+.ex-draw { position: absolute; left: -1px; top: -1px; overflow: visible; pointer-events: none; }
+.ex-draw line {
+  stroke: var(--blue); stroke-width: 1px;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1;
+  animation: draw-line 0.7s var(--ease-io) var(--d) forwards;
+}
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+.exhibition .ex-box :is(p, .ex-logo, .back-arrow) { transition: opacity 0.6s ease; }
+.exhibition.drawing .ex-box, .exhibition.drawing .ex-box * { border-color: transparent !important; }
+.exhibition.drawing .ex-box :is(p, .ex-logo, .back-arrow) { opacity: 0; transition: none; }
+
+/* ---------- about ---------- */
+
+.about { background: var(--orange); color: var(--ink); }
+/* Three grey-blue blocks at Figma's size (2398:643) keep falling and
+   turning, like main comp at 0:13. Each falls in its own third of the
+   window, a third of a fall apart in height; at this size they may cross.
+   A block starts and ends a fall at the same angle, just outside the
+   window, so it leaves the bottom as it comes back in at the top: after
+   the opening all three are always in view. They wait above until their
+   turn, so the page is empty only as it opens. */
+.about-bands-wrap {
+  --u: var(--cover);
+  position: absolute; left: 50%; top: 50%;
+  width: calc(var(--u) * 1920); height: calc(var(--u) * 1080);
+  translate: -50% -50%;
+  pointer-events: none;
+}
+/* the titles fit the slide like the tabs do, so their words are never cut */
+.art { --u: var(--fit); }
+
+/* ---------- home ---------- */
+
+.home { background: var(--blue); }
+
+/* the outlined titles */
+.title {
+  position: absolute;
+  opacity: 0;
+  /* ig.js fits each title into the window (see fitTitles) */
+  transform-origin: var(--ox, 50%) var(--oy, 50%);
+  translate: var(--tx, 0) var(--ty, 0);
+  scale: var(--k, 1);
+  transition: opacity 0.35s ease;
+}
+.title svg { width: 100%; height: auto; overflow: visible; }
+.title path {
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  stroke-linejoin: round;
+  /* reset only once the title has faded out */
+  transition: stroke-dashoffset 0s linear 0.4s;
+}
+.t-home { left: calc(var(--u) * 120); top: 0; width: calc(var(--u) * 1682); }
+.t-exhibition { left: 0; top: calc(var(--u) * 36.116); width: calc(var(--u) * 1920); }
+.t-about { left: 0; top: calc(var(--u) * 134.158); width: calc(var(--u) * 1920); }
+.t-archive { left: calc(var(--u) * 117.255); top: calc(var(--u) * 45.81); width: calc(var(--u) * 1686); }
+
+/* drawn: the home title once the page opens, the others while their tab is hovered */
+.home.in .t-home,
+.home:has(.tab-exhibition:is(:hover, :focus-visible)) .t-exhibition,
+.home:has(.tab-about:is(:hover, :focus-visible)) .t-about,
+.home:has(.tab-archive:is(:hover, :focus-visible)) .t-archive {
+  opacity: 1;
+  transition: opacity 0.12s ease;
+}
+.home.in .t-home path,
+.home:has(.tab-exhibition:is(:hover, :focus-visible)) .t-exhibition path,
+.home:has(.tab-about:is(:hover, :focus-visible)) .t-about path,
+.home:has(.tab-archive:is(:hover, :focus-visible)) .t-archive path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.6s var(--ease-io) calc(var(--d) * 0.45);
+}
+/* the home title steps aside while another one draws, and comes back whole */
+.home:has(.tab:is(:hover, :focus-visible)) .t-home { opacity: 0; transition: opacity 0.15s ease; }
+
+/* the tabs: the grey-blue card folds into Figma's grey-blue arrow square */
+.tab {
+  position: absolute;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y));
+  width: calc(var(--u) * var(--tw)); height: calc(var(--u) * var(--th));
+  outline: none;
+}
+.tab-exhibition { --x: 235; --y: 102.39; --th: 290.303; --tw: 98.061; }
+.tab-archive { --x: 589.51; --y: 600.4; --th: 275; --tw: 70; }
+.tab-about { --x: 1511; --y: 259.19; --th: 219; --tw: 70; }
+
+.tab-card {
+  position: absolute; left: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+  gap: calc(var(--u) * 12);
+  width: calc(var(--u) * var(--tw)); height: calc(var(--u) * var(--th));
+  padding: calc(var(--u) * 18);
+  background: var(--grey-blue);
+  overflow: clip;
+  transition:
+    width 0.3s var(--ease), height 0.3s var(--ease),
+    background-color 0.2s ease;
+}
+/* the current exhibition hangs from the top, the others stand on their base */
+.tab-exhibition .tab-card { top: 0; bottom: auto; }
+.tab-line {
+  display: block; flex: none;
+  width: calc(var(--u) * (var(--tw) - 36));
+  border-top: calc(var(--u) * 1.434) solid var(--blue);
+  transform-origin: 50% 50%;
+  transition: opacity 0.15s ease, transform 0.25s var(--ease);
+}
+.tab-label {
+  display: flex; align-items: center; justify-content: center; flex: none;
+  width: calc(var(--u) * 34); height: calc(var(--u) * 70.465);
+  transition: opacity 0.15s ease;
+}
+.tab-label span {
+  display: block; flex: none;
+  transform: rotate(-90deg);
+  font: 500 calc(var(--u) * 21.112) / normal "Editor Serif", serif;
+  white-space: nowrap;
+  text-box: trim-both cap alphabetic;
+}
+.tab-exhibition .tab-label span { width: calc(var(--u) * 70.465); white-space: normal; }
+.tab-arrow {
+  position: absolute; left: 0; top: 0;
+  width: calc(var(--u) * 148.674); height: calc(var(--u) * 150.76);
+  fill: var(--blue);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.tab:is(:hover, :focus-visible) .tab-card {
+  width: calc(var(--u) * 148.674); height: calc(var(--u) * 150.76);
+}
+.tab:is(:hover, :focus-visible) :is(.tab-line, .tab-label) { opacity: 0; }
+.tab:is(:hover, :focus-visible) .tab-line { transform: scaleX(0); }
+.tab:is(:hover, :focus-visible) .tab-arrow {
+  opacity: 1;
+  transition: opacity 0.2s ease 0.1s;
+}
+
+/* the tabs and badge arrive after the title has started drawing */
+.js .home :is(.tab, .badge) { opacity: 0; translate: 0 calc(var(--u) * 26); }
+.home.in :is(.tab, .badge) {
+  opacity: 1; translate: 0 0;
+  transition: opacity 0.7s ease calc(0.55s + var(--i, 3) * 0.09s), translate 1s var(--ease) calc(0.55s + var(--i, 3) * 0.09s);
+}
+
+/* the badge keeps to the window's top right corner */
+.badge {
+  position: absolute;
+  top: calc(var(--u) * 48.61); right: calc(var(--u) * 63.81);
+  width: calc(var(--u) * 110); height: calc(var(--u) * 73);
+}
+
+/* ---------- exhibition pages ---------- */
+
+.exhibition { --u: calc(var(--vw) / 1732); background: var(--paper); }
+.ex-page { position: relative; height: calc(var(--u) * var(--page)); }
+.ex-img {
+  position: absolute;
+  left: calc(var(--u) * var(--x)); top: calc(var(--u) * var(--y));
+  overflow: hidden;
+}
+/* archive photographs uncover from below as they scroll in */
+.ex-img img, .pic img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.ex-frame {
+  position: sticky; top: 0; z-index: 1;
+  height: min(calc(var(--u) * 980), 100dvh);
+  padding: calc(var(--u) * 32);
+  pointer-events: none;
+}
+.ex-frame a { pointer-events: auto; }
+.ex-box {
+  height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border: var(--line);
+}
+
+.ex-head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: var(--line); }
+.ex-curator {
+  align-self: stretch;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+  gap: calc(var(--u) * 21.654); padding: calc(var(--u) * 21.654);
+  border-right: var(--line);
+  font-size: calc(var(--u) * 21.654);
+}
+.ex-curator .fill { width: min-content; min-width: 100%; }
+.nowrap { white-space: nowrap; }
+.ex-about { width: calc(var(--u) * 979.962); display: flex; flex-direction: column; align-items: flex-end; }
+.ex-title, .ex-desc {
+  display: flex; justify-content: flex-end; align-items: flex-start;
+  gap: calc(var(--u) * 21.654); padding: calc(var(--u) * 21.654);
+  border-left: var(--line);
+}
+.ex-title { font-size: calc(var(--u) * 32.482); }
+.ex-title p:not([style]) { white-space: nowrap; }
+.ex-desc { width: 100%; border-top: var(--line); font-size: calc(var(--u) * 21.654); }
+
+.ex-foot { display: flex; justify-content: space-between; align-items: flex-end; border-top: var(--line); }
+/* the back button grows to fill its cell up to the footer's top line */
+.ex-nav { align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; }
+.ex-back {
+  flex: 1 0 auto;
+  display: flex; align-items: center; justify-content: center;
+  width: calc(var(--u) * 121.806); min-height: calc(var(--u) * 64.061);
+  border-right: var(--line);
+}
+.ex-back .back-arrow { width: calc(var(--u) * 120.904); height: calc(var(--u) * 64.061); }
+.ex-logo { width: calc(var(--u) * 121); height: calc(var(--u) * 80); }
+.ex-reading {
+  display: flex; align-items: flex-end;
+  gap: calc(var(--u) * 57.745); padding: calc(var(--u) * 21.654);
+  border-left: var(--line);
+  white-space: nowrap;
+}
+.ex-books { display: flex; align-items: flex-start; gap: calc(var(--u) * 24.652); font-size: calc(var(--u) * 18.489); }
+.ex-books > div { display: flex; flex-direction: column; gap: calc(var(--u) * 16.435); }
+.ex-reading-head {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: calc(var(--u) * 21.654);
+  font-size: calc(var(--u) * 32.482);
+}
+
+/* the frame draws itself when a page opens: ig.js lays its lines out as an
+   svg and draws them, then hands back to the real borders and the text fades in */
+.ex-box { position: relative; }
+.ex-draw { position: absolute; left: -1px; top: -1px; overflow: visible; pointer-events: none; }
+.ex-draw line {
+  stroke: var(--blue); stroke-width: 1px;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1;
+  animation: draw-line 0.7s var(--ease-io) var(--d) forwards;
+}
+@keyframes draw-line { to { stroke-dashoffset: 0; } }
+.exhibition .ex-box :is(p, .ex-logo, .back-arrow) { transition: opacity 0.6s ease; }
+.exhibition.drawing .ex-box, .exhibition.drawing .ex-box * { border-color: transparent !important; }
+.exhibition.drawing .ex-box :is(p, .ex-logo, .back-arrow) { opacity: 0; transition: none; }
+
+/* ---------- about ---------- */
+
+.about { background: var(--orange); color: var(--ink); }
+/* Three grey-blue blocks keep falling and turning, like main comp at 0:13.
+   Each falls in its own third of the window, a third of a fall apart in
+   height. At 700x140 two neighbours can't be close both sideways and in
+   height at once, so they never touch whichever way they face. A block
+   starts and ends a fall at the same angle, just outside the window, so it
+   leaves the bottom as it comes back in at the top: after the opening all
+   three are always in view. They wait above until their turn, so the page
+   is empty only as it opens. */
+.about-bands-wrap {
+  --u: var(--fit);
+  position: absolute; inset: 0; left: 0; top: 0;
+  width: auto; height: auto; translate: none;
+  --len: 1480; --wid: 274; --fall: 10.8s;
+  /* half the block's height at +-30deg: 740 cos30 + 137 sin30 */
+  --reach: calc(var(--u) * 710);
+}
+.block {
+  --y0: calc(0px - var(--reach) - var(--u) * var(--len) / 2);
+  --y1: calc(100dvh + var(--reach) - var(--u) * var(--len) / 2);
+  position: absolute; top: 0;
+  left: calc(100% * (1 + 2 * var(--lane)) / 6 - var(--u) * var(--wid) / 2);
+  width: calc(var(--u) * var(--wid)); height: calc(var(--u) * var(--len));
+  background: var(--grey-blue);
+  transform: translateY(var(--y0)) rotate(var(--r0));
+}
+.block:nth-child(1) { --lane: 0; --delay: 0s; --r0: -30deg; --r1: 330deg; }
+.block:nth-child(2) { --lane: 2; --delay: calc(var(--fall) / 3); --r0: 30deg; --r1: -330deg; }
+.block:nth-child(3) { --lane: 1; --delay: calc(var(--fall) * 2 / 3); --r0: 30deg; --r1: 390deg; }
+.about.in .block { animation: tumble var(--fall) linear var(--delay) infinite both; }
+/* the fall is steady; the turn happens mostly mid-window, so a block crosses
+   the top and bottom edges standing nearly upright and is never lost early */
+@keyframes tumble {
+  0% { transform: translateY(var(--y0)) rotate(var(--r0)); }
+  18% { transform: translateY(calc(var(--y0) * 0.82 + var(--y1) * 0.18)) rotate(calc(var(--r0) + (var(--r1) - var(--r0)) * 0.04)); }
+  82% { transform: translateY(calc(var(--y0) * 0.18 + var(--y1) * 0.82)) rotate(calc(var(--r0) + (var(--r1) - var(--r0)) * 0.96)); }
+  100% { transform: translateY(var(--y1)) rotate(var(--r1)); }
+}
+.js .about [data-in] { opacity: 1; transform: none; }
+.about-inner {
+  position: absolute; inset: calc(var(--u) * 100);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.about-top { display: flex; flex-direction: column; gap: calc(var(--u) * 247); }
+.about-tag {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: calc(var(--u) * 27.525);
+  white-space: nowrap;
+}
+.about-tag .serif { font-family: "Editor Serif", serif; font-style: italic; }
+.about-tag .arabic { font-family: "Alfa Bravo", serif; font-style: italic; }
+.about-text {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  font-weight: 500; font-size: calc(var(--u) * 32);
+}
+.about-text .center { text-align: center; }
+.about-info { display: flex; justify-content: space-between; align-items: flex-start; }
+.info {
+  display: flex; align-items: flex-start;
+  gap: calc(var(--u) * 57.829); padding: calc(var(--u) * 21.686);
+  font-weight: 500; white-space: nowrap;
+}
+.info--end { align-items: flex-end; }
+.info-detail {
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  gap: calc(var(--u) * 16.459);
+  font-size: calc(var(--u) * 18.516);
+}
+.info-detail--end { align-items: flex-end; }
+.info-detail .bold { font-weight: 700; font-size: calc(var(--u) * 21.686); }
+.info-contact { display: flex; flex-direction: column; gap: calc(var(--u) * 16.264); }
+.info-head {
+  display: flex; flex-direction: column; align-items: flex-end;
+  gap: calc(var(--u) * 21.686);
+  text-align: right;
+  font-size: calc(var(--u) * 28.914);
+}
+/* the e-mail gets a drawn underline on hover */
+.ul {
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  padding-bottom: 2px;
+  transition: background-size 0.45s var(--ease);
+}
+.ul:hover { background-size: 100% 1px; }
+.about-back, .ar-back { display: flex; align-items: center; justify-content: center; }
+.about-back { width: calc(var(--u) * 60.304); height: calc(var(--u) * 60.304); }
+.about-back .back-arrow { width: calc(var(--u) * 43.109); height: calc(var(--u) * 42.174); transform: rotate(45deg) scaleY(-1); }
+
+/* back arrows: on hover their box fills and the arrow swaps colour */
+.back { transition: background-color 0.25s ease; }
+.back-arrow {
+  display: block;
+  background: var(--arrow, var(--blue));
+  -webkit-mask: var(--m) center / 100% 100% no-repeat;
+  mask: var(--m) center / 100% 100% no-repeat;
+  transition: background-color 0.25s ease;
+}
+.back:is(:hover, :focus-visible) { background: var(--arrow, var(--blue)); }
+.back:is(:hover, :focus-visible) .back-arrow { background: var(--on, var(--grey-blue)); }
+.ex-back { --m: url(svg/back-outline.svg); --on: var(--paper); }
+.ar-back { --m: url(svg/back-blue.svg); }
+.about-back { --m: url(svg/back-dark.svg); --arrow: var(--ink); }
+/* on About the hover turns the arrow into its outline */
+.about-back:is(:hover, :focus-visible) { background: none; --m: url(svg/back-dark-outline.svg); }
+.about-back:is(:hover, :focus-visible) .back-arrow { background: var(--ink); }
+
+/* ---------- exhibition archive ---------- */
+
+.archive { background: var(--grey-blue); }
+.ar-sheet { padding: calc(var(--u) * 32); }
+.b-l { border-left: var(--line); }
+.b-r { border-right: var(--line); }
+.b-t { border-top: var(--line); }
+.b-b { border-bottom: var(--line); }
+.b-all { border: var(--line); }
+
+.ar-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: var(--line); }
+.ar-back-cell { display: flex; align-items: stretch; align-self: stretch; border-right: var(--line); }
+/* the button is the whole cell, so its hover fill reaches the lines */
+.ar-back { padding: calc(var(--u) * 16) calc(var(--u) * 32); min-height: calc(var(--u) * 98.739); }
+.ar-back .back-arrow-box { display: flex; align-items: center; justify-content: center; width: calc(var(--u) * 66.739); height: calc(var(--u) * 66.739); }
+.ar-back .back-arrow { width: calc(var(--u) * 47.709); height: calc(var(--u) * 46.674); transform: rotate(45deg) scaleY(-1); }
+.ar-title {
+  align-self: stretch;
+  display: flex; align-items: center;
+  gap: calc(var(--u) * 64); padding: calc(var(--u) * 32);
+  border-left: var(--line);
+  font-size: calc(var(--u) * 32);
+  white-space: nowrap;
+}
+
+.ar-row { display: flex; align-items: flex-start; }
+.ar-row--tall { height: calc(var(--u) * 956.59); justify-content: flex-end; }
+.ar-row--tall > .col { align-self: stretch; }
+.col { display: flex; flex-direction: column; align-items: stretch; }
+.ar-row--tall > .col.grow:first-child { gap: calc(var(--u) * 10); }
+.stretch { align-self: stretch; }
+.grow { flex: 1 1 0; min-width: 0; min-height: 0; }
+.row { display: flex; align-items: center; }
+.row > .cell { align-self: stretch; }
+
+/* the grid's lines fade in row by row as it scrolls */
+
+.card {
+  display: flex; flex-direction: column; align-items: flex-end;
+  padding: calc(var(--u) * 32);
+}
+.card.center { justify-content: center; align-items: flex-start; }
+.card.wide { align-items: stretch; }
+.pic { position: relative; overflow: hidden; }
+.pic img.top { object-position: top; }
+.cap {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  width: 100%;
+  padding-top: calc(var(--u) * 24);
+  font-size: calc(var(--u) * 25.244);
+}
+.cap[style*="--cw"] { width: calc(var(--u) * var(--cw)); }
+.cap p:not([style]) { white-space: nowrap; }
+.cap i {
+  width: calc(var(--u) * 7.494); height: calc(var(--u) * 7.494); flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--blue);
+  transition: background-color 0.3s ease, scale 0.45s var(--ease);
+}
+
+/* a card on hover: Figma's grey-blue arrow square draws itself in the
+   photograph's corner (its blue stroke goes round, then the arrow is drawn
+   and filled) and the caption's dots grow. Leaving, it fades straight out. */
+.pic-arrow {
+  position: absolute; left: 0; top: 0;
+  width: calc(var(--u) * 74); height: calc(var(--u) * 75);
+  overflow: visible;
+  pointer-events: none;
+}
+.pic-arrow :is(.pa-box, .pa-arrow) {
+  stroke: var(--blue); stroke-width: 1px; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1 1; stroke-dashoffset: 1;
+  fill-opacity: 0;
+  transition: stroke-dashoffset 0s 0.2s, fill-opacity 0.2s ease;
+}
+.pa-box { fill: var(--grey-blue); }
+.pa-arrow { fill: var(--blue); stroke-linejoin: round; }
+.card:is(:hover, :focus-visible) .pa-box {
+  stroke-dashoffset: 0; fill-opacity: 1;
+  transition: stroke-dashoffset 0.45s var(--ease-io), fill-opacity 0.3s ease 0.2s;
+}
+.card:is(:hover, :focus-visible) .pa-arrow {
+  stroke-dashoffset: 0; fill-opacity: 1;
+  transition: stroke-dashoffset 0.5s var(--ease-io) 0.3s, fill-opacity 0.3s ease 0.7s;
+}
+.card:hover .cap i, .card:focus-visible .cap i { scale: 1.5; }
+.card:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01s !important; transition-delay: 0s !important; }
+}

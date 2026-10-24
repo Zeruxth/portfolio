@@ -15,6 +15,8 @@ import PolyfloraFilm from "./PolyfloraFilm";
 import RiotProductCard from "./RiotProductCard";
 import RiotLockups from "./RiotLockups";
 import RiotLogo from "./RiotLogo";
+import IndexPosters from "./IndexPosters";
+import IndexGalleryLogo from "./IndexGalleryLogo";
 import s from "./CaseStudy.module.css";
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
@@ -72,6 +74,8 @@ function Tile({ media }: { media: Media }) {
         {media.piece === "riot-product" && <RiotProductCard />}
         {media.piece === "riot-lockups" && <RiotLockups />}
         {media.piece === "riot-logo" && <RiotLogo />}
+        {media.piece === "index-posters" && <IndexPosters />}
+        {media.piece === "index-gallery-logo" && <IndexGalleryLogo />}
       </div>
     );
   }

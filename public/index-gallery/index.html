@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Index Gallery · גלריה אינדקס · معرض إندكس</title>
+<meta name="description" content="INDEX Gallery, University of Haifa: an exhibition space inside an everyday passage.">
+<link rel="preload" href="fonts/Ratzif22-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="ig.css">
+<script>document.documentElement.classList.add("js")</script>
+</head>
+<body>
+
+<!-- one arrow for every orange square: the tabs and the archive cards -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arrow" viewBox="0 0 148.674 150.76"><path d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></symbol>
+</svg>
+
+<!-- HOME (Figma 2398:244). The outlined titles fill the window and run off
+     its edges; the tabs and the badge stay inside it. Hovering a tab folds it
+     into the orange arrow and draws the name of the page it leads to
+     (2398:365, :402, :447). -->
+<section class="view home" data-view="home" aria-label="Gallery Index">
+  <div class="art" aria-hidden="true">
+    <div class="title t-home" data-src="svg/title-home.svg"></div>
+    <div class="title t-exhibition" data-src="svg/title-exhibition.svg"></div>
+    <div class="title t-about" data-src="svg/title-about.svg"></div>
+    <div class="title t-archive" data-src="svg/title-archive.svg"></div>
+  </div>
+  <h1 class="sr-only">Gallery Index · גלריה אינדקס · فهرس معرض</h1>
+
+  <div class="stage">
+    <a class="tab tab-exhibition" href="#exhibition" style="--i:0" aria-label="Current exhibition: Second Nature">
+      <span class="tab-card">
+        <i class="tab-line"></i>
+        <span class="tab-label"><span dir="rtl">תערוכה נוכחית</span></span>
+        <svg class="tab-arrow"><use href="#arrow"/></svg>
+      </span>
+    </a>
+    <a class="tab tab-archive" href="#archive" style="--i:1" aria-label="Exhibition archive">
+      <span class="tab-card">
+        <i class="tab-line"></i>
+        <span class="tab-label"><span dir="rtl">ארכיון<br>תערוכות</span></span>
+        <svg class="tab-arrow"><use href="#arrow"/></svg>
+      </span>
+    </a>
+    <a class="tab tab-about" href="#about" style="--i:2" aria-label="About">
+      <span class="tab-card">
+        <i class="tab-line"></i>
+        <span class="tab-label"><span dir="rtl">אודות</span></span>
+        <svg class="tab-arrow"><use href="#arrow"/></svg>
+      </span>
+    </a>
+  </div>
+  <img class="badge" src="svg/badge.svg" alt="">
+</section>
+
+<!-- CURRENT EXHIBITION (2398:531): the frame stays, the photographs pass under
+     it. ig.js clones this view for every exhibition in the archive, filling
+     the [data-f] slots from its data. -->
+<section class="view exhibition" data-view="exhibition" aria-label="Second Nature: Living, Still, Preserved" hidden>
+  <div class="ex-page" data-f="page" style="--page:3517">
+    <div class="ex-imgs" data-f="imgs">
+      <div class="ex-img" style="--x:1296.51;--y:403.26;--w:278.745;--h:495.399"><img src="img/ex-2.jpg" alt=""></div>
+      <div class="ex-img" style="--x:605.52;--y:816.41;--w:235.985;--h:353.977"><img src="img/ex-3.jpg" alt=""></div>
+      <div class="ex-img" style="--x:123.15;--y:293.53;--w:439.996;--h:293.331"><img src="img/ex-1.jpg" alt=""></div>
+      <div class="ex-img" style="--x:1062.81;--y:2401.78;--w:476.51;--h:317.673"><img src="img/ex-4.jpg" alt=""></div>
+      <div class="ex-img" style="--x:235.47;--y:2847.26;--w:458.633;--h:608.875"><img src="img/shelves.jpg" alt=""></div>
+      <div class="ex-img" style="--x:32;--y:1284.72;--w:1668.35;--h:985.562"><img src="img/ex-5.jpg" alt=""></div>
+    </div>
+
+    <div class="ex-frame">
+      <div class="ex-box">
+        <header class="ex-head">
+          <div class="ex-curator">
+            <p class="fill" dir="rtl" data-f="credit-ar">القيّم/ة:<br>د. نعومي كابلان</p>
+            <p class="fill" dir="rtl" data-f="credit-he">אוצרת<br>ד״ר נעמי קפלן</p>
+            <p class="nowrap" data-f="credit-en">Curator:<br>Dr. Naomi Kaplan</p>
+          </div>
+          <div class="ex-about">
+            <div class="ex-title">
+              <p style="--w:282.816" data-f="title-en">Second Nature:<br>Living, Still, Preserved</p>
+              <p style="--w:214.7" dir="rtl" data-f="title-ar">الطبيعة الثانية:<br>حيّ، ساكن، محفوظ</p>
+              <p style="--w:213.14" dir="rtl" data-f="title-he">טבע שני:<br>חי, דומם, משומר</p>
+            </div>
+            <div class="ex-desc">
+              <p style="--w:351.043" data-f="desc-en">The exhibition examines taxidermy as objects in an in-between state: not alive, yet retaining the appearance of life.</p>
+              <p style="--w:260.871" dir="rtl" data-f="desc-ar">يتناول المعرض الحيوانات المحنطة كأجسام في حالة وسطية: ليست حيّة، لكنها تحتفظ بمظهر الحياة.</p>
+              <p style="--w:281.431" dir="rtl" data-f="desc-he">התערוכה עוסקת בפוחלצים כאובייקטים הנמצאים במצב ביניים: אינם חיים, אך שומרים על הופעה חיה.</p>
+            </div>
+          </div>
+        </header>
+        <footer class="ex-foot">
+          <div class="ex-nav">
+            <a class="ex-back back" href="#" data-f="back" aria-label="Back to Gallery Index"><i class="back-arrow"></i></a>
+            <img class="ex-logo" src="svg/logo-blue.svg" alt="Gallery Index">
+          </div>
+          <div class="ex-reading">
+            <div class="ex-books" data-f="books">
+              <div>
+                <p><b>Rachel Poliquin</b><br>The Breathless Zoo</p>
+                <p><b>Donna Haraway</b><br>When Species Meet</p>
+              </div>
+              <div>
+                <p><b>John Berger</b><br>Why Look at Animals?</p>
+                <p><b>Stephen T. Asma</b><br>Stuffed Animals and Pickled Heads</p>
+              </div>
+            </div>
+            <div class="ex-reading-head">
+              <p dir="rtl" data-f="head-he">קריאה נוספת</p>
+              <p data-f="head-en">Further Reading</p>
+              <p dir="rtl" data-f="head-ar">قراءة إضافية</p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT (2398:643) -->
+<section class="view about" data-view="about" aria-label="About" hidden>
+  <div class="about-bands-wrap" aria-hidden="true"><i class="block"></i><i class="block"></i><i class="block"></i></div>
+  <div class="stage">
+    <div class="about-inner">
+      <div class="about-top">
+        <div class="about-tag" data-in style="--i:0">
+          <p class="serif">Art. Culture. Inspiration.</p>
+          <p class="arabic" dir="rtl">فن. ثقافة. إلهام.</p>
+          <p class="serif" dir="rtl">אמנות. תרבות. השראה.</p>
+        </div>
+        <div class="about-text">
+          <p style="--w:480.939;--i:1" data-in>The gallery operates as an exhibition space within an everyday passage, presenting rotating, context-based exhibitions on an intimate scale. The works are not detached from the space but embedded within it, enabling a direct and brief encounter with art as part of daily flow.</p>
+          <p style="--w:379.158;--i:2" data-in class="center" dir="rtl">تعمل المعرض كمساحة عرض داخل ممر يومي، ويقدّم معارض متغيّرة قائمة على السياق وبمقياس حميمي. لا تنفصل الأعمال عن المكان، بل تندمج فيه، وتتيح لقاءً مباشرًا وقصيرًا مع الفن كجزء من المسار اليومي.</p>
+          <p style="--w:440.082;--i:3" data-in class="right" dir="rtl">הגלריה פועלת כמרחב תצוגה בתוך מעבר יומיומי ומציגה תערוכות מתחלפות, מבוססות הקשר, בקנה מידה אינטימי. העבודות אינן מנותקות מהמרחב אלא נטמעות בו, ומאפשרות מפגש ישיר וקצר עם אמנות כחלק מהרצף היומיומי.</p>
+        </div>
+      </div>
+      <div class="about-info">
+        <div class="info" data-in style="--i:4">
+          <div class="info-detail">
+            <div class="info-contact">
+              <p class="bold"><a class="ul" href="mailto:index.gallery@univ.haifa.ac.il">index.gallery@univ.haifa.ac.il</a></p>
+              <p>@index.gallery</p>
+            </div>
+            <a class="about-back back" href="#" aria-label="Back to Gallery Index"><i class="back-arrow"></i></a>
+          </div>
+          <div class="info-head">
+            <p dir="rtl">יצירת קשר</p>
+            <p>Contact Us</p>
+            <p dir="rtl">للتواصل</p>
+          </div>
+        </div>
+        <div class="info info--end" data-in style="--i:5">
+          <div class="info-detail">
+            <p class="bold">09:00-18:00</p>
+            <p dir="rtl">א’-ה’</p>
+            <p>Sun-Thu</p>
+            <p dir="rtl">الأحد–الخميس</p>
+          </div>
+          <div class="info-head">
+            <p dir="rtl">שעות פתיחה</p>
+            <p>Opening Hours</p>
+            <p dir="rtl">ساعات الزيارة:</p>
+          </div>
+        </div>
+        <div class="info" data-in style="--i:6">
+          <div class="info-detail info-detail--end">
+            <p dir="rtl">גלריה אינדקס, אוניברסיטת חיפה</p>
+            <p>INDEX Gallery, University of Haifa</p>
+            <p dir="rtl">معرض إندكس، جامعة حيفا</p>
+          </div>
+          <div class="info-head">
+            <p dir="rtl">מיקום</p>
+            <p>Location</p>
+            <p dir="rtl">الموقع</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EXHIBITION ARCHIVE (2410:830). Every card opens its exhibition. -->
+<section class="view archive" data-view="archive" aria-label="Exhibition Archive" hidden>
+  <div class="ar-sheet">
+    <div class="ar-top b-l b-r b-t">
+    <header class="ar-head">
+      <div class="ar-back-cell"><a class="ar-back back" href="#" aria-label="Back to Gallery Index"><span class="back-arrow-box"><i class="back-arrow"></i></span></a></div>
+      <div class="ar-title">
+        <p>Exhibition Archive</p>
+        <p class="tight" dir="rtl">ארכיון תערוכות</p>
+        <p dir="rtl">أرشيف المعارض</p>
+      </div>
+    </header>
+
+    <div class="ar-row ar-row--tall">
+      <div class="col grow"><div class="cell grow b-b"></div><div class="cell grow b-b"></div></div>
+      <div class="col" style="--w:734">
+        <div class="row">
+          <a class="card b-l" href="#layers">
+            <div class="pic" style="--w:457.622;--h:516"><img class="top" src="img/layers.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+            <div class="cap" style="--cw:459">
+              <p style="--w:122.751">Layers of Preservation</p><i></i><p dir="rtl">طبقات الحفظ</p><i></i><p dir="rtl">שכבות של שימור</p>
+            </div>
+          </a>
+          <div class="cell grow b-l"></div>
+        </div>
+        <a class="card grow center wide b-b b-l b-t" href="#system-core">
+          <div class="pic" style="--h:171.91"><img src="img/system-core.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+          <div class="cap">
+            <p>System Core</p><i></i><p dir="rtl">نواة النظام</p><i></i><p dir="rtl">מרכזי שיטה</p>
+          </div>
+        </a>
+      </div>
+      <a class="card center b-b b-l" href="#exhibition">
+        <div class="pic" style="--w:619.612;--h:822.589"><img src="img/shelves.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+        <div class="cap">
+          <p style="--w:219.794">Second Nature:<br>Living, Still, Preserved</p><i></i><p style="--w:166.857" dir="rtl">الطبيعة الثانية:<br>حيّ، ساكن، محفوظ</p><i></i><p style="--w:165.645" dir="rtl">טבע שני:<br>חי, דומם, משומר</p>
+        </div>
+      </a>
+    </div>
+    </div>
+
+    <div class="ar-row b-b b-l b-r">
+      <a class="card" href="#objects">
+        <div class="pic" style="--w:500;--h:750"><img src="img/objects.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+        <div class="cap">
+          <p style="--w:100.867">Objects in Transit</p><i></i><p dir="rtl">أجسام في العبور</p><i></i><p dir="rtl">אובייקטים במעבר</p>
+        </div>
+      </a>
+      <div class="col grow stretch"><div class="cell b-b b-l b-r" style="--h:653"></div><div class="cell grow b-l b-r"></div></div>
+      <div class="col">
+        <a class="card" href="#lines">
+          <div class="pic" style="--w:649.158;--h:432.772"><img src="img/lines.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+          <div class="cap">
+            <p style="--w:86.584">Lines of Passage</p><i></i><p dir="rtl">خطوط عبور</p><i></i><p dir="rtl">קווי מעבר</p>
+          </div>
+        </a>
+        <div class="cell b-t" style="--h:317.228"></div>
+      </div>
+      <div class="col stretch" style="--w:229"><div class="cell b-b b-l" style="--h:276"></div><div class="cell grow b-l"></div></div>
+    </div>
+
+    <div class="ar-row b-b b-l b-r">
+      <div class="col grow stretch"><div class="cell b-b b-l b-r" style="--h:653"></div><div class="cell grow b-l b-r"></div></div>
+      <div class="col">
+        <div class="cell b-b" style="--h:317.228"></div>
+        <a class="card" href="#taxonomy">
+          <div class="pic" style="--w:690.102;--h:440.092"><img src="img/taxonomy.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+          <div class="cap">
+            <p style="--w:193.756">Taxonomy Research Laboratory</p><i></i><p dir="rtl">مختبر أبحاث التصنيف</p><i></i><p style="--w:104.608" dir="rtl">מעבדת חקר טקסונומיה</p>
+          </div>
+        </a>
+      </div>
+      <div class="col stretch" style="--w:229"><div class="cell b-b b-l" style="--h:276"></div><div class="cell grow b-l"></div></div>
+      <div class="col stretch">
+        <a class="card b-b b-l" href="#haifa">
+          <div class="pic" style="--w:589.451;--h:667.045"><img src="img/haifa.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+          <div class="cap">
+            <p style="--w:170.052">Who’s the Most Haifa in the city</p><i></i><p style="--w:142.728" dir="rtl">ما هو الأكثر حيفا في المدينة؟</p><i></i><p dir="rtl">מי הכי חיפה בעיר</p>
+          </div>
+        </a>
+        <div class="cell grow b-b b-l"></div>
+      </div>
+    </div>
+
+    <div class="ar-row ar-row--tall">
+      <div class="col grow"><div class="cell grow b-l b-r"></div><div class="cell grow b-all"></div></div>
+      <div class="col">
+        <div class="cell grow b-b"></div>
+        <a class="card b-b" href="#campus">
+          <div class="pic" style="--w:628.772;--h:630.248"><img src="img/eyes.jpg" alt=""><svg class="pic-arrow" viewBox="0 0 148.674 150.76" aria-hidden="true"><rect class="pa-box" x="0.5" y="0.5" width="147.674" height="149.76" pathLength="1"/><path class="pa-arrow" pathLength="1" d="M121.366 123.453L120.499 123.453L111.654 123.453L106.377 123.356L31.3475 121.977L31.6229 106.99L95.2142 108.159L27.3074 37.7096L38.099 27.3075L106.377 98.1428L106.377 34.2893L121.366 34.2893L121.366 123.453Z"/></svg></div>
+          <div class="cap">
+            <p style="--w:140.441">The Campus Through Different Eyes</p><i></i><p style="--w:133.77" dir="rtl">الحرم الجامعي بعيون أخرى</p><i></i><p dir="rtl">קמפוס בעיניים אחרות</p>
+          </div>
+        </a>
+      </div>
+      <div class="col" style="--w:481"><div class="cell b-b b-l b-r" style="--h:276"></div><div class="cell grow b-b b-l b-r"></div></div>
+    </div>
+  </div>
+</section>
+
+
+<script src="ig.js"></script>
+</body>
+</html>

@@ -29,6 +29,16 @@
       ],
       "port": 4318,
       "autoPort": true
+    },
+    {
+      "name": "index-gallery",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const R='public/index-gallery',T={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u.endsWith('/'))u+='index.html';f.readFile(p.join(R,u),(e,b)=>{if(e){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':T[p.extname(u)]||'application/octet-stream'});s.end(b)})}).listen(process.env.PORT||4319)"
+      ],
+      "port": 4319,
+      "autoPort": true
     }
   ]
 }

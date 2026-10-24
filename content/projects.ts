@@ -53,7 +53,7 @@ export type Media =
       kind: "live";
       label: string;
       ratio: number;
-      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "riot-lockups" | "riot-logo" | "polyflora-film" | "riot-product";
+      piece: "zoo-labels" | "zoo-logo" | "zoo-syrups" | "halach-illustrations" | "halach-book" | "festival-bracelets" | "riot-lockups" | "riot-logo" | "polyflora-film" | "riot-product" | "index-gallery-logo" | "index-posters";
       /** where the piece sits in the tile, in % of the tile, from the Figma frame */
       frame?: Frame;
     };
@@ -142,6 +142,15 @@ const riotVid = vid("blooming-riot");
 
 /** the landing page lives at public/blooming-riot/, outside the app's routes */
 const RIOT_PAGE = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/blooming-riot/index.html`;
+
+const INDEX_SUMMARY =
+  "Index Gallery is a proposed visual identity for an exhibition space connected to the University of Haifa's main library. The concept extends the library's role of collecting, organizing, and sharing knowledge into the gallery, treating each exhibition as an entry in an ever-growing visual index.";
+
+const indexImg = img("index-gallery");
+const indexVid = vid("index-gallery");
+
+/** the gallery's site lives at public/index-gallery/, outside the app's routes */
+const INDEX_PAGE = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/index-gallery/index.html`;
 
 export const PROJECTS: Project[] = [
   {
@@ -389,6 +398,49 @@ export const PROJECTS: Project[] = [
         [riotVid("The landing page", "website", WIDE, { ground: "#F5F7F5" })],
       ],
       chapters: [],
+    },
+  },
+  {
+    slug: "index-gallery",
+    title: "Index gallery",
+    // meta and copy are from the inner page (Figma 2224:2239), thumbnail from 2224:2352
+    description: INDEX_SUMMARY,
+    disciplines: ["Visual Identity", "Typography", "Exhibition Design", "Web Design"],
+    year: "2025",
+    note: "Student project",
+    image: "/projects/index-gallery/thumb.jpg",
+    study: {
+      summary: INDEX_SUMMARY,
+      link: { label: "Link to the project", href: INDEX_PAGE },
+      credit: { text: "The project was done in collaboration with", name: "@fish___graphics", href: "https://www.instagram.com/fish___graphics/" },
+      // photo tiles flattened from their Figma stacks at 2x; the logo and the
+      // posters are live
+      intro: [
+        // main comp_3.mov from iCloud, at the 214.7 x 381.4 Figma frame on the gallery blue
+        [indexVid("Motion identity", "main-comp", WIDE, {
+          ground: "#2A58CD",
+          frame: { left: 38.83, top: 12.14, width: 22.34, height: 75.72 },
+        })],
+        [
+          { kind: "live", label: "Logo, animated", ratio: 1, piece: "index-gallery-logo" },
+          indexImg("A-frame sign", "a-frame.jpg"),
+        ],
+      ],
+      chapters: [
+        {
+          label: "The visual system",
+          text: "The visual system operates on two levels. The gallery's main identity draws from the structure and visual language of books, while individual exhibitions use a more detailed system inspired by indexes, catalogues, and classification. The contrast in scale and typography creates a distinction between the gallery and its exhibitions, while allowing both identities to work together.",
+          rows: [
+            [
+              indexImg("Poster on the wall", "wall-poster.jpg"),
+              { kind: "live", label: "Posters, from grid to print", ratio: 1, piece: "index-posters" },
+            ],
+            // the site recording (exports/index-gallery), framed as the Blooming Riot one is
+            [indexVid("Website", "website", WIDE, { ground: "#27375F" })],
+            [indexImg("Poster on the stairs", "stairs.jpg"), indexImg("Brochure", "brochure.jpg")],
+          ],
+        },
+      ],
     },
   },
 ];

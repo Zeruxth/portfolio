@@ -1,0 +1,38 @@
+/* the 472.5 Instagram-post tile (Figma 2224:1777); each poster as tall as the
+   tile's poster box, centred, at its own width */
+.stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #f7f7f9;
+}
+.sheet {
+  position: absolute;
+  top: 8.886%;     /* 41.99 / 472.5 */
+  height: 82.227%; /* 388.52 / 472.5 */
+  left: 50%;
+  transform: translateX(-50%);
+}
+.grid,
+.poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+/* the outline sits on the poster's edge, half its weight outside, like every
+   other line; the grid is put away under a settled poster so it doesn't frame it */
+.grid {
+  overflow: visible;
+}
+.line {
+  fill: none;
+  stroke: #000;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+}
+.poster {
+  object-fit: cover;
+  user-select: none;
+}
