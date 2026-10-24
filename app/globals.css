@@ -6,7 +6,8 @@
   --bg: #DEDEDE;
   --ink: #222222;
 
-  --rail: 280px;
+  /* 280 up to a 1440 window, growing to 10% wider (308) by 1920, then held */
+  --rail: clamp(280px, calc(280px + (100vw - 1440px) * 0.0583), 308px);
   --pad: 24px;
   --tab-h: 60px;
 

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  createContext, useCallback, useContext, useEffect, useMemo, useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { PROJECTS } from "@/content/projects";
 import { SECTIONS } from "./sections";
@@ -49,45 +46,26 @@ interface TabsState {
 
 const Ctx = createContext<TabsState>({ tabs: [], close: () => {} });
 
+/**
+ * The bar is the route, nothing more: it shows only the tabs on the way to the
+ * page you are on, so going back (or up) closes the tab you left.
+ */
 export function TabsProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  // seeded from the route, so the bar is already right in the server HTML
-  const [tabs, setTabs] = useState<Tab[]>(() => tabsForPath(pathname));
-
-  const chain = tabsForPath(pathname);
-  const currentId = chain.at(-1)?.id ?? null;
-
-  useEffect(() => {
-    // home is the root, and its frame shows the logo tab alone — going there
-    // closes everything else rather than leaving tabs standing behind it
-    if (!chain.length) {
-      setTabs((open) => (open.length ? [] : open));
-      return;
-    }
-    setTabs((open) => {
-      const missing = chain.filter((t) => !open.some((o) => o.id === t.id));
-      return missing.length ? [...open, ...missing] : open;
-    });
-    // the id is what identifies the route; the objects are rebuilt every render
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentId]);
+  const currentId = tabForPath(pathname)?.id ?? null;
+  // rebuilt only when the route changes, so the bar's keys stay put
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const tabs = useMemo(() => tabsForPath(pathname), [currentId]);
 
   const close = useCallback(
     (id: string) => {
       const i = tabs.findIndex((t) => t.id === id);
       if (i === -1) return;
-      const next = tabs.filter((t) => t.id !== id);
-      setTabs(next);
-
-      // Navigate OUTSIDE the state updater: React runs updaters during render,
-      // and routing from there updates the Router mid-render.
-      if (id === currentId) {
-        const fallback = next[i - 1] ?? next[next.length - 1];
-        router.push(fallback ? fallback.href : "/");
-      }
+      // closing a tab closes everything opened from it, landing on its parent
+      router.push(tabs[i - 1]?.href ?? "/");
     },
-    [tabs, currentId, router],
+    [tabs, router],
   );
 
   const value = useMemo(() => ({ tabs, close }), [tabs, close]);

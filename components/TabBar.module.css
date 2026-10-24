@@ -47,7 +47,7 @@
   transition: background 0.18s ease;
 }
 .tab:not([data-active="true"]):hover::before,
-.tab:not([data-active="true"]):focus-within::before { background: var(--ink); }
+.tab:not([data-active="true"]):has(:focus-visible)::before { background: var(--ink); }
 
 .inner {
   position: relative;
@@ -62,10 +62,10 @@
 .bar > .tab:first-child .inner { border-left: 1px solid var(--ink); }
 
 .tab:not([data-active="true"]):hover .inner,
-.tab:not([data-active="true"]):focus-within .inner { color: var(--bg); }
+.tab:not([data-active="true"]):has(:focus-visible) .inner { color: var(--bg); }
 
-/* the logo tab is exactly as wide as the rail: 209 + the 72px diagonal = 281 */
-.logoTab .inner { width: 209px; padding: 0; position: relative; }
+/* the logo tab is exactly as wide as the rail: rail - 71 + the 72px diagonal */
+.logoTab .inner { width: calc(var(--rail) - 71px); padding: 0; position: relative; }
 /*
  * Placed rather than padded. The mark is 36.5px tall in a 60px tab, so a 16px
  * padding box is shorter than the mark and align-items:center clamps it to the
