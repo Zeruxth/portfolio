@@ -232,7 +232,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
               ref={(el) => { blocks.current[0] = el; }}
             >
               <div data-head className={s.introHead}>
-                <Link href="/projects" className={s.back} aria-label="Back to Selected Projects">
+                <Link href="/projects" className={s.back} aria-label="Back to Projects">
                   <Arrow className={s.backArrow} />
                 </Link>
                 <h1 className={s.title} onClick={() => goTo(0)}>

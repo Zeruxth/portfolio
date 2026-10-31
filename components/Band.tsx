@@ -19,7 +19,8 @@ const BAND_SHARE = 0.3;
 const PREVIEWS: Record<string, string> = {
   projects: placeholderStrip(0, 6),
   about: placeholderStrip(3, 6),
-  archive: placeholderStrip(1, 6),
+  smaller: placeholderStrip(1, 6),
+  tools: placeholderStrip(4, 6),
 };
 
 export default function Band({

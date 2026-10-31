@@ -1,7 +1,7 @@
 /** PLACEHOLDER — swap for the address you actually want people mailing. */
 export const CONTACT_EMAIL = "hello@akiyamin.com";
 
-export type SectionKey = "home" | "projects" | "about" | "archive";
+export type SectionKey = "home" | "projects" | "about" | "smaller" | "tools";
 
 export interface Section {
   key: SectionKey;
@@ -33,12 +33,12 @@ export const SECTIONS: Section[] = [
   {
     key: "projects",
     href: "/projects",
-    label: "Selected Projects",
+    label: "Projects",
     word: "WORK",
     color: "#E83A3A",
     ink: "#222222",
     explainer:
-      "The bigger stuff. Fully developed projects across branding, illustration, print, digital products and motion, with a closer look at the ideas, decisions and details behind each one.",
+      "A closer look at some of the projects I’ve worked on, and all the thinking and making that went into them.",
     count: "12 projects",
   },
   {
@@ -53,15 +53,26 @@ export const SECTIONS: Section[] = [
     count: "Since 2019",
   },
   {
-    key: "archive",
-    href: "/archive",
-    label: "Archive",
-    word: "ARCHIVE",
+    key: "smaller",
+    href: "/smaller-projects",
+    label: "Smaller projects",
+    word: "SMALL",
     color: "#E83AD0",
     ink: "#222222",
     explainer:
-      "The smaller stuff. Experiments, one-offs, illustrations, moving things and other pieces that never needed a full case study, but still deserved a place of their own.",
+      "One-offs, and other things worth sharing without the whole case study.",
     count: "147 things",
+  },
+  {
+    key: "tools",
+    href: "/tools",
+    label: "Tools",
+    word: "TOOLS",
+    color: "#199329",
+    ink: "#222222",
+    explainer:
+      "Little things I built because I needed them, got curious, or just wanted to see if I could. Some are useful, some are just fun. Feel free to give them a try.",
+    count: "4 tools",
   },
 ];
 
@@ -81,7 +92,9 @@ export const PREFIX = "AKI";
  */
 export const LONGEST_WORD = SECTIONS.reduce(
   (n, s) => Math.max(n, s.word.length),
-  0,
+  // the band was drawn around ARCHIVE; holding its seven letters keeps the size
+  // where it was now that every word is shorter
+  7,
 );
 
 export function sectionForPath(pathname: string): Section {

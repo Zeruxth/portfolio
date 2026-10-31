@@ -1,0 +1,113 @@
+.index {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+}
+
+/* ---- the names ---- */
+
+.names { border-right: 1px solid var(--ink); overflow-y: auto; }
+
+/* names deal in the way the Projects rows do */
+@keyframes nameIn {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.name {
+  animation: nameIn 0.44s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ink);
+  cursor: default;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+/* the shown tool reads like the menu row for the page you're on */
+.name[data-on="true"] { background: var(--ink); color: var(--bg); }
+.name:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.name[data-on="true"]:focus-visible { outline-color: var(--bg); }
+
+.title {
+  font-family: var(--ui);
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.kind {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---- the shown tool ---- */
+
+@keyframes detailIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.detail {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  animation: detailIn 0.24s ease backwards;
+}
+
+/* the cover runs edge to edge, a rule under it like the rows */
+.cover {
+  flex: none;
+  aspect-ratio: 16 / 10;
+  background-size: cover;
+  background-position: center;
+  border-bottom: 1px solid var(--ink);
+}
+
+.text {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px;
+}
+.body { display: flex; flex-direction: column; gap: 24px; }
+
+.desc {
+  font-family: var(--mono);
+  font-size: 18px;
+  line-height: 1.3;
+  letter-spacing: 0.18px;
+  max-width: 590px;
+}
+
+.meta {
+  flex: none;
+  min-width: 140px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+.meta li { list-style: none; }
+.meta li + li { margin-top: 16px; }
+
+/* the ways to get it are the case study's project link (CaseStudy .link) */
+.actions { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .name, .detail { animation: none; }
+}
+
+@media (max-width: 1100px) {
+  .title { font-size: 24px; }
+  .desc { font-size: 15px; }
+  .meta { font-size: 13px; min-width: 110px; }
+}

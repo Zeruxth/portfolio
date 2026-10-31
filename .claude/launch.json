@@ -39,6 +39,26 @@
       ],
       "port": 4319,
       "autoPort": true
+    },
+    {
+      "name": "tools",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const R='public/tools',T={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2','.png':'image/png'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u.endsWith('/'))u+='index.html';f.readFile(p.join(R,u),(e,b)=>{if(e){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':T[p.extname(u)]||'application/octet-stream'});s.end(b)})}).listen(process.env.PORT||4320)"
+      ],
+      "port": 4320,
+      "autoPort": true
+    },
+    {
+      "name": "tools-covers",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "-e",
+        "const h=require('http'),f=require('fs'),p=require('path');const R='exports/tools-covers',T={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'text/javascript','.json':'application/json','.webp':'image/webp','.jpg':'image/jpeg','.svg':'image/svg+xml','.woff2':'font/woff2','.ttf':'font/ttf','.png':'image/png'};h.createServer((q,s)=>{let u=decodeURIComponent(q.url.split('?')[0]);if(u.endsWith('/'))u+='book-editor.html';f.readFile(p.join(R,u),(e,b)=>{if(e){s.writeHead(404);return s.end()}s.writeHead(200,{'Content-Type':T[p.extname(u)]||'application/octet-stream'});s.end(b)})}).listen(process.env.PORT||4321)"
+      ],
+      "port": 4321,
+      "autoPort": true
     }
   ]
 }

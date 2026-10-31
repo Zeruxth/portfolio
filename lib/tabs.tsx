@@ -13,7 +13,7 @@ export interface Tab {
 
 /**
  * The tabs a route opens, outermost first; empty for home. A project opens its
- * section too, so the bar reads logo / Selected Projects / <project name>
+ * section too, so the bar reads logo / Projects / <project name>
  * however you arrived.
  */
 export function tabsForPath(pathname: string): Tab[] {

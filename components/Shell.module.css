@@ -28,7 +28,7 @@
 /*
  * Every kinetic layer is a child of this box, and it clips them.
  *
- * No padding here: the Selected Projects rows run edge to edge and carry
+ * No padding here: the Projects rows run edge to edge and carry
  * their own 16px, as they do in Figma. Pages that need an inset add it.
  */
 .stage {

@@ -10,11 +10,11 @@
  * the preview art cannot fall out of step.
  */
 export const GROUNDS: string[] = [
-  "#E83A3A", // red — Selected Projects
+  "#E83A3A", // red — Projects
   "#E35D31", // orange
   "#199329", // green — About
   "#3A42E8", // blue
-  "#E83AD0", // magenta — Archive
+  "#E83AD0", // magenta — Smaller projects
 ];
 
 export const INK = "#222222";

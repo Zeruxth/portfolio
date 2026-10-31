@@ -159,7 +159,7 @@
   #c-title { font-size: 28px; font-weight: 300; line-height: 1.12; letter-spacing: -.01em; margin-top: 4px; }
   #c-by { font-size: 15px; color: var(--dim); margin-top: 6px; }
   #c-acts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
-  #c-acts a, #c-acts button { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  #c-acts a, #c-acts button { font: inherit; text-transform: inherit; letter-spacing: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
   #c-acts a:hover, #c-acts button:hover { color: var(--dim); }
   #c-acts .rm { color: var(--err); margin-inline-start: auto; }
   .card-sec { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 12px; }
@@ -179,6 +179,13 @@
   #toast { position: fixed; bottom: 18px; left: 50%; transform: translate(-50%, 10px); background: var(--ink); color: var(--wall); padding: 7px 14px;
            font: 11.5px var(--mono); opacity: 0; transition: opacity .2s, transform .2s; z-index: 20; pointer-events: none; max-width: calc(100vw - 32px); }
   #toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+  /* the page runs either against the Mac app or on its own in the browser */
+  .web-only { display: none; }
+  body.web .web-only { display: block; }
+  body.web .app-only, body.web #x-gallery { display: none; }
+  details.sources ul.web-only { display: none; }
+  body.web details.sources ul.web-only { display: block; }
 
   @media (max-width: 860px) {
     body { display: block; height: auto; overflow: auto; }
@@ -211,10 +218,13 @@
     <p class="help">Finds the largest image the page offers, then reads the title, maker, date, medium and licence.</p>
     <details class="sources">
       <summary>Where it works</summary>
-      <ul>
+      <ul class="app-only">
         <li>The Met</li><li>Rijksmuseum</li><li>Cleveland</li><li>Art Institute of Chicago</li>
         <li>MFA Boston</li><li>Smithsonian</li><li>Cooper Hewitt</li><li>National Gallery</li>
         <li>WikiArt</li><li>Wikimedia</li><li>and most pages that carry an image</li>
+      </ul>
+      <ul class="web-only">
+        <li>The Met</li><li>Cleveland</li><li>Art Institute of Chicago</li><li>Wikimedia</li>
       </ul>
     </details>
   </section>
@@ -248,7 +258,8 @@
       <button id="x-gallery"><b>Gallery page</b><span>HTML</span>
         <small>Writes each record into its image's own metadata, and makes a gallery.html that opens anywhere.</small></button>
       <button id="x-zip"><b>Export the collection</b><span>ZIP</span>
-        <small>Images and records together, to move to another computer.</small></button>
+        <small class="app-only">Images and records together, to move to another computer.</small>
+        <small class="web-only">Every image the museums let a site save, all the records, and a gallery page that opens anywhere.</small></button>
       <button id="x-import"><b>Import a collection</b><span>ZIP</span>
         <small>Adds what's new from an exported ZIP; nothing is listed twice.</small></button>
     </div>
@@ -298,6 +309,7 @@
 
 <div id="toast" role="status"></div>
 
+<script src="web.js"></script>
 <script>
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -305,16 +317,18 @@ const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "
 let entries = [];       // in download order; the accession number is the position here
 let shelf = "";         // "" all, "*" starred, "~" pasted, else a search folder
 let open = null;        // the entry on the card
-let live = false;       // the Mac app answered; otherwise the page shows the sample collection
+let live = false;       // the Mac app answered; otherwise the page runs on its own (web.js)
+const kept = new Map(); // source_url → object URL, for images imported from a ZIP
 let ws = null, fails = 0, busy = null, total = 0;
 
 /* ---------- the record ---------- */
 const relOf = e => (e.image_rel_path || "").replace(/\\/g, "/");
-const folderOf = e => { const r = relOf(e), i = r.indexOf("/"); return i > 0 ? r.slice(0, i) : ""; };
+const folderOf = e => { if (e.folder != null) return e.folder; const r = relOf(e), i = r.indexOf("/"); return i > 0 ? r.slice(0, i) : ""; };
+const path = r => r.split("/").map(encodeURIComponent).join("/");
 const srcOf = e => {
+  if (!live) return kept.get(e.source_url) || (e.sample ? "sample/" + path(e.sample) : e.display_url || e.image_url || "");
   const r = relOf(e) || (e.local_file || "").replace(/\\/g, "/").split("/").pop();
-  if (!r) return "";
-  return (live ? "/images/" : "sample/") + r.split("/").map(encodeURIComponent).join("/");
+  return r ? "/images/" + path(r) : "";
 };
 const noOf = e => "No. " + String(entries.indexOf(e) + 1).padStart(3, "0");
 const known = v => v && !/^unknown/i.test(v);
@@ -389,15 +403,15 @@ async function star(e) {
   if (live) {
     const r = await fetch("/api/star", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source_url: e.source_url }) });
     e.starred = (await r.json()).starred;
-  } else e.starred = !e.starred;
+  } else await ArtWeb.star(e);
   redraw();
 }
 async function remove(e) {
-  if (!confirm(`Take “${e.title}” out of the collection?\nThe image file stays on disk.`)) return;
+  if (!confirm(`Take “${e.title}” out of the collection?` + (live ? "\nThe image file stays on disk." : ""))) return;
   if (live) {
     const r = await fetch("/api/entry", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source_url: e.source_url }) });
     if (!r.ok) return toast("Couldn't remove it");
-  }
+  } else await ArtWeb.remove(e);
   entries = entries.filter(x => x !== e);
   hide(); redraw(); toast("Removed from the collection");
 }
@@ -422,6 +436,7 @@ function fill(e) {
 
   const acts = [];
   if (live && e.local_file) acts.push(`<button data-a="file">Show the file</button>`);
+  if (!live) acts.push(`<button data-a="save">Save image</button>`);
   if (e.source_url) acts.push(`<a href="${esc(e.source_url)}" target="_blank" rel="noopener">Source page</a>`);
   if (e.image_url) acts.push(`<a href="${esc(e.image_url)}" target="_blank" rel="noopener">Original image</a>`);
   acts.push(`<button data-a="rm" class="rm">Remove</button>`);
@@ -430,6 +445,7 @@ function fill(e) {
     const a = ev.target.dataset.a;
     if (a === "rm") remove(e);
     if (a === "file") post("/open-file", { filename: relOf(e) || e.local_file.split("/").pop() });
+    if (a === "save") saveImage(e);
   };
 
   const px = e.image_width ? `${e.image_width} × ${e.image_height} px` : "";
@@ -502,8 +518,11 @@ function connect() {
     if (busy) end("Interrupted");
     setTimeout(connect, Math.min(2000 * fails, 10000));
   };
-  ws.onmessage = ev => {
-    let m; try { m = JSON.parse(ev.data); } catch { return; }
+  ws.onmessage = ev => { let m; try { m = JSON.parse(ev.data); } catch { return; } onMsg(m); };
+}
+
+// what the app's server says over its socket, and what web.js says in the browser
+function onMsg(m) {
     switch (m.event) {
       case "history": entries = m.entries || []; redraw(); break;
       case "step": line(m.msg, m.status); break;
@@ -511,7 +530,7 @@ function connect() {
         $("found").className = "on";
         $("found").innerHTML = `<b>${esc(m.title)}</b><span>${esc([m.artist, m.date_created, m.medium].filter(known).join(" · "))}</span>`;
         break;
-      case "complete": entries.push(m.entry); redraw(); end("Saved"); toast("Saved: " + m.entry.title); break;
+      case "complete": entries.push(m.entry); redraw(); end(live ? "Saved" : "Added"); toast((live ? "Saved: " : "Added: ") + m.entry.title); break;
       case "error": line(m.message, "err"); end("Stopped"); break;
       case "search_total": progress(0, m.total); break;
       case "search_progress":
@@ -528,7 +547,6 @@ function connect() {
         if (m.total) { shelf = m.folder; redraw(); }
         break;
     }
-  };
 }
 const send = msg => {
   if (!ws || ws.readyState !== 1) { toast("Not connected yet"); return false; }
@@ -536,36 +554,43 @@ const send = msg => {
 };
 const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
-function demoNote() {
-  $("work").classList.add("on"); $("work-title").textContent = "This is the demo"; $("work-n").textContent = "";
-  $("bar").classList.add("idle"); $("found").className = ""; $("short").className = "";
-  $("log").innerHTML = "";
-  line("Fetching runs in the app on your Mac, where the files are saved. The works shown here are from a real search for “dragon”.");
+// in the browser, web.js does the work and answers in the server's messages
+function web(fn) { fn(onMsg).catch(err => onMsg({ event: "error", message: err.message })); }
+
+async function saveImage(e) {
+  const blob = await ArtWeb.blobOf(e, "sample/");
+  if (!blob) { window.open(e.image_url, "_blank", "noopener"); return toast("The museum doesn't let other sites save it, so it opened on its own"); }
+  const ext = { "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif", "image/tiff": ".tif" }[blob.type] || ".jpg";
+  download(blob, (e.title || "image").replace(/[^\w\s-]+/g, "").trim().replace(/\s+/g, "-").slice(0, 80) + ext);
+}
+function download(blob, name) {
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: name });
+  document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
 }
 
 $("add").addEventListener("submit", ev => {
   ev.preventDefault();
   const url = $("url").value.trim();
   if (!/^https?:\/\//.test(url)) return nudge($("url"));
-  if (!live) return demoNote();
   if (busy) return;
   begin("add");
+  if (!live) { $("url").value = ""; return web(emit => ArtWeb.add(url, emit)); }
   if (send({ event: "download", url })) $("url").value = ""; else end("Not connected");
 });
 $("find").addEventListener("submit", ev => {
   ev.preventDefault();
   const query = $("subject").value.trim();
   if (!query) return nudge($("subject"));
-  if (!live) return demoNote();
   if (busy) return;
   begin("search");
+  const limit = +$("limit").value, minimum = +$("minimum").value || 0;
+  if (!live) { $("subject").value = ""; return web(emit => ArtWeb.search(query, limit, minimum, emit)); }
   if (send({ event: "search", query, limit: +$("limit").value, minimum: +$("minimum").value || 0 })) $("subject").value = ""; else end("Not connected");
 });
 function nudge(el) { el.focus(); el.animate([{ transform: "translateX(-3px)" }, { transform: "translateX(3px)" }, { transform: "none" }], { duration: 180, iterations: 2 }); }
 
 /* ---------- take it along ---------- */
 async function job(btn, fn) {
-  if (!live) return toast("Exports run in the app on your Mac");
   if (!entries.length) return toast("Nothing to export yet");
   btn.disabled = true;
   try { await fn(); } catch (err) { toast(err.message); } finally { btn.disabled = false; }
@@ -580,6 +605,11 @@ $("x-gallery").onclick = function () {
   });
 };
 $("x-zip").onclick = function () {
+  if (!live) return job(this, async () => {
+    const z = await ArtWeb.exportZip("sample/", gallery, (n, of) => toast(`Packing the collection… ${n} / ${of}`));
+    download(z.blob, z.name);
+    toast(z.kept === z.total ? `Saved ${z.name}` : `Saved ${z.name}: ${z.kept} images, ${z.total - z.kept} kept as links`);
+  });
   job(this, async () => {
     toast("Packing the collection…");
     const r = await fetch("/api/export-collection");
@@ -590,12 +620,17 @@ $("x-zip").onclick = function () {
     toast("Saved " + name);
   });
 };
-$("x-import").onclick = function () { if (!live) return toast("Imports run in the app on your Mac"); $("import-file").click(); };
+$("x-import").onclick = function () { $("import-file").click(); };
 $("import-file").addEventListener("change", async ev => {
   const file = ev.target.files[0]; ev.target.value = "";
   if (!file) return;
   const btn = $("x-import"); btn.disabled = true; toast("Importing…");
   try {
+    if (!live) {
+      const j = await ArtWeb.importZip(file);
+      await loadWeb();
+      return toast(`${j.added} new ${j.added === 1 ? "work" : "works"} added`);
+    }
     const j = await (await fetch("/api/import-collection", { method: "POST", headers: { "Content-Type": "application/zip" }, body: await file.arrayBuffer() })).json();
     if (j.error) throw new Error(j.error);
     toast(`${j.added} new ${j.added === 1 ? "work" : "works"} added`);
@@ -613,10 +648,46 @@ function toast(msg) { $("toast").textContent = msg; $("toast").classList.add("on
     live = r.ok && (await r.json()).app === "art-downloader";
   } catch { live = false; }
   if (live) return connect();
-  status("", "Demo · the downloader itself runs on your Mac");
-  try { entries = await (await fetch("sample/collection.json")).json(); } catch { entries = []; }
-  redraw();
+  document.body.classList.add("web");
+  status("live", "Runs in your browser · the collection stays on this device");
+  try { await ArtWeb.seed("sample/collection.json"); } catch { /* storage may be off: start empty */ }
+  await loadWeb();
 })();
+
+async function loadWeb() {
+  try { entries = await ArtWeb.list(); } catch { entries = []; status("lost", "This browser won't keep a collection (private window?)"); }
+  for (const u of kept.values()) URL.revokeObjectURL(u);
+  kept.clear();
+  for (const e of entries) if (e.kept) { const b = await ArtWeb.keptFile(e.source_url).catch(() => null); if (b) kept.set(e.source_url, URL.createObjectURL(b)); }
+  redraw();
+}
+
+/* ---------- the gallery page that goes into a ZIP ---------- */
+function gallery(log) {
+  const it = s => esc(s).replace(/\*([^*]+)\*/g, "<i>$1</i>");
+  const cards = log.map((e, i) => {
+    const img = e.image_rel_path ? path(e.image_rel_path) : e.display_url || e.image_url;
+    const rows = [["Medium", e.medium], ["Held by", e.museum_or_source], ["Credit", e.credit_line], ["Licence", e.license]]
+      .filter(([, v]) => v).map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+    const cites = Object.entries(e.citations || {}).map(([k, v]) => `<p class="cit"><span>${STYLE_NAMES[k] || k}</span>${it(v)}</p>`).join("");
+    return `<article><a class="mat" href="${esc(e.image_rel_path ? img : e.image_url)}" target="_blank"><img src="${esc(img)}" alt="" loading="lazy"></a>
+      <p class="no">No. ${String(i + 1).padStart(3, "0")}${e.image_rel_path ? "" : " · linked, not kept"}</p><h3>${esc(e.title)}</h3>
+      <p class="by">${esc([known(e.artist) ? e.artist : "Maker unknown", known(e.date_created) ? e.date_created : ""].filter(Boolean).join(" · "))}</p>
+      <dl>${rows}</dl>${cites}<p class="links"><a href="${esc(e.source_url)}" target="_blank">Source page</a></p></article>`;
+  }).join("\n");
+  return `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The collection</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&display=swap" rel="stylesheet">
+<style>:root{--wall:#e4e3df;--lift:#eceae6;--matte:#d6d5d0;--ink:#34332f;--dim:#6e6c67;--faint:#95938d;--line:#b8b6b0;--hair:#cbc9c3}
+*{box-sizing:border-box;margin:0}body{background:var(--wall);color:var(--ink);font:400 15px/1.45 Newsreader,Georgia,serif;padding:40px;max-width:1500px;margin:0 auto}
+h1{font-size:40px;font-weight:300;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:30px}h1 i{font-weight:300}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:40px 28px}
+.mat{aspect-ratio:4/3;background:var(--matte);display:flex;align-items:center;justify-content:center;padding:9%}.mat img{max-width:100%;max-height:100%}
+.no,dt,.cit span,.links{font:11px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}.no{margin-top:10px;color:var(--faint)}
+h3{font-size:19px;font-weight:400;margin-top:2px}.by{color:var(--dim)}dl{display:grid;grid-template-columns:96px 1fr;margin-top:10px;border-top:1px solid var(--hair)}
+dt,dd{padding:4px 0;border-bottom:1px solid var(--hair)}dd{margin:0;font-size:14px}.cit{margin-top:8px;padding:7px 9px;background:var(--lift);border:1px solid var(--hair);font-size:13.5px}
+.cit span{display:block;font-size:10px}.links{margin-top:10px}.links a{color:var(--ink)}</style>
+<h1>The <i>collection</i></h1><div class="grid">${cards}</div>`;
+}
 </script>
 </body>
 </html>

@@ -1,16 +1,16 @@
 import { placeholderTile } from "@/lib/placeholder";
 import s from "../page.module.css";
 
-export const metadata = { title: "Archive — AKI_WIP" };
+export const metadata = { title: "Smaller projects — AKI_WIP" };
 
-/** PLACEHOLDER count — replace with the real archive. */
+/** PLACEHOLDER count — replace with the real smaller projects. */
 const COUNT = 48;
 
-export default function Archive() {
+export default function SmallerProjects() {
   return (
     <>
       <div className={s.head}>
-        <span>Archive</span>
+        <span>Smaller projects</span>
         <span>147 things · 2019—2026</span>
       </div>
       <div className={s.body}>
