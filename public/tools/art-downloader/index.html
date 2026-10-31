@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Art Downloader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- the same pair as the Spread Mockup: Newsreader for the catalogue, Plex Mono for the register -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  /* a registrar's desk: stone for the rail, a lighter wall for the works, a matte under each one */
+  :root {
+    --paper: #d9d8d3; --wall: #e4e3df; --lift: #eceae6; --sink: #cfcec9; --matte: #d6d5d0;
+    --ink: #34332f; --dim: #6e6c67; --faint: #95938d; --line: #b8b6b0; --hair: #cbc9c3;
+    --ok: #4f6b55; --err: #8a4a3f;
+    --serif: "Newsreader", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--wall); color: var(--ink); font: 400 14px/1.45 var(--serif); font-optical-sizing: auto;
+         display: grid; grid-template-columns: 340px minmax(0, 1fr); height: 100vh; overflow: hidden;
+         -webkit-font-smoothing: antialiased; }
+  button, input, select { font: inherit; color: inherit; }
+  a { color: inherit; }
+  :focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+
+  /* ---------- rail ---------- */
+  #rail { background: var(--paper); border-inline-end: 1px solid var(--line); overflow-y: auto; padding: 22px 24px 18px;
+          display: flex; flex-direction: column; }
+  header { margin-bottom: 22px; }
+  h1 { font-size: 34px; font-weight: 300; letter-spacing: -.015em; line-height: 1; }
+  h1 em { font-style: italic; }
+  .sub { color: var(--dim); font-size: 14px; line-height: 1.4; margin-top: 10px; max-width: 27ch; }
+
+  section { border-top: 1px solid var(--line); padding: 14px 0 18px; }
+  h2 { display: flex; gap: 10px; align-items: baseline; font-size: 21px; font-weight: 300; line-height: 1.1; margin-bottom: 12px; }
+  h2 .n { margin-inline-start: auto; font: 11px var(--mono); color: var(--faint); }
+  .lab { display: flex; justify-content: space-between; align-items: baseline; font: 10.5px var(--mono); text-transform: uppercase;
+         letter-spacing: .07em; color: var(--dim); margin-bottom: 6px; }
+  .help { font-size: 13px; color: var(--dim); margin-top: 8px; line-height: 1.4; }
+  .help b { font-weight: 400; color: var(--ink); }
+
+  .entry { display: flex; border-bottom: 1px solid var(--ink); }
+  .entry input { flex: 1; min-width: 0; background: none; border: 0; padding: 6px 0 7px; font-size: 16px; outline: none; }
+  .entry input::placeholder { color: var(--faint); }
+  .entry input:focus-visible { outline: none; }
+  .entry:focus-within { border-color: var(--ink); box-shadow: 0 1px 0 var(--ink); }
+  .go { flex: none; background: none; border: 0; padding: 0 0 0 10px; font: 500 11px var(--mono); text-transform: uppercase;
+        letter-spacing: .07em; cursor: pointer; }
+  .go:hover { color: var(--dim); }
+  .go:disabled { color: var(--faint); cursor: default; }
+
+  .row { display: flex; gap: 14px; margin-top: 12px; }
+  .row label { flex: 1; }
+  .row select, .row input { width: 100%; background: var(--lift); border: 1px solid var(--line); height: 30px; padding: 0 8px;
+                            font: 12px var(--mono); border-radius: 0; appearance: none; }
+  .row select { background-image: linear-gradient(45deg, transparent 50%, var(--dim) 50%), linear-gradient(-45deg, transparent 50%, var(--dim) 50%);
+                background-position: calc(100% - 13px) 13px, calc(100% - 9px) 13px; background-size: 4px 4px; background-repeat: no-repeat; }
+
+  details.sources { margin-top: 8px; }
+  details.sources summary { list-style: none; cursor: pointer; font: 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--dim); }
+  details.sources summary::-webkit-details-marker { display: none; }
+  details.sources summary::before { content: "+ "; }
+  details.sources[open] summary::before { content: "− "; }
+  details.sources ul { list-style: none; padding: 8px 0 0; columns: 2; column-gap: 14px; font-size: 13px; color: var(--dim); }
+  details.sources li { break-inside: avoid; padding: 1px 0; }
+
+  /* ---------- the log, set like a ledger ---------- */
+  #work { display: none; }
+  #work.on { display: block; }
+  .bar { height: 2px; background: var(--sink); margin: 2px 0 10px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--ink); transition: width .3s ease; }
+  .bar.idle { display: none; }
+  #log { list-style: none; padding: 0; max-height: 132px; overflow-y: auto; font: 11.5px/1.5 var(--mono); color: var(--dim); }
+  #log li { display: grid; grid-template-columns: 14px 1fr; gap: 6px; overflow-wrap: anywhere; }
+  #log li::before { content: "→"; color: var(--faint); }
+  #log li.ok::before { content: "✓"; color: var(--ok); }
+  #log li.err { color: var(--err); }
+  #log li.err::before { content: "×"; color: var(--err); }
+  #log li.spin::before { content: "·"; }
+  #found { display: none; margin-top: 10px; padding: 9px 11px; background: var(--lift); border: 1px solid var(--hair); }
+  #found.on { display: block; }
+  #found b { display: block; font-weight: 400; font-size: 15px; line-height: 1.25; }
+  #found span { display: block; font-size: 13px; color: var(--dim); margin-top: 2px; }
+  #short { display: none; margin-top: 10px; font-size: 13px; color: var(--err); }
+  #short.on { display: block; }
+
+  .carry { display: grid; gap: 0; }
+  .carry button { display: grid; grid-template-columns: 1fr auto; align-items: baseline; text-align: start; background: none; border: 0;
+                  border-bottom: 1px solid var(--hair); padding: 8px 0; cursor: pointer; }
+  .carry button:first-child { border-top: 1px solid var(--hair); }
+  .carry button b { font-weight: 400; font-size: 15px; }
+  .carry button small { grid-column: 1 / -1; font-size: 12.5px; color: var(--dim); line-height: 1.35; margin-top: 1px; }
+  .carry button span { font: 11px var(--mono); color: var(--faint); }
+  .carry button:hover b { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .carry button:disabled { cursor: default; opacity: .55; }
+  .carry button:disabled b { text-decoration: none; }
+
+  #status { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); display: flex; gap: 8px; align-items: baseline;
+            font: 11px var(--mono); color: var(--dim); }
+  #status i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); transform: translateY(-1px); }
+  #status.live i { background: var(--ok); }
+  #status.lost i { background: var(--err); }
+  #status.wait i { animation: blink 1s ease infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+
+  /* ---------- the shelf ---------- */
+  main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  #tools { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 18px 28px 14px; border-bottom: 1px solid var(--hair); }
+  #count { font-size: 21px; font-weight: 300; line-height: 1; }
+  #count em { font-style: italic; }
+  #shelves { display: flex; flex-wrap: wrap; gap: 2px 16px; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+  #shelves button { background: none; border: 0; padding: 4px 0 3px; border-bottom: 1px solid transparent; cursor: pointer; color: var(--dim); }
+  #shelves button:hover { color: var(--ink); }
+  #shelves button[aria-pressed=true] { color: var(--ink); border-color: var(--ink); }
+  #shelves sup { font-size: 9px; color: var(--faint); margin-inline-start: 2px; }
+  .filters { display: flex; gap: 14px; margin-inline-start: auto; align-items: center; }
+  #q { width: 170px; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 3px 0; font-size: 14px; outline: none; }
+  #q:focus { border-color: var(--ink); }
+  #q::placeholder { color: var(--faint); }
+  #sort { background: none; border: 0; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--dim); cursor: pointer; padding: 3px 0; }
+
+  #scroll { flex: 1; overflow-y: auto; padding: 22px 28px 40px; }
+  #plates { display: grid; grid-template-columns: repeat(auto-fill, minmax(186px, 1fr)); gap: 30px 22px; }
+  .plate { position: relative; display: flex; flex-direction: column; text-align: start; background: none; border: 0; padding: 0; cursor: pointer; }
+  .mat { position: relative; aspect-ratio: 4 / 5; background: var(--matte); display: flex; align-items: center; justify-content: center; padding: 14%; }
+  .mat img { max-width: 100%; max-height: 100%; display: block; box-shadow: 0 1px 2px rgba(52,51,47,.18); transition: transform .3s ease; }
+  .plate:hover .mat img { transform: translateY(-2px); }
+  .mat .none { font: 11px var(--mono); color: var(--faint); }
+  .no { margin-top: 9px; font: 10.5px var(--mono); color: var(--faint); letter-spacing: .03em; display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
+  .no span:first-child { flex: none; }
+  .no span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tt { margin-top: 3px; font-size: 15px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .by { font-size: 13px; color: var(--dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .star { position: absolute; top: 6px; inset-inline-end: 6px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+          background: var(--wall); border: 0; font-size: 13px; line-height: 1; color: var(--dim); cursor: pointer; opacity: 0; transition: opacity .15s; }
+  .plate:hover .star, .plate:focus-within .star, .star[aria-pressed=true] { opacity: 1; }
+  .star[aria-pressed=true] { color: var(--ink); }
+  .star:hover { color: var(--ink); }
+
+  #nothing { display: none; padding: 80px 20px; text-align: center; color: var(--dim); }
+  #nothing b { display: block; font-weight: 300; font-size: 24px; color: var(--ink); margin-bottom: 6px; }
+
+  /* ---------- the catalogue entry ---------- */
+  #veil { position: fixed; inset: 0; background: rgba(52,51,47,.28); z-index: 10; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  #veil.on { opacity: 1; pointer-events: auto; }
+  #card { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(520px, 100vw); background: var(--paper); border-inline-start: 1px solid var(--line);
+          z-index: 11; display: flex; flex-direction: column; transform: translateX(102%); transition: transform .28s cubic-bezier(.3,.7,.2,1); }
+  #card.on { transform: none; }
+  .view { flex: none; position: relative; height: 46vh; min-height: 260px; background: var(--sink); display: flex; align-items: center; justify-content: center; padding: 28px; }
+  .view img { max-width: 100%; max-height: 100%; display: block; box-shadow: 0 1px 3px rgba(52,51,47,.22); }
+  .view .bar2 { position: absolute; top: 10px; inset-inline: 12px; display: flex; justify-content: space-between; font: 11px var(--mono); }
+  .view .bar2 button { background: var(--paper); border: 0; height: 24px; padding: 0 8px; cursor: pointer; text-transform: uppercase; letter-spacing: .07em; font: inherit; font-size: 11px; }
+  .view .bar2 button:hover { color: var(--dim); }
+  .body { flex: 1; overflow-y: auto; padding: 18px 24px 32px; }
+  #c-no { font: 11px var(--mono); color: var(--faint); }
+  #c-title { font-size: 28px; font-weight: 300; line-height: 1.12; letter-spacing: -.01em; margin-top: 4px; }
+  #c-by { font-size: 15px; color: var(--dim); margin-top: 6px; }
+  #c-acts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 14px; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+  #c-acts a, #c-acts button { background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  #c-acts a:hover, #c-acts button:hover { color: var(--dim); }
+  #c-acts .rm { color: var(--err); margin-inline-start: auto; }
+  .card-sec { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 12px; }
+  .card-sec h3 { font: 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--dim); font-weight: 400; margin-bottom: 8px; }
+  dl { display: grid; grid-template-columns: 112px 1fr; }
+  dt, dd { padding: 5px 0; border-bottom: 1px solid var(--hair); font-size: 14px; }
+  dt { font: 10.5px/22px var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--dim); }
+  dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+  dd a { text-decoration: none; border-bottom: 1px solid var(--line); }
+  #c-desc { font-size: 15px; line-height: 1.5; color: var(--ink); }
+  .styles { display: flex; gap: 16px; font: 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+  .styles button { background: none; border: 0; padding: 2px 0; border-bottom: 1px solid transparent; color: var(--dim); cursor: pointer; }
+  .styles button[aria-pressed=true] { color: var(--ink); border-color: var(--ink); }
+  .styles .copy { margin-inline-start: auto; color: var(--ink); }
+  #c-cite { font-size: 15px; line-height: 1.5; padding: 10px 12px; background: var(--lift); border: 1px solid var(--hair); overflow-wrap: anywhere; }
+
+  #toast { position: fixed; bottom: 18px; left: 50%; transform: translate(-50%, 10px); background: var(--ink); color: var(--wall); padding: 7px 14px;
+           font: 11.5px var(--mono); opacity: 0; transition: opacity .2s, transform .2s; z-index: 20; pointer-events: none; max-width: calc(100vw - 32px); }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 860px) {
+    body { display: block; height: auto; overflow: auto; }
+    #rail { border-inline-end: 0; border-bottom: 1px solid var(--line); padding: 20px 16px; }
+    #status { margin-top: 0; }
+    #tools { padding: 16px; }
+    .filters { margin-inline-start: 0; width: 100%; }
+    #q { flex: 1; }
+    #scroll { padding: 18px 16px 32px; overflow: visible; }
+    #plates { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 24px 14px; }
+    .star { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<aside id="rail">
+  <header>
+    <h1>Art <em>Downloader</em></h1>
+    <p class="sub">Keeps a museum's full-size image together with its record and three ready citations.</p>
+  </header>
+
+  <section>
+    <h2>Add a work <span class="n">01</span></h2>
+    <form class="entry" id="add">
+      <input id="url" type="url" placeholder="Paste an artwork's page" autocomplete="off" spellcheck="false" aria-label="Artwork page address">
+      <button class="go" id="add-go">Fetch</button>
+    </form>
+    <p class="help">Finds the largest image the page offers, then reads the title, maker, date, medium and licence.</p>
+    <details class="sources">
+      <summary>Where it works</summary>
+      <ul>
+        <li>The Met</li><li>Rijksmuseum</li><li>Cleveland</li><li>Art Institute of Chicago</li>
+        <li>MFA Boston</li><li>Smithsonian</li><li>Cooper Hewitt</li><li>National Gallery</li>
+        <li>WikiArt</li><li>Wikimedia</li><li>and most pages that carry an image</li>
+      </ul>
+    </details>
+  </section>
+
+  <section>
+    <h2>Search a subject <span class="n">02</span></h2>
+    <form class="entry" id="find">
+      <input id="subject" type="text" placeholder="dragon, griffin, a saint…" autocomplete="off" spellcheck="false" aria-label="Subject">
+      <button class="go" id="find-go">Search</button>
+    </form>
+    <div class="row">
+      <label><div class="lab">Up to</div>
+        <select id="limit"><option>25</option><option>50</option><option selected>100</option><option>200</option></select></label>
+      <label><div class="lab">Warn below</div>
+        <input id="minimum" type="number" min="0" max="200" value="10"></label>
+    </div>
+    <p class="help">Searches the open-access collections and keeps only works whose title names the subject. They land on <b>a shelf of their own</b>.</p>
+  </section>
+
+  <section id="work" aria-live="polite">
+    <h2><span id="work-title">Working</span> <span class="n" id="work-n"></span></h2>
+    <div class="bar idle" id="bar"><i></i></div>
+    <ul id="log"></ul>
+    <div id="found"></div>
+    <p id="short"></p>
+  </section>
+
+  <section>
+    <h2>Take it along <span class="n">03</span></h2>
+    <div class="carry">
+      <button id="x-gallery"><b>Gallery page</b><span>HTML</span>
+        <small>Writes each record into its image's own metadata, and makes a gallery.html that opens anywhere.</small></button>
+      <button id="x-zip"><b>Export the collection</b><span>ZIP</span>
+        <small>Images and records together, to move to another computer.</small></button>
+      <button id="x-import"><b>Import a collection</b><span>ZIP</span>
+        <small>Adds what's new from an exported ZIP; nothing is listed twice.</small></button>
+    </div>
+    <input type="file" id="import-file" accept=".zip" hidden>
+  </section>
+
+  <p id="status" class="wait"><i></i><span id="status-text">Looking for the app…</span></p>
+</aside>
+
+<main>
+  <div id="tools">
+    <p id="count"></p>
+    <nav id="shelves" aria-label="Shelves"></nav>
+    <div class="filters">
+      <input id="q" type="search" placeholder="Find in the collection" aria-label="Find in the collection">
+      <select id="sort" aria-label="Order">
+        <option value="newest">Newest</option><option value="oldest">Oldest</option>
+        <option value="title">Title</option><option value="artist">Maker</option>
+      </select>
+    </div>
+  </div>
+  <div id="scroll">
+    <div id="plates"></div>
+    <p id="nothing"><b>Nothing here yet</b><span id="nothing-text">Paste an artwork's page, or search a subject.</span></p>
+  </div>
+</main>
+
+<div id="veil"></div>
+<aside id="card" aria-hidden="true" aria-labelledby="c-title">
+  <div class="view">
+    <div class="bar2"><button id="c-star" aria-pressed="false">☆ Star</button><button id="c-close">Close</button></div>
+    <img id="c-img" alt="">
+  </div>
+  <div class="body">
+    <p id="c-no"></p>
+    <h2 id="c-title" style="display:block"></h2>
+    <p id="c-by"></p>
+    <div id="c-acts"></div>
+    <div class="card-sec"><h3>Record</h3><dl id="c-rec"></dl></div>
+    <div class="card-sec" id="c-desc-sec"><h3>Description</h3><p id="c-desc"></p></div>
+    <div class="card-sec" id="c-cite-sec">
+      <div class="styles" id="c-styles"></div>
+      <p id="c-cite"></p>
+    </div>
+  </div>
+</aside>
+
+<div id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+let entries = [];       // in download order; the accession number is the position here
+let shelf = "";         // "" all, "*" starred, "~" pasted, else a search folder
+let open = null;        // the entry on the card
+let live = false;       // the Mac app answered; otherwise the page shows the sample collection
+let ws = null, fails = 0, busy = null, total = 0;
+
+/* ---------- the record ---------- */
+const relOf = e => (e.image_rel_path || "").replace(/\\/g, "/");
+const folderOf = e => { const r = relOf(e), i = r.indexOf("/"); return i > 0 ? r.slice(0, i) : ""; };
+const srcOf = e => {
+  const r = relOf(e) || (e.local_file || "").replace(/\\/g, "/").split("/").pop();
+  if (!r) return "";
+  return (live ? "/images/" : "sample/") + r.split("/").map(encodeURIComponent).join("/");
+};
+const noOf = e => "No. " + String(entries.indexOf(e) + 1).padStart(3, "0");
+const known = v => v && !/^unknown/i.test(v);
+// "Martin Schongauer (German, c. 1450–1491)" reads as just the name on a plate
+const maker = e => known(e.artist) ? e.artist : "Maker unknown";
+const shortMaker = e => known(e.artist) ? e.artist.replace(/\s*\(.*$/, "") : "Maker unknown";
+const dateOf = e => known(e.date_created) ? e.date_created : "";
+const houseOf = e => e.museum_or_source || e.source_host || "";
+
+/* ---------- shelves + plates ---------- */
+function shelves() {
+  const counts = new Map();
+  for (const e of entries) { const f = folderOf(e); if (f) counts.set(f, (counts.get(f) || 0) + 1); }
+  const pasted = entries.filter(e => !folderOf(e)).length, starred = entries.filter(e => e.starred).length;
+  const list = [["", "All", entries.length], ["*", "Starred", starred]];
+  for (const [f, n] of [...counts].sort()) list.push([f, f.replace(/-/g, " "), n]);
+  if (counts.size && pasted) list.push(["~", "Pasted", pasted]);
+  if (![...list].some(([k]) => k === shelf)) shelf = "";
+  $("shelves").innerHTML = list.map(([k, label, n]) =>
+    `<button data-k="${esc(k)}" aria-pressed="${k === shelf}">${esc(label)}<sup>${n}</sup></button>`).join("");
+}
+$("shelves").addEventListener("click", ev => {
+  const b = ev.target.closest("button"); if (!b) return;
+  shelf = b.dataset.k; shelves(); plates();
+});
+
+function plates() {
+  const q = $("q").value.trim().toLowerCase();
+  let list = entries.filter(e => {
+    if (shelf === "*" && !e.starred) return false;
+    if (shelf === "~" && folderOf(e)) return false;
+    if (shelf && shelf !== "*" && shelf !== "~" && folderOf(e) !== shelf) return false;
+    return !q || [e.title, e.artist, e.museum_or_source, e.medium, e.date_created].some(v => (v || "").toLowerCase().includes(q));
+  });
+  const by = $("sort").value;
+  if (by === "newest") list = list.slice().reverse();
+  if (by === "title") list = list.slice().sort((a, b) => (a.title || "").localeCompare(b.title || ""));
+  if (by === "artist") list = list.slice().sort((a, b) => shortMaker(a).localeCompare(shortMaker(b)));
+
+  const n = entries.length;
+  $("count").innerHTML = n ? `${n} <em>${n === 1 ? "work" : "works"}</em>` : "<em>An empty register</em>";
+  $("nothing").style.display = list.length ? "none" : "block";
+  $("nothing-text").textContent = n ? "No work matches." : "Paste an artwork's page, or search a subject.";
+  $("plates").replaceChildren(...list.map(plate));
+}
+$("q").addEventListener("input", plates);
+$("sort").addEventListener("change", plates);
+
+function plate(e) {
+  const el = document.createElement("div");
+  el.className = "plate"; el.tabIndex = 0; el.setAttribute("role", "button");
+  el.setAttribute("aria-label", e.title || "Untitled");
+  const src = srcOf(e);
+  el.innerHTML =
+    `<div class="mat">${src ? `<img src="${src}" alt="" loading="lazy">` : `<span class="none">no image</span>`}</div>
+     <p class="no"><span>${noOf(e)}</span><span>${esc(houseOf(e).replace(/^The /, ""))}</span></p>
+     <p class="tt">${esc(e.title || "Untitled")}</p>
+     <p class="by">${esc([shortMaker(e), dateOf(e)].filter(Boolean).join(", "))}</p>
+     <button class="star" aria-label="Star" aria-pressed="${!!e.starred}">${e.starred ? "★" : "☆"}</button>`;
+  const img = el.querySelector("img");
+  if (img) img.onerror = () => img.replaceWith(Object.assign(document.createElement("span"), { className: "none", textContent: "file missing" }));
+  el.querySelector(".star").addEventListener("click", ev => { ev.stopPropagation(); star(e); });
+  el.addEventListener("click", () => show(e));
+  el.addEventListener("keydown", ev => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); show(e); } });
+  return el;
+}
+
+function redraw() { shelves(); plates(); if (open) fill(open); }
+
+/* ---------- star / remove ---------- */
+async function star(e) {
+  if (live) {
+    const r = await fetch("/api/star", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source_url: e.source_url }) });
+    e.starred = (await r.json()).starred;
+  } else e.starred = !e.starred;
+  redraw();
+}
+async function remove(e) {
+  if (!confirm(`Take “${e.title}” out of the collection?\nThe image file stays on disk.`)) return;
+  if (live) {
+    const r = await fetch("/api/entry", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source_url: e.source_url }) });
+    if (!r.ok) return toast("Couldn't remove it");
+  }
+  entries = entries.filter(x => x !== e);
+  hide(); redraw(); toast("Removed from the collection");
+}
+
+/* ---------- the card ---------- */
+let style = "APA_7";
+const STYLE_NAMES = { APA_7: "APA", MLA_9: "MLA", Chicago_17: "Chicago" };
+
+function show(e) { open = e; fill(e); $("card").classList.add("on"); $("veil").classList.add("on"); $("card").setAttribute("aria-hidden", "false"); $("c-close").focus(); }
+function hide() { open = null; $("card").classList.remove("on"); $("veil").classList.remove("on"); $("card").setAttribute("aria-hidden", "true"); }
+$("c-close").onclick = hide; $("veil").onclick = hide;
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && open) hide(); });
+$("c-star").onclick = () => open && star(open);
+
+function fill(e) {
+  $("c-img").src = srcOf(e); $("c-img").alt = e.title || "";
+  $("c-no").textContent = noOf(e) + (folderOf(e) ? " · shelf: " + folderOf(e).replace(/-/g, " ") : "");
+  $("c-title").textContent = e.title || "Untitled";
+  $("c-by").textContent = [maker(e), dateOf(e)].filter(Boolean).join(" · ");
+  $("c-star").textContent = e.starred ? "★ Starred" : "☆ Star";
+  $("c-star").setAttribute("aria-pressed", !!e.starred);
+
+  const acts = [];
+  if (live && e.local_file) acts.push(`<button data-a="file">Show the file</button>`);
+  if (e.source_url) acts.push(`<a href="${esc(e.source_url)}" target="_blank" rel="noopener">Source page</a>`);
+  if (e.image_url) acts.push(`<a href="${esc(e.image_url)}" target="_blank" rel="noopener">Original image</a>`);
+  acts.push(`<button data-a="rm" class="rm">Remove</button>`);
+  $("c-acts").innerHTML = acts.join("");
+  $("c-acts").onclick = ev => {
+    const a = ev.target.dataset.a;
+    if (a === "rm") remove(e);
+    if (a === "file") post("/open-file", { filename: relOf(e) || e.local_file.split("/").pop() });
+  };
+
+  const px = e.image_width ? `${e.image_width} × ${e.image_height} px` : "";
+  const kb = e.file_size_kb ? (e.file_size_kb > 1024 ? (e.file_size_kb / 1024).toFixed(1) + " MB" : e.file_size_kb + " KB") : "";
+  const rows = [
+    ["Medium", e.medium], ["Dimensions", e.dimensions], ["Held by", houseOf(e)], ["Credit", e.credit_line],
+    ["Licence", e.license], ["Image", [px, kb].filter(Boolean).join(", ")], ["Fetched", e.download_date],
+  ].filter(([, v]) => v);
+  $("c-rec").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v)}</dd>`).join("");
+
+  $("c-desc-sec").style.display = e.description ? "" : "none";
+  $("c-desc").textContent = e.description || "";
+
+  const cites = e.citations || {};
+  $("c-cite-sec").style.display = Object.keys(cites).length ? "" : "none";
+  if (!cites[style]) style = Object.keys(cites)[0];
+  $("c-styles").innerHTML = Object.keys(cites).map(k =>
+    `<button data-s="${k}" aria-pressed="${k === style}">${STYLE_NAMES[k] || k.replace("_", " ")}</button>`).join("") +
+    `<button class="copy" data-copy>Copy</button>`;
+  // the citations mark titles *like this*; show and copy them as real italics
+  const html = esc(cites[style] || "").replace(/\*([^*]+)\*/g, "<i>$1</i>");
+  $("c-cite").innerHTML = html;
+  $("c-styles").onclick = ev => {
+    const b = ev.target.closest("button"); if (!b) return;
+    if (b.dataset.s) { style = b.dataset.s; fill(e); return; }
+    const plain = (cites[style] || "").replace(/\*([^*]+)\*/g, "$1");
+    const item = window.ClipboardItem ? [new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([plain], { type: "text/plain" }) })] : null;
+    (item ? navigator.clipboard.write(item) : navigator.clipboard.writeText(plain))
+      .then(() => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1600); }, () => toast("Couldn't reach the clipboard"));
+  };
+}
+
+/* ---------- the log ---------- */
+function begin(kind) {
+  busy = kind; total = 0;
+  $("work").classList.add("on");
+  $("work-title").textContent = kind === "search" ? "Searching" : "Fetching";
+  $("work-n").textContent = "";
+  $("log").innerHTML = ""; $("found").className = ""; $("short").className = "";
+  $("bar").classList.toggle("idle", kind !== "search"); $("bar").firstChild.style.width = "0";
+  for (const id of ["url", "subject", "add-go", "find-go", "limit", "minimum"]) $(id).disabled = true;
+}
+function end(title) {
+  busy = null;
+  $("work-title").textContent = title || "Done";
+  for (const id of ["url", "subject", "add-go", "find-go", "limit", "minimum"]) $(id).disabled = false;
+}
+function line(msg, status = "info") {
+  const li = document.createElement("li");
+  li.className = status; li.textContent = msg;
+  $("log").append(li); $("log").scrollTop = $("log").scrollHeight;
+}
+function progress(n, of) {
+  total = Math.max(total, of || 0);
+  $("bar").firstChild.style.width = total ? Math.round(n / total * 100) + "%" : "0";
+  $("work-n").textContent = total ? `${n} / ${total}` : "";
+}
+
+/* ---------- talking to the app ---------- */
+function status(cls, text) { $("status").className = cls; $("status-text").textContent = text; }
+
+function connect() {
+  if (ws && ws.readyState <= 1) return;
+  status("wait", fails ? "Reconnecting…" : "Connecting…");
+  ws = new WebSocket(`ws://${location.host}`);
+  ws.onopen = () => { fails = 0; status("live", "Connected to the app"); };
+  ws.onclose = () => {
+    fails++;
+    status(fails >= 5 ? "lost" : "wait", fails >= 5 ? "The app stopped. Open Art Downloader again, then reload." : "Reconnecting…");
+    if (busy) end("Interrupted");
+    setTimeout(connect, Math.min(2000 * fails, 10000));
+  };
+  ws.onmessage = ev => {
+    let m; try { m = JSON.parse(ev.data); } catch { return; }
+    switch (m.event) {
+      case "history": entries = m.entries || []; redraw(); break;
+      case "step": line(m.msg, m.status); break;
+      case "meta":
+        $("found").className = "on";
+        $("found").innerHTML = `<b>${esc(m.title)}</b><span>${esc([m.artist, m.date_created, m.medium].filter(known).join(" · "))}</span>`;
+        break;
+      case "complete": entries.push(m.entry); redraw(); end("Saved"); toast("Saved: " + m.entry.title); break;
+      case "error": line(m.message, "err"); end("Stopped"); break;
+      case "search_total": progress(0, m.total); break;
+      case "search_progress":
+        progress(m.current || 0, m.total);
+        if (m.entry) { entries.push(m.entry); redraw(); }
+        break;
+      case "search_below_min":
+        $("short").className = "on";
+        $("short").textContent = `Only ${m.found} matching ${m.found === 1 ? "work" : "works"} for “${m.query}”, fewer than the ${m.minimum} you asked for. Nothing unrelated was added.`;
+        break;
+      case "search_complete":
+        end(m.total ? "Done" : "Nothing found");
+        line(`${m.total} ${m.total === 1 ? "work" : "works"} on the shelf “${m.folder.replace(/-/g, " ")}”`, m.total ? "ok" : "info");
+        if (m.total) { shelf = m.folder; redraw(); }
+        break;
+    }
+  };
+}
+const send = msg => {
+  if (!ws || ws.readyState !== 1) { toast("Not connected yet"); return false; }
+  ws.send(JSON.stringify(msg)); return true;
+};
+const post = (url, body) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+
+function demoNote() {
+  $("work").classList.add("on"); $("work-title").textContent = "This is the demo"; $("work-n").textContent = "";
+  $("bar").classList.add("idle"); $("found").className = ""; $("short").className = "";
+  $("log").innerHTML = "";
+  line("Fetching runs in the app on your Mac, where the files are saved. The works shown here are from a real search for “dragon”.");
+}
+
+$("add").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const url = $("url").value.trim();
+  if (!/^https?:\/\//.test(url)) return nudge($("url"));
+  if (!live) return demoNote();
+  if (busy) return;
+  begin("add");
+  if (send({ event: "download", url })) $("url").value = ""; else end("Not connected");
+});
+$("find").addEventListener("submit", ev => {
+  ev.preventDefault();
+  const query = $("subject").value.trim();
+  if (!query) return nudge($("subject"));
+  if (!live) return demoNote();
+  if (busy) return;
+  begin("search");
+  if (send({ event: "search", query, limit: +$("limit").value, minimum: +$("minimum").value || 0 })) $("subject").value = ""; else end("Not connected");
+});
+function nudge(el) { el.focus(); el.animate([{ transform: "translateX(-3px)" }, { transform: "translateX(3px)" }, { transform: "none" }], { duration: 180, iterations: 2 }); }
+
+/* ---------- take it along ---------- */
+async function job(btn, fn) {
+  if (!live) return toast("Exports run in the app on your Mac");
+  if (!entries.length) return toast("Nothing to export yet");
+  btn.disabled = true;
+  try { await fn(); } catch (err) { toast(err.message); } finally { btn.disabled = false; }
+}
+$("x-gallery").onclick = function () {
+  job(this, async () => {
+    toast("Writing the gallery…");
+    const j = await (await fetch("/api/export-gallery", { method: "POST" })).json();
+    if (j.error) throw new Error(j.error);
+    toast(`${j.total} works · metadata written into ${j.embedded} images`);
+    if (j.gallery) post("/open-file", { filename: j.gallery.replace(/\\/g, "/").split("/").pop() });
+  });
+};
+$("x-zip").onclick = function () {
+  job(this, async () => {
+    toast("Packing the collection…");
+    const r = await fetch("/api/export-collection");
+    if (!r.ok) throw new Error(((await r.json().catch(() => ({}))).error) || r.statusText);
+    const name = ((r.headers.get("Content-Disposition") || "").match(/filename="?([^"]+)"?/) || [])[1] || "art-collection.zip";
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(await r.blob()), download: name });
+    document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+    toast("Saved " + name);
+  });
+};
+$("x-import").onclick = function () { if (!live) return toast("Imports run in the app on your Mac"); $("import-file").click(); };
+$("import-file").addEventListener("change", async ev => {
+  const file = ev.target.files[0]; ev.target.value = "";
+  if (!file) return;
+  const btn = $("x-import"); btn.disabled = true; toast("Importing…");
+  try {
+    const j = await (await fetch("/api/import-collection", { method: "POST", headers: { "Content-Type": "application/zip" }, body: await file.arrayBuffer() })).json();
+    if (j.error) throw new Error(j.error);
+    toast(`${j.added} new ${j.added === 1 ? "work" : "works"} added`);
+  } catch (err) { toast("Import failed: " + err.message); } finally { btn.disabled = false; }
+});
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) { $("toast").textContent = msg; $("toast").classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => $("toast").classList.remove("on"), 3000); }
+
+/* ---------- start: the app, or the sample ---------- */
+(async () => {
+  try {
+    const r = await fetch("/api/hello", { cache: "no-store" });
+    live = r.ok && (await r.json()).app === "art-downloader";
+  } catch { live = false; }
+  if (live) return connect();
+  status("", "Demo · the downloader itself runs on your Mac");
+  try { entries = await (await fetch("sample/collection.json")).json(); } catch { entries = []; }
+  redraw();
+})();
+</script>
+</body>
+</html>

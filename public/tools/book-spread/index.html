@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spread Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- a book's own type: Adobe Jenson in its optical sizes, Narkiss Tam for Hebrew (Adobe kit); Plex Mono from the portfolio for labels -->
+<link rel="stylesheet" href="https://use.typekit.net/iui2oiq.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.3/build/mp4-muxer.min.js"></script>
+<style>
+  /* the panel is a cool violet with light type; the main actions and chosen options are solid white so they never sink into it.
+     "Grey" turns the panel down to stone with dark actions. The book always sits on neutral graphite. */
+  :root {
+    --paper: #5b4ccf; --ink: #f7f5ff; --dim: rgba(247,245,255,.76); --faint: rgba(247,245,255,.52); --line: rgba(247,245,255,.22);
+    --edge: rgba(247,245,255,.55); --tray: rgba(20,10,80,.22); --field: rgba(255,255,255,.12); --hover: rgba(255,255,255,.12);
+    --accent: #ffffff; --on-accent: #3b2d9e; --cta-hover: #ece8ff; --em: #cdc5ff; --r: 10px;
+    --stage: #33322f; --stage-line: #45443f; --mark: #7d7b75; --stage-ink: #c9c7c1; --stage-dim: #8a8882; --chip: rgba(51,50,47,.88);
+    --serif: "adobe-jenson-pro", "narkiss-tam", Georgia, serif;
+    --display: "adobe-jenson-pro-display", "narkiss-tam", Georgia, serif;
+    --subhead: "adobe-jenson-pro-subhead", "narkiss-tam", Georgia, serif;
+    --mono: "IBM Plex Mono", "narkiss-tam-condensed", ui-monospace, monospace;
+  }
+  :root[data-tone=grey] {
+    --paper: #d9d8d3; --ink: #34332f; --dim: #6e6c67; --faint: #95938d; --line: #b8b6b0;
+    --edge: #8f8d86; --tray: #cbcac4; --field: #e5e4e0; --hover: #cfcec9;
+    --accent: #34332f; --on-accent: #eceae6; --cta-hover: #4a4844; --em: #6e6c67;
+  }
+  body, #panel, h1 em, .seg, .seg button, .btn, input[type=number] { transition: background-color .3s, color .3s, border-color .3s; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { background: var(--paper); color: var(--ink); font: 400 15px/1.45 var(--serif);
+         display: grid; grid-template-columns: minmax(0, 1fr) 328px; height: 100vh; overflow: hidden;
+         -webkit-font-smoothing: antialiased; }
+  button, input { font: inherit; color: inherit; }
+
+  /* ---------- stage ---------- */
+  #stage { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--stage); }
+  #view { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; cursor: grab; }
+  #view.grabbing { cursor: grabbing; }
+  #frame { position: relative; transform-origin: center center; will-change: transform; }
+  canvas#cv { display: block; }
+  /* crop marks sit just outside the canvas, like a proof */
+  .crop { position: absolute; width: 18px; height: 18px; pointer-events: none; }
+  .crop::before, .crop::after { content: ""; position: absolute; background: var(--mark); }
+  .crop::before { width: 14px; height: 1px; } .crop::after { width: 1px; height: 14px; }
+  .crop.tl { left: -22px; top: -22px; } .crop.tl::before { top: 18px; left: 0; } .crop.tl::after { left: 18px; top: 0; }
+  .crop.tr { right: -22px; top: -22px; } .crop.tr::before { top: 18px; right: 0; } .crop.tr::after { right: 18px; top: 0; }
+  .crop.bl { left: -22px; bottom: -22px; } .crop.bl::before { bottom: 18px; left: 0; } .crop.bl::after { left: 18px; bottom: 0; }
+  .crop.br { right: -22px; bottom: -22px; } .crop.br::before { bottom: 18px; right: 0; } .crop.br::after { right: 18px; bottom: 0; }
+  #stage.drag::after { content: ""; position: absolute; inset: 14px; border: 1px dashed var(--mark); pointer-events: none; z-index: 3; }
+  #empty { color: var(--stage-dim); text-align: center; max-width: 320px; }
+  #empty b { display: block; color: var(--stage-ink); font: 400 28px var(--display); line-height: 1.2; margin-bottom: 6px; }
+  .chip { position: absolute; z-index: 2; display: flex; align-items: center; gap: 2px; padding: 3px;
+          background: var(--chip); border: 1px solid var(--stage-line); border-radius: var(--r); color: var(--stage-ink); }
+  #hud { bottom: 12px; inset-inline-start: 12px; }
+  #hud button { background: none; border: 0; border-radius: 7px; height: 24px; min-width: 26px; padding: 0 7px; cursor: pointer; color: var(--stage-ink);
+                font: 11px var(--mono); text-transform: uppercase; letter-spacing: .06em; }
+  #hud button:hover { color: #fff; background: rgba(255,255,255,.08); }
+  #hud .z { font: 11px var(--mono); min-width: 46px; text-align: center; color: var(--stage-dim); }
+  #dims { top: 12px; inset-inline-start: 12px; padding: 3px 8px; font: 11px var(--mono); color: var(--stage-dim); }
+
+  #strip { flex: none; display: flex; gap: 10px; padding: 10px 16px 8px; overflow-x: auto; border-top: 1px solid var(--stage-line); background: var(--stage); }
+  #strip:empty { display: none; }
+  .th { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: 0; padding: 0; cursor: pointer; }
+  .th canvas { display: block; height: 52px; width: auto; border-radius: 4px; outline: 1px solid var(--stage-line); outline-offset: 2px; opacity: .5; }
+  .th span { font: italic 13px var(--serif); color: var(--stage-dim); }
+  .th[aria-current=true] canvas { opacity: 1; outline-color: var(--stage-ink); }
+  .th[aria-current=true] span { color: var(--stage-ink); }
+
+  /* ---------- panel: set like a colophon ---------- */
+  #panel { overflow-y: auto; padding: 22px 24px 32px; background: var(--paper); color: var(--ink); }
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+  h1 { font: 400 40px/1 var(--display); letter-spacing: -.01em; white-space: nowrap; }
+  h1 em { font-style: italic; color: var(--em); }
+  :lang(he) h1 em { font-style: normal; }
+  .sub { color: var(--dim); font-size: 15px; line-height: 1.4; margin-top: 10px; max-width: 24ch; }
+  .hctl { flex: none; display: flex; gap: 12px; align-items: center; margin-top: 4px; }
+  .hbtn { background: none; border: 0; border-bottom: 1px solid var(--ink); height: 22px; padding: 0 2px; font: 500 11px var(--mono);
+          text-transform: uppercase; letter-spacing: .06em; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .hbtn:hover { color: var(--dim); border-color: var(--dim); }
+  #tone::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--em); transition: background-color .3s; }
+
+  section { border-top: 1px solid var(--line); padding: 14px 0 18px; }
+  /* a running head: the title on the reading side, the folio on the far one */
+  h2 { display: flex; gap: 10px; align-items: baseline; font: 400 24px/1.1 var(--subhead); margin-bottom: 14px; }
+  h2 .n { order: 2; margin-inline-start: auto; font: 11px var(--mono); color: var(--faint); }
+  .field { margin-bottom: 14px; }
+  .lab { display: flex; justify-content: space-between; align-items: baseline; font: 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--dim); margin-bottom: 6px; }
+  .lab output { font: 11px var(--mono); color: var(--ink); letter-spacing: 0; }
+  .help { font-size: 14px; color: var(--dim); margin-top: 6px; line-height: 1.4; }
+  .note { font-size: 14px; font-style: italic; color: var(--dim); margin-top: 8px; line-height: 1.4; }
+  :lang(he) .note { font-style: normal; }
+  /* Hebrew labels have no capitals to carry them, so they sit a size up */
+  :lang(he) .lab, :lang(he) details summary, :lang(he) .btn, :lang(he) .inline { font-family: "narkiss-tam-condensed", sans-serif; font-size: 14px; letter-spacing: .02em; }
+  :lang(he) .lab output, :lang(he) .inline input { font-family: var(--mono); }
+  /* in Hebrew, Narkiss Tam leads the stack instead of waiting behind Jenson for missing glyphs */
+  :lang(he) { --serif: "narkiss-tam", "adobe-jenson-pro", sans-serif; --display: "narkiss-tam", "adobe-jenson-pro-display", sans-serif;
+              --subhead: "narkiss-tam", "adobe-jenson-pro-subhead", sans-serif; }
+  /* Narkiss Tam runs larger than Jenson: Hebrew text sits a step down */
+  :lang(he) body { font-size: 14px; } :lang(he) h1 { font-size: 34px; } :lang(he) h2 { font-size: 21px; }
+  :lang(he) .help, :lang(he) .note, :lang(he) .sub { font-size: 13px; } :lang(he) .seg button, :lang(he) label.chk { font-size: 14px; }
+
+  .btn { display: block; width: 100%; height: 38px; background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); border-radius: var(--r); cursor: pointer;
+         font: 500 11px var(--mono); text-transform: uppercase; letter-spacing: .07em; }
+  .btn:hover { background: var(--cta-hover); border-color: var(--cta-hover); }
+  .btn.ghost { background: none; color: var(--ink); border-color: var(--edge); }
+  .btn.ghost:hover { background: var(--hover); border-color: var(--ink); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.ghost:disabled:hover { background: none; border-color: var(--edge); }
+  .row { display: flex; gap: 6px; }
+  .row > * { flex: 1; }
+  .row .btn { white-space: nowrap; padding: 0 6px; letter-spacing: .03em; }
+
+  /* the chosen option is lifted a shade and underlined, not inverted */
+  /* a tray of options; the chosen one is a pill in the accent colour */
+  .seg { display: flex; gap: 2px; padding: 3px; background: var(--tray); border-radius: var(--r); }
+  .seg button { flex: 1; height: 28px; background: none; border: 0; border-radius: 7px; cursor: pointer;
+                font-size: 15px; color: var(--dim); padding: 0 4px; white-space: nowrap; }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed=true] { background: var(--accent); color: var(--on-accent); }
+
+  label.chk { display: flex; gap: 9px; align-items: flex-start; font-size: 15px; cursor: pointer; margin-bottom: 9px; }
+  label.chk input { accent-color: var(--accent); margin-top: 4px; }
+  .inline { display: flex; align-items: center; gap: 6px; font: 11px var(--mono); color: var(--dim); margin: 2px 0 0; }
+  input[type=number] { width: 58px; height: 28px; background: var(--field); border: 1px solid var(--edge); border-radius: 7px; text-align: center; font: 12px var(--mono); }
+
+  input[type=range] { width: 100%; -webkit-appearance: none; appearance: none; background: none; height: 14px; }
+  input[type=range]::-webkit-slider-runnable-track { height: 2px; border-radius: 1px; background: var(--edge); }
+  input[type=range]::-moz-range-track { height: 2px; border-radius: 1px; background: var(--edge); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--accent); border: 2px solid var(--paper); margin-top: -6px; border-radius: 50%; }
+  input[type=range]::-moz-range-thumb { width: 12px; height: 12px; background: var(--accent); border: 2px solid var(--paper); border-radius: 50%; }
+
+  .swatches { display: flex; gap: 6px; align-items: center; }
+  .sw { width: 28px; height: 28px; border: 1px solid rgba(0,0,0,.12); border-radius: 50%; cursor: pointer; padding: 0; }
+  .sw[aria-pressed=true] { outline: 1.5px solid var(--accent); outline-offset: 2px; }
+  .sw.custom { position: relative; overflow: hidden; background: conic-gradient(#c8695a, #cdb76a, #7fa07a, #6f9aa3, #7a77a8, #a8739a, #c8695a); }
+  .sw.custom input { position: absolute; inset: -6px; opacity: 0; cursor: pointer; }
+
+  details summary { cursor: pointer; font: 10.5px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--dim); list-style: none; padding: 4px 0; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before { content: "+ "; }
+  details[open] summary::before { content: "− "; }
+  details summary:hover { color: var(--ink); }
+  details .inner { padding-top: 10px; }
+
+  #status { font: italic 14px var(--serif); color: var(--dim); min-height: 18px; margin-top: 10px; }
+  #nav { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+  #nav button { width: 34px; height: 28px; background: none; border: 1px solid var(--edge); border-radius: 7px; cursor: pointer; font-size: 16px; }
+  #nav button:hover { border-color: var(--ink); background: var(--hover); }
+  #count { flex: 1; text-align: center; font: italic 16px var(--serif); color: var(--dim); }
+  :focus-visible { outline: 1.5px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 800px) {
+    body { grid-template-columns: 1fr; grid-template-rows: 58vh auto; height: auto; overflow: auto; }
+    #panel { border-inline-start: 0; border-top: 1px solid var(--line); overflow: visible; padding: 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="view">
+    <div id="empty"><b data-i="empty"></b><span data-i="emptySub"></span></div>
+    <div id="frame" hidden>
+      <canvas id="cv"></canvas>
+      <i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
+    </div>
+    <div class="chip" id="dims" dir="ltr" hidden></div>
+    <div class="chip" id="hud" hidden>
+      <button id="zOut" aria-label="−">−</button><div class="z" id="zVal">100%</div><button id="zIn" aria-label="+">+</button>
+      <button id="zFit" data-i="fit"></button><button id="z100">1:1</button>
+    </div>
+  </div>
+  <div id="strip"></div>
+</div>
+
+<aside id="panel">
+  <header>
+    <div><h1><span data-i="titleA"></span> <em data-i="titleB"></em></h1><p class="sub" data-i="sub"></p></div>
+    <div class="hctl"><button id="tone" class="hbtn"></button><button id="lang" class="hbtn"></button></div>
+  </header>
+
+  <section>
+    <h2><span class="n">01</span><span data-i="s1"></span></h2>
+    <button class="btn" id="pick" data-i="open"></button>
+    <p class="note" id="sampleNote" data-i="sampleNote"></p>
+    <div id="srcGrp" style="margin-top:14px">
+      <div class="field">
+        <div class="lab"><span data-i="dir"></span></div>
+        <div class="seg"><button id="dRtl" data-i="rtl"></button><button id="dLtr" data-i="ltr"></button></div>
+        <p class="help" data-i="dirHelp"></p>
+      </div>
+      <div class="field">
+        <div class="lab"><span data-i="source"></span></div>
+        <div class="seg"><button id="sAuto" data-i="auto"></button><button id="sSpread" data-i="spreads"></button><button id="sSingle" data-i="singles"></button></div>
+        <p class="help" id="detNote"></p>
+      </div>
+      <label class="chk"><input type="checkbox" id="trim"><span><span data-i="trim"></span><span class="help" style="display:block;margin-top:1px" data-i="trimHelp"></span></span></label>
+      <label class="chk"><input type="checkbox" id="bleedOn"><span data-i="bleed"></span></label>
+      <div class="inline"><input type="number" id="bleed" value="3" min="0" max="20" step="0.5"><span data-i="mm"></span> · <input type="number" id="dpi" value="300" min="72" max="1200"> DPI</div>
+      <p class="help" data-i="dpiHelp"></p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span><span data-i="s2"></span></h2>
+    <div class="field">
+      <div class="lab"><span data-i="preset"></span></div>
+      <div class="seg" id="presets"><button data-p="flat" data-i="flat"></button><button data-p="soft" data-i="soft"></button><button data-p="deep" data-i="deep"></button></div>
+    </div>
+    <div class="field">
+      <div class="lab"><span data-i="view"></span></div>
+      <div class="seg"><button id="vFlat" data-i="straight"></button><button id="vAngle" data-i="angled"></button></div>
+    </div>
+    <div class="field">
+      <div class="lab"><span data-i="show"></span></div>
+      <div class="seg"><button id="dSpread" data-i="spreadV"></button><button id="dSingle" data-i="singleV"></button></div>
+      <label class="chk" id="coverWrap" style="margin-top:8px"><input type="checkbox" id="cover" checked><span data-i="cover"></span></label>
+    </div>
+    <div class="field">
+      <div class="lab"><span data-i="surface"></span></div>
+      <div class="swatches" id="bgs"></div>
+    </div>
+    <details>
+      <summary data-i="fine"></summary>
+      <div class="inner" id="sliders"></div>
+    </details>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span><span data-i="s3"></span></h2>
+    <div class="row" style="margin-bottom:6px"><button class="btn ghost" id="dl" data-i="png" disabled></button><button class="btn ghost" id="dlAll" data-i="zip" disabled></button></div>
+    <div class="field" style="margin-top:14px">
+      <div class="lab"><span data-i="transition"></span></div>
+      <div class="seg" id="trans"><button data-t="cut" data-i="cut"></button><button data-t="fade" data-i="fade"></button><button data-t="slide" data-i="slide"></button><button data-t="turn" data-i="turn"></button></div>
+    </div>
+    <div class="field">
+      <div class="lab"><span data-i="hold"></span><output id="vH">2.0s</output></div>
+      <input type="range" id="hd" min="5" max="80" value="20">
+    </div>
+    <div class="field">
+      <div class="seg" id="res"><button data-h="720">720p</button><button data-h="1080">1080p</button><button data-h="1440">1440p</button></div>
+    </div>
+    <div class="row"><button class="btn ghost" id="play" data-i="preview"></button><button class="btn" id="rec" data-i="rec" disabled></button></div>
+    <p class="note" id="fmtNote"></p>
+    <div id="nav"><button id="prev" aria-label="previous">‹</button><div id="count" dir="ltr">—</div><button id="next" aria-label="next">›</button></div>
+    <div id="status" role="status"></div>
+  </section>
+</aside>
+
+<script>
+/* ---------- words ---------- */
+const T = {
+  en: {
+    title: "Spread Mockup", titleA: "Spread", titleB: "Mockup", sub: "Book spreads on a surface, at the file's own resolution.",
+    empty: "Drop a PDF or images here", emptySub: "Spreads or single pages, both work.", fit: "Fit",
+    s1: "Book", open: "Open PDF or images", sampleNote: "Showing Aki Yamin's book My Life Is a Beautiful Attack as the sample. Drop your own PDF anywhere on the page.", tonePurple: "Purple", toneGrey: "Grey",
+    dir: "Reading direction", rtl: "Right to left", ltr: "Left to right", dirHelp: "Hebrew and Arabic books open to the left, so the pages pair up the other way.",
+    source: "The file holds", auto: "Detect", spreads: "Spreads", singles: "Pages",
+    det: "Found {s} spreads and {p} single pages.",
+    trim: "Trim empty border", trimHelp: "For exports with a blank border around every page.",
+    bleed: "Remove bleed", mm: "mm", dpiHelp: "DPI only matters for images; a PDF carries its own size.",
+    s2: "Look", preset: "Depth", flat: "Flat", soft: "Soft", deep: "Deep", view: "View", straight: "Straight on", angled: "Angled",
+    show: "Show", spreadV: "Spreads", singleV: "Single pages", cover: "First and last page on their own",
+    surface: "Surface", fine: "Fine-tune",
+    gs: "Gutter shadow", gw: "Shadow width", cu: "Page curve", sp: "Spine line", sh: "Book shadow", ang: "Angle", vg: "Vignette", gn: "Grain", pd: "Margin",
+    s3: "Export", png: "This spread · PNG", zip: "All · ZIP", transition: "Video transition", cut: "Cut", fade: "Fade", slide: "Slide", turn: "Turn",
+    hold: "Seconds per spread", preview: "Preview", rec: "Export video",
+    fast: "MP4, rendered faster than real time.", slow: "{f}, recorded in real time: the preview plays while it records.", novideo: "This browser can't make video.",
+    loading: "Loading…", rendering: "Rendering PDF {a}/{b}", counts: "{p} pages · {v} views", saving: "Saving {a}/{b}", zipped: "Saved {n} images",
+    encoding: "Encoding {n}%", recording: "Recording {n}%", saved: "Video saved", sampleFail: ""
+  },
+  he: {
+    title: "מוקאפ כפולות", titleA: "מוקאפ", titleB: "כפולות", sub: "כפולות של ספר על משטח, ברזולוציה של הקובץ עצמו.",
+    empty: "גררו לכאן PDF או תמונות", emptySub: "כפולות או עמודים בודדים, שניהם עובדים.", fit: "התאמה",
+    s1: "הספר", open: "פתיחת PDF או תמונות", sampleNote: "מוצג ספר של אקי ימין לדוגמה. אפשר לגרור PDF משלכם לכל מקום בעמוד.", tonePurple: "סגול", toneGrey: "אפור",
+    dir: "כיוון קריאה", rtl: "מימין לשמאל", ltr: "משמאל לימין", dirHelp: "ספרים בעברית ובערבית נפתחים שמאלה, ולכן העמודים מתחברים לכפולות בכיוון ההפוך.",
+    source: "הקובץ מכיל", auto: "זיהוי", spreads: "כפולות", singles: "עמודים",
+    det: "זוהו {s} כפולות ו־{p} עמודים בודדים.",
+    trim: "קיצוץ שוליים ריקים", trimHelp: "לקבצים שיש בהם מסגרת ריקה סביב כל עמוד.",
+    bleed: "הורדת בליד", mm: "מ״מ", dpiHelp: "ה־DPI רלוונטי רק לתמונות; ב־PDF הגודל נלקח מהקובץ.",
+    s2: "מראה", preset: "עומק", flat: "שטוח", soft: "רך", deep: "עמוק", view: "זווית", straight: "מלמעלה", angled: "בזווית",
+    show: "תצוגה", spreadV: "כפולות", singleV: "עמוד בודד", cover: "עמוד ראשון ואחרון לבד",
+    surface: "משטח", fine: "כיוונון",
+    gs: "צל הגאטר", gw: "רוחב הצל", cu: "כיפוף העמוד", sp: "קו השדרה", sh: "צל הספר", ang: "זווית", vg: "וינייטה", gn: "גרעין", pd: "שוליים",
+    s3: "ייצוא", png: "הכפולה הזו · PNG", zip: "הכל · ZIP", transition: "מעבר בסרטון", cut: "חיתוך", fade: "עמעום", slide: "החלקה", turn: "דפדוף",
+    hold: "שניות לכל כפולה", preview: "תצוגה מקדימה", rec: "ייצוא סרטון",
+    fast: "MP4, מרונדר מהר מזמן אמת.", slow: "{f}, מוקלט בזמן אמת: התצוגה רצה בזמן ההקלטה.", novideo: "הדפדפן הזה לא יודע ליצור וידאו.",
+    loading: "טוען…", rendering: "מרנדר PDF ‏{a}/{b}", counts: "{p} עמודים · {v} תצוגות", saving: "שומר {a}/{b}", zipped: "נשמרו {n} תמונות",
+    encoding: "מקודד {n}%", recording: "מקליט {n}%", saved: "הסרטון נשמר", sampleFail: ""
+  }
+};
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+let lang = store.get("spread-lang") || ((navigator.language || "").startsWith("he") ? "he" : "en");
+const t = (k, v) => (T[lang][k] || k).replace(/\{(\w+)\}/g, (_, x) => v && x in v ? v[x] : "");
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i]").forEach(el => { el.textContent = t(el.dataset.i); });
+  $("#lang").textContent = lang === "he" ? "EN" : "עב"; applyTone();
+  document.title = t("title");
+  buildSliders(); showFmt(); refreshText();
+}
+
+const $ = s => document.querySelector(s);
+const cv = $("#cv"), ctx = cv.getContext("2d");
+
+/* ---------- state ---------- */
+const PRESETS = {
+  flat: { gs: 0, gw: 8, cu: 0, sp: 0, vg: 0, gn: 0, sh: 30 },
+  soft: { gs: 38, gw: 8, cu: 14, sp: 22, vg: 10, gn: 6, sh: 45 },
+  deep: { gs: 72, gw: 12, cu: 32, sp: 45, vg: 22, gn: 12, sh: 60 }
+};
+const S = Object.assign({ src: "auto", disp: "spread", cover: true, trim: false, bleedOn: false, bleed: 3, dpi: 300, rtl: true,
+  view: "flat", ang: 22, pd: 14, bg: "#4a4945", hold: 2000, vh: 1080, trans: "turn", preset: "soft" }, PRESETS.soft);
+S.rtl = lang === "he";
+const SLIDERS = [["gs", 0, 100], ["gw", 1, 40], ["cu", 0, 60], ["sp", 0, 100], ["sh", 0, 100], ["ang", 5, 40], ["vg", 0, 100], ["gn", 0, 60], ["pd", 0, 60]];
+
+let items = [], pages = [], views = [], MA = .75, PH = 1400, cur = 0, busy = false, isSample = false, lastStatus = null;
+let zoom = 1, panX = 0, panY = 0, lastDims = "";
+
+/* ---------- controls ---------- */
+const press = (sel, on) => document.querySelectorAll(sel).forEach(b => b.setAttribute("aria-pressed", on(b)));
+function buildSliders() {
+  const box = $("#sliders"); box.innerHTML = "";
+  SLIDERS.forEach(([k, min, max]) => {
+    if (k === "ang" && S.view !== "angle") return;
+    const f = document.createElement("div"); f.className = "field";
+    f.innerHTML = '<div class="lab"><span>' + t(k) + '</span><output>' + S[k] + '</output></div><input type="range" min="' + min + '" max="' + max + '" value="' + S[k] + '">';
+    const r = f.querySelector("input"), o = f.querySelector("output");
+    r.oninput = () => { S[k] = +r.value; o.textContent = r.value; if (k in PRESETS.soft) { S.preset = null; showControls(); } preview(); };
+    r.onchange = () => thumbs();
+    box.appendChild(f);
+  });
+}
+function showControls() {
+  press("#presets button", b => b.dataset.p === S.preset);
+  press("#trans button", b => b.dataset.t === S.trans);
+  press("#res button", b => +b.dataset.h === S.vh);
+  $("#dRtl").setAttribute("aria-pressed", S.rtl); $("#dLtr").setAttribute("aria-pressed", !S.rtl);
+  ["auto", "spread", "single"].forEach(x => $("#s" + x[0].toUpperCase() + x.slice(1)).setAttribute("aria-pressed", S.src === x));
+  $("#dSpread").setAttribute("aria-pressed", S.disp === "spread"); $("#dSingle").setAttribute("aria-pressed", S.disp === "single");
+  $("#vFlat").setAttribute("aria-pressed", S.view === "flat"); $("#vAngle").setAttribute("aria-pressed", S.view === "angle");
+  $("#coverWrap").style.display = S.disp === "spread" ? "" : "none";
+  $("#trim").checked = S.trim; $("#bleedOn").checked = S.bleedOn; $("#cover").checked = S.cover;
+}
+document.querySelectorAll("#presets button").forEach(b => b.onclick = () => {
+  S.preset = b.dataset.p; Object.assign(S, PRESETS[b.dataset.p]); buildSliders(); showControls(); preview(); thumbs(); });
+document.querySelectorAll("#trans button").forEach(b => b.onclick = () => { S.trans = b.dataset.t; showControls(); });
+document.querySelectorAll("#res button").forEach(b => b.onclick = () => { S.vh = +b.dataset.h; showControls(); });
+$("#vFlat").onclick = () => { S.view = "flat"; buildSliders(); showControls(); lastDims = ""; preview(); thumbs(); };
+$("#vAngle").onclick = () => { S.view = "angle"; buildSliders(); showControls(); lastDims = ""; preview(); thumbs(); };
+$("#dRtl").onclick = () => { S.rtl = true; showControls(); build(); };
+$("#dLtr").onclick = () => { S.rtl = false; showControls(); build(); };
+$("#sAuto").onclick = () => { S.src = "auto"; showControls(); build(); };
+$("#sSpread").onclick = () => { S.src = "spread"; showControls(); build(); };
+$("#sSingle").onclick = () => { S.src = "single"; showControls(); build(); };
+$("#dSpread").onclick = () => { S.disp = "spread"; showControls(); build(); };
+$("#dSingle").onclick = () => { S.disp = "single"; showControls(); build(); };
+$("#trim").onchange = e => { S.trim = e.target.checked; items.forEach(i => i.box = null); build(); };
+$("#cover").onchange = e => { S.cover = e.target.checked; build(); };
+$("#bleedOn").onchange = e => { S.bleedOn = e.target.checked; build(); };
+$("#bleed").onchange = e => { S.bleed = +e.target.value || 0; build(); };
+$("#dpi").onchange = e => { S.dpi = +e.target.value || 300; items.forEach(i => { if (i.isImg) i.pxPerMM = S.dpi / 25.4; }); build(); };
+$("#hd").oninput = e => { S.hold = +e.target.value * 100; $("#vH").textContent = (S.hold / 1000).toFixed(1) + "s"; };
+$("#lang").onclick = () => { lang = lang === "he" ? "en" : "he"; store.set("spread-lang", lang); applyLang(); };
+// purple by default; "Grey" turns the panel down to stone, and the choice is remembered
+let tone = store.get("spread-tone") === "grey" ? "grey" : "purple";
+function applyTone() { document.documentElement.dataset.tone = tone; $("#tone").textContent = t(tone === "grey" ? "toneGrey" : "tonePurple"); }
+$("#tone").onclick = () => { tone = tone === "grey" ? "purple" : "grey"; store.set("spread-tone", tone); applyTone(); };
+
+const SURFACES = ["#2b2a28", "#4a4945", "#77756f", "#a9a7a1", "#d2d1cc"];
+function buildSurfaces() {
+  const box = $("#bgs"); box.innerHTML = "";
+  SURFACES.forEach(c => {
+    const b = document.createElement("button"); b.className = "sw"; b.style.background = c; b.title = c;
+    b.onclick = () => { S.bg = c; buildSurfaces(); preview(); thumbs(); };
+    b.setAttribute("aria-pressed", S.bg === c); box.appendChild(b);
+  });
+  const c = document.createElement("label"); c.className = "sw custom";
+  c.setAttribute("aria-pressed", !SURFACES.includes(S.bg));
+  c.innerHTML = '<input type="color" value="' + S.bg + '" aria-label="custom">';
+  c.querySelector("input").oninput = e => { S.bg = e.target.value; preview(); };
+  c.querySelector("input").onchange = () => { buildSurfaces(); thumbs(); };
+  box.appendChild(c);
+}
+
+// "next" follows the book: in a right-to-left book the next spread is to the left
+$("#prev").onclick = () => go(cur - 1); $("#next").onclick = () => go(cur + 1);
+addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  const fwd = S.rtl ? "ArrowLeft" : "ArrowRight", back = S.rtl ? "ArrowRight" : "ArrowLeft";
+  if (e.key === fwd) go(cur + 1); if (e.key === back) go(cur - 1);
+  if (e.key === "0") fitView(); if (e.key === "1") setZoom(1);
+});
+function go(i) { if (!views.length || busy) return; cur = (i + views.length) % views.length; markThumb(); preview(); }
+
+/* ---------- zoom & pan ---------- */
+const view = $("#view"), frame = $("#frame");
+function applyView() {
+  frame.style.transform = "translate(" + panX.toFixed(1) + "px," + panY.toFixed(1) + "px) scale(" + zoom + ")";
+  $("#zVal").textContent = Math.round(zoom * 100) + "%";
+  frame.querySelectorAll(".crop").forEach(c => c.style.transform = "scale(" + (1 / zoom) + ")");
+}
+function fitView() {
+  if (!cv.width) return;
+  const r = view.getBoundingClientRect();
+  zoom = Math.min((r.width - 90) / cv.width, (r.height - 90) / cv.height); panX = panY = 0; applyView();
+}
+function setZoom(z, mx, my) {
+  const r = view.getBoundingClientRect(), cx = r.width / 2, cy = r.height / 2;
+  const m = { x: mx == null ? cx : mx - r.left, y: my == null ? cy : my - r.top };
+  const px = (m.x - cx - panX) / zoom, py = (m.y - cy - panY) / zoom;
+  zoom = Math.max(.03, Math.min(8, z)); panX = m.x - cx - px * zoom; panY = m.y - cy - py * zoom; applyView();
+}
+$("#zIn").onclick = () => setZoom(zoom * 1.25); $("#zOut").onclick = () => setZoom(zoom / 1.25);
+$("#zFit").onclick = fitView; $("#z100").onclick = () => setZoom(1);
+view.addEventListener("wheel", e => { if (frame.hidden) return; e.preventDefault(); setZoom(zoom * Math.pow(.9993, e.deltaY), e.clientX, e.clientY); }, { passive: false });
+let dragging = false, lx = 0, ly = 0;
+view.addEventListener("pointerdown", e => { if (frame.hidden || e.target.closest(".chip")) return; dragging = true; lx = e.clientX; ly = e.clientY; view.classList.add("grabbing"); view.setPointerCapture(e.pointerId); });
+view.addEventListener("pointermove", e => { if (!dragging) return; panX += e.clientX - lx; panY += e.clientY - ly; lx = e.clientX; ly = e.clientY; applyView(); });
+addEventListener("pointerup", () => { dragging = false; view.classList.remove("grabbing"); });
+addEventListener("resize", () => { if (!busy && !frame.hidden) fitView(); });
+
+/* ---------- input ---------- */
+const fi = document.createElement("input"); fi.type = "file"; fi.accept = "image/*,application/pdf"; fi.multiple = true;
+fi.onchange = () => load([...fi.files]);
+$("#pick").onclick = () => fi.click();
+document.body.addEventListener("dragover", e => { e.preventDefault(); $("#stage").classList.add("drag"); });
+document.body.addEventListener("dragleave", e => { if (!e.relatedTarget) $("#stage").classList.remove("drag"); });
+document.body.addEventListener("drop", e => { e.preventDefault(); $("#stage").classList.remove("drag"); load([...e.dataTransfer.files]); });
+function say(key, v) { lastStatus = key ? [key, v] : null; $("#status").textContent = key ? t(key, v) : ""; }
+function refreshText() { if (lastStatus) say(...lastStatus); detNote(); }
+
+async function load(files) {
+  files = files.filter(f => f.type.startsWith("image/") || f.type === "application/pdf");
+  if (!files.length) return;
+  say("loading");
+  const out = [];
+  for (const f of files) {
+    if (f.type === "application/pdf") out.push(...await readPDF(f));
+    else out.push({ el: await readImage(URL.createObjectURL(f)), box: null, isImg: true, pxPerMM: S.dpi / 25.4 });
+  }
+  isSample = false; $("#sampleNote").hidden = true;
+  show(out);
+}
+function show(list) {
+  items = list; cur = 0; lastDims = "";
+  $("#empty").hidden = true; frame.hidden = false; $("#hud").hidden = false; $("#dims").hidden = false;
+  build();
+}
+function readImage(src) { return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; }); }
+async function readPDF(f) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  const doc = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise, out = [];
+  for (let p = 1; p <= doc.numPages; p++) {
+    say("rendering", { a: p, b: doc.numPages });
+    const page = await doc.getPage(p), v0 = page.getViewport({ scale: 1 });
+    const vp = page.getViewport({ scale: Math.min(3, 2600 / v0.width) });
+    const c = document.createElement("canvas"); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+    const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+    await page.render({ canvasContext: g, viewport: vp }).promise;
+    out.push({ el: c, box: null, isImg: false, pxPerMM: c.width / (v0.width / 72 * 25.4) });
+  }
+  return out;
+}
+// The sample is Aki's book "My Life Is a Beautiful Attack": nine spreads rendered from the print PDF, with a single page at each end.
+// It's a Hebrew book, so it opens right to left whatever language the interface is in.
+const SAMPLE = Array.from({ length: 11 }, (_, i) => "sample/" + String(i + 1).padStart(2, "0") + ".webp");
+async function loadSample() {
+  const els = await Promise.all(SAMPLE.map(readImage));
+  isSample = true; S.rtl = true; showControls();
+  // 1600px over the book's 210mm page height
+  show(els.map(el => ({ el, box: null, isImg: true, pxPerMM: el.height / 210 })));
+}
+
+/* ---------- trim ---------- */
+function boxOf(rec) {
+  const el = rec.el;
+  if (!S.trim) return { x: 0, y: 0, w: el.width, h: el.height };
+  if (rec.box) return rec.box;
+  const s = Math.min(1, 700 / Math.max(el.width, el.height));
+  const w = Math.max(2, Math.round(el.width * s)), h = Math.max(2, Math.round(el.height * s));
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(el, 0, 0, w, h);
+  const d = x.getImageData(0, 0, w, h).data, at = (px, py) => { const i = (py * w + px) * 4; return [d[i], d[i + 1], d[i + 2]]; };
+  const ref = at(0, 0), tol = 16, same = (px, py) => { const p = at(px, py); return Math.abs(p[0] - ref[0]) < tol && Math.abs(p[1] - ref[1]) < tol && Math.abs(p[2] - ref[2]) < tol; };
+  const rowSame = py => { for (let px = 0; px < w; px += 2) if (!same(px, py)) return false; return true; };
+  const colSame = px => { for (let py = 0; py < h; py += 2) if (!same(px, py)) return false; return true; };
+  let tp = 0, b = h - 1, l = 0, r = w - 1;
+  while (tp < b && rowSame(tp)) tp++; while (b > tp && rowSame(b)) b--; while (l < r && colSame(l)) l++; while (r > l && colSame(r)) r--;
+  const k = 1 / s, box = { x: Math.round(l * k), y: Math.round(tp * k), w: Math.round((r - l + 1) * k), h: Math.round((b - tp + 1) * k) };
+  rec.box = (box.w < el.width * .25 || box.h < el.height * .25) ? { x: 0, y: 0, w: el.width, h: el.height } : box;
+  return rec.box;
+}
+
+/* ---------- build ---------- */
+let counts = null;
+function detNote() { $("#detNote").textContent = S.src === "auto" && counts ? t("det", counts) : ""; }
+function build() {
+  pages = []; views = [];
+  if (!items.length) return;
+  const boxes = items.map(rec => {
+    let b = { ...boxOf(rec) };
+    if (S.bleedOn && S.bleed > 0 && rec.pxPerMM) {
+      const ins = S.bleed * rec.pxPerMM;
+      if (b.w - 2 * ins > 20 && b.h - 2 * ins > 20) b = { x: b.x + ins, y: b.y + ins, w: b.w - 2 * ins, h: b.h - 2 * ins };
+    }
+    return b;
+  });
+  // InDesign exports the cover (and a trailing odd page) at single width, so spreads are decided per file
+  const asp = boxes.map(b => b.w / b.h), amin = Math.min(...asp), amax = Math.max(...asp), uniform = amax / amin < 1.5;
+  const isSpread = i => S.src === "spread" ? true : S.src === "single" ? false : (uniform ? amin > 1.15 : asp[i] > amin * 1.5);
+  const perFile = [];
+  items.forEach((rec, i) => {
+    const b = boxes[i];
+    if (isSpread(i)) {
+      const half = b.w / 2, L = { el: rec.el, x: b.x, y: b.y, w: half, h: b.h }, R = { el: rec.el, x: b.x + half, y: b.y, w: b.w - half, h: b.h };
+      pages.push(L, R); perFile.push([L, R]);
+    } else { const P = { el: rec.el, ...b }; pages.push(P); perFile.push([P]); }
+  });
+  pages.forEach((p, i) => p.n = i + 1);
+  const nSpreads = perFile.filter(a => a.length === 2).length;
+  counts = { s: nSpreads, p: perFile.length - nSpreads }; detNote();
+  MA = Math.max(...pages.map(p => p.w / p.h));
+  PH = Math.round(Math.max(...pages.map(p => p.h)));
+  pages.forEach(p => p.solo = false);
+  perFile.forEach(a => { if (a.length === 1) a[0].solo = true; });
+  if (!nSpreads && S.cover && pages.length) { pages[0].solo = true; if (pages.length % 2 === 0) pages[pages.length - 1].solo = true; }
+
+  // a view is {first, second}: first in reading order. It lands left or right depending on the book's direction.
+  const V = (a, b) => S.rtl ? { L: b || null, R: a || null } : { L: a || null, R: b || null };
+  const lone = (p, last) => last ? V(null, p) : V(p, null);   // an opening page sits where a recto would
+  const openLone = p => S.rtl ? { L: p, R: null } : { L: null, R: p };
+  const closeLone = p => S.rtl ? { L: null, R: p } : { L: p, R: null };
+  if (S.disp === "single") pages.forEach(p => views.push({ L: null, R: p }));
+  else if (nSpreads) {
+    // the file already carries the pagination: keep it as exported
+    perFile.forEach((arr, i) => {
+      if (arr.length === 2) views.push({ L: arr[0], R: arr[1] });
+      else views.push(i === perFile.length - 1 && i > 0 ? closeLone(arr[0]) : openLone(arr[0]));
+    });
+  } else {
+    let i = 0;
+    if (S.cover && pages.length) { views.push(openLone(pages[0])); i = 1; }
+    for (; i < pages.length; i += 2) {
+      const a = pages[i], b = pages[i + 1];
+      views.push(b ? V(a, b) : (i === pages.length - 1 ? closeLone(a) : V(a, null)));
+    }
+  }
+  cur = Math.min(cur, views.length - 1);
+  $("#dl").disabled = $("#dlAll").disabled = false; $("#rec").disabled = !views.length;
+  say("counts", { p: pages.length, v: views.length });
+  thumbs(); preview();
+}
+
+/* ---------- drawing ---------- */
+function layout(W) {
+  const p = S.pd / 100, contentW = S.disp === "single" ? MA : MA * 2;
+  const k = W / (contentW + 2 * p);
+  return { k, H: Math.round((1 + 2 * p) * k), ph: k };
+}
+function nativeWidth() {
+  const p = S.pd / 100, contentW = S.disp === "single" ? MA : MA * 2;
+  return Math.min(6000, Math.round(PH * (contentW + 2 * p)));
+}
+let grainSrc = null;
+function grain(g) {
+  if (!grainSrc) {
+    const n = 220, c = document.createElement("canvas"); c.width = c.height = n;
+    const x = c.getContext("2d"), im = x.createImageData(n, n);
+    for (let i = 0; i < n * n; i++) { const v = 128 + (Math.random() * 2 - 1) * 44; im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = v; im.data[i * 4 + 3] = 255; }
+    x.putImageData(im, 0, 0); grainSrc = c;
+  }
+  return g.createPattern(grainSrc, "repeat");
+}
+function drawPage(g, src, dx, dy, dw, dh, curve, vcur, gutterLeft) {
+  if (!src || dw <= .5) return;
+  const N = 220, wgt = []; let sum = 0;
+  for (let i = 0; i < N; i++) { const u = (i + .5) / N, q = gutterLeft ? 1 - u : u, w = 1 - curve * Math.pow(q, 3); wgt.push(w); sum += w; }
+  let acc = 0;
+  for (let i = 0; i < N; i++) {
+    const sx = src.x + src.w * (i / N), sw = src.w / N, dwi = dw * wgt[i] / sum, u = (i + .5) / N, q = gutterLeft ? 1 - u : u;
+    const vh = dh * (1 - vcur * Math.pow(q, 3)), oy = dy + (dh - vh) / 2;
+    g.drawImage(src.el, sx, src.y, sw + .6, src.h, dx + acc, oy, dwi + .9, vh);
+    acc += dwi;
+  }
+}
+// Draws the open book (pages, gutter, vignette) on a transparent canvas; returns its bounds.
+function drawBook(g, W, H, V) {
+  const { ph } = layout(W), y0 = (H - ph) / 2, curve = S.cu / 100, vcur = curve * .3, single = S.disp === "single";
+  const wOf = s => s ? s.w / s.h * ph : 0;
+  let x0, pw;
+  if (single) {
+    const bw = wOf(V.R), solo = !!(V.R && V.R.solo); x0 = W / 2 - bw / 2; pw = bw;
+    drawPage(g, V.R, x0, y0, bw, ph, solo ? 0 : curve * .6, solo ? 0 : vcur * .6, true);
+    const gwPx = Math.max(2, bw * S.gw / 100), a = S.gs / 100;
+    if (a > 0 && !solo) {
+      const q = g.createLinearGradient(x0, 0, x0 + gwPx, 0);
+      q.addColorStop(0, "rgba(0,0,0," + (a * .9).toFixed(3) + ")"); q.addColorStop(1, "rgba(0,0,0,0)");
+      g.globalCompositeOperation = "source-atop"; g.fillStyle = q; g.fillRect(x0, y0, gwPx, ph); g.globalCompositeOperation = "source-over";
+    }
+  } else {
+    const lw = wOf(V.L), rw = wOf(V.R), lone = !V.L || !V.R;
+    const spine = lone ? (V.L ? W / 2 + lw / 2 : W / 2 - rw / 2) : W / 2;
+    x0 = spine - lw; pw = lw + rw;
+    drawPage(g, V.L, spine - lw, y0, lw, ph, lone ? 0 : curve, lone ? 0 : vcur, false);
+    drawPage(g, V.R, spine, y0, rw, ph, lone ? 0 : curve, lone ? 0 : vcur, true);
+    const gwPx = Math.max(2, Math.max(lw, rw) * S.gw / 100), a = S.gs / 100;
+    g.globalCompositeOperation = "source-atop";
+    if (a > 0 && !lone) {
+      const gr = g.createLinearGradient(spine - gwPx, 0, spine + gwPx, 0);
+      for (let i = 0; i <= 24; i++) { const q = i / 24, d = Math.abs(q - .5) * 2; gr.addColorStop(q, "rgba(0,0,0," + (a * Math.pow(1 - d, 2.4)).toFixed(4) + ")"); }
+      g.fillStyle = gr; g.fillRect(spine - gwPx, y0 - ph, gwPx * 2, ph * 3);
+    }
+    if (S.sp > 0 && !lone) {
+      const tt = Math.max(1, pw * .0018), g2 = g.createLinearGradient(spine - tt * 2, 0, spine + tt * 2, 0);
+      g2.addColorStop(0, "rgba(0,0,0,0)"); g2.addColorStop(.5, "rgba(0,0,0," + (S.sp / 100 * .85).toFixed(3) + ")"); g2.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = g2; g.fillRect(spine - tt * 2, y0 - ph, tt * 4, ph * 3);
+    }
+  }
+  if (S.vg > 0) {
+    const v = S.vg / 100, band = pw * .1;
+    let q = g.createLinearGradient(x0, 0, x0 + band, 0); q.addColorStop(0, "rgba(0,0,0," + (v * .55).toFixed(3) + ")"); q.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = q; g.fillRect(x0, 0, band, H);
+    q = g.createLinearGradient(x0 + pw, 0, x0 + pw - band, 0); q.addColorStop(0, "rgba(0,0,0," + (v * .55).toFixed(3) + ")"); q.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = q; g.fillRect(x0 + pw - band, 0, band, H);
+    q = g.createLinearGradient(0, y0, 0, y0 + ph * .14); q.addColorStop(0, "rgba(0,0,0," + (v * .4).toFixed(3) + ")"); q.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = q; g.fillRect(x0, y0, pw, ph * .14);
+    q = g.createLinearGradient(0, y0 + ph, 0, y0 + ph * .86); q.addColorStop(0, "rgba(0,0,0," + (v * .4).toFixed(3) + ")"); q.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = q; g.fillRect(x0, y0 + ph * .86, pw, ph * .14);
+  }
+  g.globalCompositeOperation = "source-over";
+  return { x0, y0, pw, ph };
+}
+const scratch = document.createElement("canvas"), sg = scratch.getContext("2d");
+// clear = draw only the book (and its shadow) on transparency, for video transitions
+function compose(g, W, V, clear) {
+  const { H } = layout(W);
+  g.canvas.width = W; g.canvas.height = H;
+  g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; g.filter = "none";
+  if (!clear) { g.fillStyle = S.bg; g.fillRect(0, 0, W, H); }
+  if (!V) return;
+  scratch.width = W; scratch.height = H; sg.clearRect(0, 0, W, H);
+  const b = drawBook(sg, W, H, V), sh = S.sh / 100, blur = Math.max(2, b.ph * .035);
+  if (S.view === "angle") {
+    // turn the book about its spine axis: the far edge shrinks, strips are re-drawn with perspective
+    const th = S.ang * Math.PI / 180, d = 3.2, half = W / 2, N = 360, cy = H / 2;
+    const proj = u => { const z = u * Math.sin(th); return { x: half + u * Math.cos(th) * half * d / (d + z), s: d / (d + z) }; };
+    if (sh > 0) {   // a soft contact shadow under the tilted book
+      const l = proj((b.x0 - half) / half), r = proj((b.x0 + b.pw - half) / half);
+      g.save(); g.filter = "blur(" + blur.toFixed(1) + "px)"; g.fillStyle = "rgba(0,0,0," + (sh * .55).toFixed(3) + ")";
+      g.beginPath();
+      g.moveTo(l.x, cy - b.ph / 2 * l.s + blur * .6); g.lineTo(r.x, cy - b.ph / 2 * r.s + blur * .6);
+      g.lineTo(r.x + blur * .4, cy + b.ph / 2 * r.s + blur * 1.6); g.lineTo(l.x + blur * .4, cy + b.ph / 2 * l.s + blur * 1.6);
+      g.closePath(); g.fill(); g.restore();
+    }
+    for (let i = 0; i < N; i++) {
+      const sx = b.x0 + b.pw * i / N, sw = b.pw / N;
+      const a = proj((sx - half) / half), c = proj((sx + sw - half) / half);
+      const s = (a.s + c.s) / 2, hgt = H * s;
+      g.drawImage(scratch, sx, 0, sw, H, a.x, cy - hgt / 2, c.x - a.x + .7, hgt);
+    }
+  } else {
+    if (sh > 0) {
+      g.save(); g.filter = "blur(" + blur.toFixed(1) + "px)"; g.fillStyle = "rgba(0,0,0," + (sh * .5).toFixed(3) + ")";
+      g.fillRect(b.x0 + blur * .2, b.y0 + blur * .8, b.pw, b.ph); g.restore();
+    }
+    g.drawImage(scratch, 0, 0);
+  }
+  if (!clear) addGrain(g, W, H);
+}
+function addGrain(g, W, H) {
+  if (S.gn <= 0) return;
+  g.globalCompositeOperation = "overlay"; g.globalAlpha = S.gn / 100 * .6;
+  g.fillStyle = grain(g); g.fillRect(0, 0, W, H);
+  g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+}
+
+/* ---------- preview ---------- */
+function preview() {
+  if (busy || !views.length) return;
+  compose(ctx, nativeWidth(), views[cur]);
+  const d = cv.width + "×" + cv.height;
+  $("#dims").textContent = d + " px";
+  $("#count").textContent = (cur + 1) + " / " + views.length;
+  if (d !== lastDims) { lastDims = d; fitView(); } else applyView();
+}
+function viewLabel(v) {
+  const ns = [v.L, v.R].filter(Boolean).map(p => p.n).sort((a, b) => a - b);
+  return ns.length === 2 ? (ns[0] === ns[1] - 1 ? ns[0] + "–" + ns[1] : ns.join("·")) : String(ns[0] || "");
+}
+function thumbs() {
+  const st = $("#strip"); st.innerHTML = "";
+  views.forEach((v, i) => {
+    const c = document.createElement("canvas"), g = c.getContext("2d");
+    const keep = { pd: S.pd, gn: S.gn }; S.pd = 4; S.gn = 0;
+    compose(g, 220, v); Object.assign(S, keep);
+    const b = document.createElement("button"); b.className = "th"; b.setAttribute("aria-current", i === cur);
+    b.appendChild(c); const s = document.createElement("span"); s.textContent = viewLabel(v); b.appendChild(s);
+    b.onclick = () => go(i); st.appendChild(b);
+  });
+}
+function markThumb() {
+  [...$("#strip").children].forEach((x, j) => x.setAttribute("aria-current", j === cur));
+  const el = $("#strip").children[cur]; if (el) el.scrollIntoView({ block: "nearest", inline: "nearest" });
+}
+
+/* ---------- images ---------- */
+const nameOf = i => (S.disp === "single" ? "page-" : "spread-") + String(i + 1).padStart(2, "0") + ".png";
+function pngOf(i) {
+  return new Promise(res => { const c = document.createElement("canvas"); compose(c.getContext("2d"), nativeWidth(), views[i]); c.toBlob(res, "image/png"); });
+}
+function download(blob, name) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+$("#dl").onclick = async () => download(await pngOf(cur), nameOf(cur));
+$("#dlAll").onclick = async () => {
+  if (busy) return; busy = true;
+  const zip = new JSZip();
+  for (let i = 0; i < views.length; i++) { say("saving", { a: i + 1, b: views.length }); zip.file(nameOf(i), await pngOf(i)); }
+  download(await zip.generateAsync({ type: "blob" }), "spreads.zip");
+  busy = false; say("zipped", { n: views.length }); preview();
+};
+
+/* ---------- video ---------- */
+const TR = 700;   // transition length in ms, taken from the end of each spread's hold
+const turnBuf = document.createElement("canvas");
+const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+// While a video renders, each spread is drawn once and reused: a held spread is the same picture every frame.
+let cache = null;
+function cached(i, W, clear) {
+  const key = i + (clear ? "c" : "f") + W;
+  if (cache && cache.has(key)) return cache.get(key);
+  const c = document.createElement("canvas"); compose(c.getContext("2d"), W, views[i], clear);
+  if (cache) cache.set(key, c);
+  return c;
+}
+function frameAt(g, W, ms) {
+  const n = views.length, i = Math.min(n - 1, Math.floor(ms / S.hold)), into = ms - i * S.hold;
+  const tr = S.trans === "cut" || i === n - 1 ? 0 : Math.min(TR, S.hold * .45);
+  if (!tr || into < S.hold - tr) {
+    const c = cached(i, W, false); g.canvas.width = c.width; g.canvas.height = c.height; g.drawImage(c, 0, 0); return;
+  }
+  const p = ease((into - (S.hold - tr)) / tr), A = views[i], B = views[i + 1];
+  const bufA = cached(i, W, true), bufB = cached(i + 1, W, true);
+  const H = bufA.height; g.canvas.width = W; g.canvas.height = H;
+  g.fillStyle = S.bg; g.fillRect(0, 0, W, H);
+  const lone = v => !v.L || !v.R;
+  let mode = S.trans;
+  if (mode === "turn" && (lone(A) || lone(B) || S.disp === "single")) mode = "fade";
+  if (mode === "fade") { g.globalAlpha = 1 - p; g.drawImage(bufA, 0, 0); g.globalAlpha = p; g.drawImage(bufB, 0, 0); g.globalAlpha = 1; }
+  else if (mode === "slide") {
+    const dir = S.rtl ? 1 : -1;   // the next spread comes in from the reading side
+    g.drawImage(bufA, dir * p * W, 0); g.drawImage(bufB, dir * (p - 1) * W, 0);
+  } else {
+    // page turn: the leaving page folds over the spine and lands as the next spread's facing page
+    const half = W / 2, turnRight = !S.rtl;   // LTR turns the right-hand page, RTL the left-hand one
+    const stay = turnRight ? 0 : half, moving = turnRight ? half : 0;
+    g.drawImage(bufA, stay, 0, half, H, stay, 0, half, H);        // the side that isn't turning yet shows A
+    g.drawImage(bufB, moving, 0, half, H, moving, 0, half, H);    // under the lifting page, B is already there
+    const tg = turnBuf.getContext("2d"); turnBuf.width = W; turnBuf.height = H;
+    let x, w;
+    if (p < .5) { w = half * (1 - p * 2); x = turnRight ? half : half - w; tg.drawImage(bufA, moving, 0, half, H, x, 0, w, H); }
+    else { w = half * (p * 2 - 1); x = turnRight ? half - w : half; tg.drawImage(bufB, stay, 0, half, H, x, 0, w, H); }
+    tg.globalCompositeOperation = "source-atop";                  // shade the page, not the surface around it
+    tg.fillStyle = "rgba(0,0,0," + ((p < .5 ? p : 1 - p) * .7).toFixed(3) + ")"; tg.fillRect(x, 0, w, H);
+    g.drawImage(turnBuf, 0, 0);
+  }
+  addGrain(g, W, H);
+}
+$("#play").onclick = () => {
+  if (busy || !views.length) return;
+  busy = true; cache = new Map(); const t0 = performance.now(), total = S.hold * views.length, W = nativeWidth();
+  (function step() {
+    const e = performance.now() - t0;
+    if (e >= total) { busy = false; cache = null; preview(); return; }
+    frameAt(ctx, W, e); requestAnimationFrame(step);
+  })();
+};
+const canFast = () => "VideoEncoder" in window && window.Mp4Muxer;
+function pickMime() {
+  for (const m of ["video/mp4;codecs=avc1.42E01E", "video/mp4", "video/webm;codecs=vp9", "video/webm"]) if (window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+  return null;
+}
+function showFmt() {
+  const m = pickMime();
+  $("#fmtNote").textContent = canFast() ? t("fast") : m ? t("slow", { f: m.includes("mp4") ? "MP4" : "WebM" }) : t("novideo");
+}
+function videoSize() { const { H } = layout(1000); let W = Math.round(1000 * S.vh / H); W += W % 2; let H2 = S.vh; H2 += H2 % 2; return { W, H: H2 }; }
+async function exportFast() {
+  const { W } = videoSize(), fps = 30, total = S.hold * views.length, frames = Math.ceil(total / 1000 * fps);
+  compose(ctx, W, views[0]); const H = cv.height + cv.height % 2;
+  const codecs = ["avc1.640033", "avc1.640028", "avc1.4d0028", "avc1.42E01E"];
+  let config = null;
+  for (const codec of codecs) {
+    const c = { codec, width: W, height: H, bitrate: 16e6, framerate: fps };
+    try { if ((await VideoEncoder.isConfigSupported(c)).supported) { config = c; break; } } catch (e) {}
+  }
+  if (!config) return false;
+  const muxer = new Mp4Muxer.Muxer({ target: new Mp4Muxer.ArrayBufferTarget(), video: { codec: "avc", width: W, height: H }, fastStart: "in-memory" });
+  const enc = new VideoEncoder({ output: (chunk, meta) => muxer.addVideoChunk(chunk, meta), error: e => console.error(e) });
+  enc.configure(config);
+  const off = document.createElement("canvas"), og = off.getContext("2d");
+  for (let f = 0; f < frames; f++) {
+    frameAt(og, W, f * 1000 / fps);
+    if (off.height !== H) { const tmp = og.getImageData(0, 0, off.width, off.height); off.height = H; og.fillStyle = S.bg; og.fillRect(0, 0, W, H); og.putImageData(tmp, 0, 0); }
+    const vf = new VideoFrame(off, { timestamp: Math.round(f * 1e6 / fps), duration: Math.round(1e6 / fps) });
+    enc.encode(vf, { keyFrame: f % (fps * 2) === 0 }); vf.close();
+    if (f % 10 === 0) { say("encoding", { n: Math.round(f / frames * 100) }); ctx.drawImage(off, 0, 0); }
+    while (enc.encodeQueueSize > 8) await new Promise(r => setTimeout(r, 4));
+  }
+  await enc.flush(); muxer.finalize();
+  download(new Blob([muxer.target.buffer], { type: "video/mp4" }), "flip.mp4");
+  return true;
+}
+function exportRealtime() {
+  return new Promise(res => {
+    const mime = pickMime(); if (!mime) return res(false);
+    const { W } = videoSize(), total = S.hold * views.length;
+    compose(ctx, W, views[0]); lastDims = ""; fitView();
+    const rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime, videoBitsPerSecond: 14e6 }), chunks = [];
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = () => { download(new Blob(chunks, { type: mime }), "flip." + (mime.includes("mp4") ? "mp4" : "webm")); res(true); };
+    rec.start();
+    const t0 = performance.now();
+    (function step() {
+      const e = performance.now() - t0;
+      if (e >= total) { rec.stop(); return; }
+      frameAt(ctx, W, e); say("recording", { n: Math.round(e / total * 100) }); requestAnimationFrame(step);
+    })();
+  });
+}
+$("#rec").onclick = async () => {
+  if (busy || !views.length) return;
+  busy = true; $("#rec").disabled = true; cache = new Map();
+  let ok = false;
+  try { ok = canFast() && await exportFast(); } catch (e) { console.error(e); ok = false; }
+  if (!ok) ok = await exportRealtime();
+  busy = false; cache = null; $("#rec").disabled = false; say(ok ? "saved" : null); lastDims = ""; preview();
+};
+
+/* ---------- start ---------- */
+buildSurfaces(); showControls(); applyLang();
+loadSample();
+</script>
+</body>
+</html>
