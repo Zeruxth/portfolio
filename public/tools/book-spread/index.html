@@ -74,7 +74,8 @@
 
   /* ---------- panel: set like a colophon ---------- */
   #panel { overflow-y: auto; padding: 22px 24px 32px; background: var(--paper); color: var(--ink); }
-  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
+  /* the colour and language toggles drop under the title when the panel is too narrow for both */
+  header { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 22px; }
   h1 { font: 400 40px/1 var(--display); letter-spacing: -.01em; white-space: nowrap; }
   h1 em { font-style: italic; color: var(--em); }
   :lang(he) h1 em { font-style: normal; }

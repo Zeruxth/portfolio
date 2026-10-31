@@ -16,7 +16,9 @@ function Action({ action }: { action: ToolAction }) {
     <a
       className={c.link}
       href={external ? action.href : `${BASE}${action.href}`}
-      {...(external && { target: "_blank", rel: "noopener noreferrer" })}
+      // every tool opens in a new tab, so the portfolio stays where you left it
+      target="_blank"
+      rel="noopener noreferrer"
       {...(action.kind === "download" && { download: true })}
     >
       {action.label}
