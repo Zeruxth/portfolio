@@ -63,7 +63,7 @@ export const TOOLS: Tool[] = [
     kind: "Web tool",
     platform: "Browser",
     year: "2025",
-    image: "/tools/covers/book-spread.jpg",
+    image: "/tools/covers/book-spread-books.jpg",
     actions: [{ label: "Open", href: "/tools/book-spread/", kind: "open" }],
   },
   {
