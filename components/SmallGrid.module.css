@@ -1,0 +1,261 @@
+.scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  container-type: inline-size;
+}
+
+/* ---- the grid ---- */
+
+/* layout() in SmallGrid.tsx places every tile; each one's images set its shape */
+.grid { position: relative; }
+.grid[data-ready="false"] { visibility: hidden; }
+
+.cell { position: absolute; }
+
+/* The rules are the right and bottom edge of each card, so neighbours share one */
+.card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* clip, not hidden: hidden would catch the opened caption's sticky */
+  overflow: clip;
+  background: var(--bg);
+  border-right: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+
+/* ---- the tile ---- */
+
+.face {
+  all: unset;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cell-w);
+  height: var(--cell-h);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.face:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.cell[data-open="true"] .face { visibility: hidden; }
+
+.frame {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* images keep their own shape: Img sets each one's ratio and its share of the row */
+.tileRow,
+.mosaicRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+.tileRow img,
+.tileRow video {
+  flex: 1 1 0;
+  display: block;
+  min-width: 0;
+  height: auto;
+}
+.mosaicColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.mosaicColumn img,
+.mosaicColumn video {
+  display: block;
+  height: auto;
+}
+
+/*
+ * Every tile the same: the title on the left, running to a second line if it's
+ * long; the tags on the right; the square always in the bottom right corner.
+ */
+.caption {
+  flex: none;
+  min-height: 102px;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 16px;
+}
+/* the title takes its one line if there's room; the tags wrap before it does */
+.caption > :first-child { flex: 0 1 auto; min-width: 0; }
+
+.tagsAndMore {
+  flex: 1 1 0;
+  min-width: min-content;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* the size of a tool's kind (ToolList .kind), which does this job beside its title */
+.tags > span { font-size: 14px; letter-spacing: 0.14px; }
+/* level with the title's first line */
+.tagsAndMore .tags { padding-top: 10px; text-align: right; }
+.tagsAndMore .tags > span { justify-content: flex-end; }
+
+.line {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 24px;
+}
+
+/* the title and the tags are the Projects list's (ProjectList .title, CaseStudy .meta) */
+
+/*
+ * The hover is the contact row's and the shown tool's: ink comes up. The square
+ * in the corner holds how many more images there are, in the site's one solid
+ * colour; on hover it flips with the tile and the arrow draws in where the
+ * number was. A tile with nothing more to show only gets it on hover.
+ */
+.more {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--bg);
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+}
+[data-empty="true"] > .more { opacity: 0; }
+
+.count,
+.arrow { grid-area: 1 / 1; }
+
+.count {
+  font-family: var(--ui);
+  font-size: 22px;
+  line-height: 28px;
+  transition: opacity 0.12s ease;
+}
+
+/* the site's arrow, at the site's size */
+.arrow {
+  width: 30.344px;
+  height: 19.211px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+@keyframes drawArrow {
+  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+}
+
+.face:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+.face:focus-visible .more { background: var(--bg); color: var(--ink); opacity: 1; }
+.face:focus-visible .count { opacity: 0; }
+.face:focus-visible .arrow { opacity: 1; }
+.face:focus-visible .arrow path { animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+
+@media (hover: hover) {
+  .face:hover { background: var(--ink); color: var(--bg); }
+  .face:hover .more { background: var(--bg); color: var(--ink); opacity: 1; }
+  .face:hover .count { opacity: 0; }
+  .face:hover .arrow { opacity: 1; }
+  .face:hover .arrow path { animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow path { animation: none !important; }
+}
+
+/* ---- the opened tile ---- */
+
+@keyframes openedIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.opened {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--cell-w);
+  height: var(--cell-h);
+  cursor: zoom-out;
+}
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+/* what wasn't in the tile comes up once the tile has started to make room */
+.opened img,
+.opened video { animation: openedIn 0.42s ease 0.2s backwards; }
+
+/* however much a project has in it, its name and its text stay on screen */
+.openCaption {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: -16px;
+  padding: 16px 0;
+  background: var(--bg);
+  animation: openedIn 0.42s ease 0.2s backwards;
+}
+.openCaption p { max-width: 708px; }
+
+/* a tall composition: the text beside it from its top edge, staying in view down a long one */
+.flow[data-beside="true"] { flex-direction: row; align-items: flex-start; }
+.flow[data-beside="true"] .images { flex: none; }
+.flow[data-beside="true"] .openCaption {
+  flex: 1 1 0;
+  min-width: 0;
+  position: sticky;
+  top: 16px;
+  bottom: auto;
+  margin: 0;
+  padding: 0;
+}
+
+.closeHidden {
+  all: unset;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.closeHidden:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  align-self: flex-start;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  font-family: var(--ui);
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+/* Mosaic: everything at once, in rows of one height */
+.mosaic { display: flex; flex-direction: column; gap: 16px; }
+

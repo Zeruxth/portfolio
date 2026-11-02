@@ -163,3 +163,13 @@ export function TabCut({ className }: { className?: string }) {
     </svg>
   );
 }
+
+/** the x on a tab, and on anything else that closes */
+export function Close() {
+  return (
+    <svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true">
+      <path d="M10.1634 0.539935L0.539937 10.1634" strokeWidth="1.52717" />
+      <path d="M0.539935 0.539935L10.1634 10.1634" strokeWidth="1.52717" />
+    </svg>
+  );
+}

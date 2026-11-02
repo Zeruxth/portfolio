@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { tabForPath, useTabs } from "@/lib/tabs";
+import { Close } from "./icons";
 import PandaLogo from "./PandaLogo";
 import s from "./TabBar.module.css";
 
@@ -11,15 +12,6 @@ function Edge() {
   return (
     <svg className={s.edge} viewBox="0 0 72.64 60.77" preserveAspectRatio="none" aria-hidden="true">
       <path className={s.edgeLine} d="M0.32 0.384L72.32 60.384" />
-    </svg>
-  );
-}
-
-function Close() {
-  return (
-    <svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true">
-      <path d="M10.1634 0.539935L0.539937 10.1634" strokeWidth="1.52717" />
-      <path d="M0.539935 0.539935L10.1634 10.1634" strokeWidth="1.52717" />
     </svg>
   );
 }
