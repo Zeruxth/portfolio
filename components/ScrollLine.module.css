@@ -1,0 +1,17 @@
+/* placed and coloured by ScrollLine.tsx */
+.line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  width: 2px;
+  background: var(--ink);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease, background 0.15s ease;
+}
+.line[data-on="true"] {
+  opacity: 1;
+  transition-duration: 0.12s, 0.15s;
+}
+.line[data-over="dark"] { background: var(--bg); }

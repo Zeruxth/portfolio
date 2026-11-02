@@ -3,6 +3,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import { SectionHoverProvider } from "@/lib/section-hover";
 import { TabsProvider } from "@/lib/tabs";
 import Shell from "@/components/Shell";
+import ScrollLine from "@/components/ScrollLine";
 import "./globals.css";
 import "./kinetic.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Shell>{children}</Shell>
           </TabsProvider>
         </SectionHoverProvider>
+        <ScrollLine />
       </body>
     </html>
   );
