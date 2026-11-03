@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CONTACT_EMAIL, SECTIONS, sectionForPath } from "@/lib/sections";
 import { useSectionHover } from "@/lib/section-hover";
-import { Arrow } from "./icons";
+import { ArrowCell } from "./ArrowCell";
 import s from "./Menu.module.css";
 
 export default function Menu() {
@@ -24,6 +24,7 @@ export default function Menu() {
             key={section.key}
             href={section.href}
             className={s.row}
+            data-arrow-host={section.key === active.key ? undefined : true}
             data-active={section.key === active.key}
             aria-current={section.key === active.key ? "page" : undefined}
             style={{ "--c": section.color, "--on": section.ink } as React.CSSProperties}
@@ -33,8 +34,8 @@ export default function Menu() {
           >
             <span className={s.head}>
               <span className={s.title}>{section.label}</span>
-              <Arrow className={s.arrow} />
             </span>
+            {section.key !== active.key && <ArrowCell hidden />}
             {section.explainer && (
               <span className={s.exp}>
                 <span className={s.expInner}>
@@ -46,11 +47,11 @@ export default function Menu() {
         ))}
       </nav>
 
-      <a className={s.contact} href={`mailto:${CONTACT_EMAIL}`}>
+      <a className={s.contact} href={`mailto:${CONTACT_EMAIL}`} data-arrow-host>
         <p>
           Have a project, a job or some cool shit in mind? <em>Let’s talk</em>
         </p>
-        <Arrow className={s.contactArrow} />
+        <ArrowCell />
       </a>
     </div>
   );

@@ -11,6 +11,10 @@
   --pad: 24px;
   --tab-h: 60px;
 
+  /* every arrow, 1:1 with its viewBox in icons.tsx */
+  --arrow-w: 22px;
+  --arrow-h: 16px;
+
   /* set by <Band> once it has measured; never changes between sections */
   --band-fs: 200px;
 

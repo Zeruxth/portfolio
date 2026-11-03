@@ -1,18 +1,15 @@
-/* Exported from Figma. The arrow is one path shared by the contact block and the
-   hover rows — the Figma exports differ only in fill, so it takes currentColor. */
+/* The arrow takes currentColor, so the contact block and the hover rows share it. */
 
 /**
- * The arrow, as a stroke rather than the outlined fill Figma exported.
- *
- * Its centreline was recovered from that outline: each end cap's midpoint is a
- * centreline endpoint, each kink's midpoint a vertex. Offsetting it back out by
- * half the original width lands within 0.03 units of the exported outline, so
- * this is the path Figma strokes.
+ * The arrow: a straight shaft and a 45-degree head, stroked, with a mitred tip.
  *
  * 1.886 is the logo's on-screen weight (1.43085 authored, drawn 1.3179x its
- * viewBox). Every arrow is rendered at 30.344px — 1:1 with the viewBox — so the
- * authored number IS the on-screen number. Change the logo's display size and
- * this needs revisiting.
+ * viewBox). Every arrow is rendered 1:1 with its 22 x 16 viewBox (--arrow-w and
+ * --arrow-h in globals.css), so the authored number IS the on-screen number.
+ * Change the logo's display size and this needs revisiting.
+ *
+ * Hover moves the <g>: the svg clips to its own box, so the arrow can slide out
+ * of one side and back in the other wherever it sits.
  */
 export const ARROW_STROKE = 1.886;
 
@@ -20,7 +17,7 @@ export function Arrow({ className }: { className?: string }) {
   return (
     <svg
       className={className}
-      viewBox="0 0 30.3438 19.2109"
+      viewBox="0 0 22 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
@@ -31,9 +28,8 @@ export function Arrow({ className }: { className?: string }) {
         strokeLinecap="butt"
         strokeLinejoin="miter"
       >
-        {/* pathLength normalises both subpaths so one dash value drives them equally */}
-        <path pathLength={1} d="M0.3848 11.3759L9.6743 8.1455L16.98 11.3755L29.5718 9.2544" />
-        <path pathLength={1} d="M20.332 18.4199L29.5718 9.2544L20.332 0.8252" />
+        <path d="M0 8H20" />
+        <path d="M13.37 15.3L20.67 8L13.37 0.7" />
       </g>
     </svg>
   );
@@ -41,10 +37,9 @@ export function Arrow({ className }: { className?: string }) {
 
 /**
  * Sound on / off, drawn in the arrow's hand: the same stroke, butt ends and
- * mitred kinks, on the arrow's own 30.344 x 19.211 box. The speaker is a hard
- * outline; "on" is two chevrons, the outer one the arrow's head itself; "off"
- * crosses them out. Every stroke has pathLength 1, so the arrow's draw-on
- * animation works on these too.
+ * mitred corners, on its own 30.344 x 19.211 box, larger than the arrow. The
+ * speaker is a hard outline; "on" is two chevrons; "off" crosses them out. Every stroke has pathLength 1, so one draw-on
+ * animation drives them all.
  */
 export function Sound({ on, className }: { on: boolean; className?: string }) {
   return (
@@ -168,8 +163,8 @@ export function TabCut({ className }: { className?: string }) {
 export function Close() {
   return (
     <svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true">
-      <path d="M10.1634 0.539935L0.539937 10.1634" strokeWidth="1.52717" />
-      <path d="M0.539935 0.539935L10.1634 10.1634" strokeWidth="1.52717" />
+      <path d="M10 0.7L0.7 10" strokeWidth={ARROW_STROKE} />
+      <path d="M0.7 0.7L10 10" strokeWidth={ARROW_STROKE} />
     </svg>
   );
 }

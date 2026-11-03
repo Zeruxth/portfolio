@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { Project } from "@/content/projects";
 import { placeholderTile } from "@/lib/placeholder";
-import { Arrow } from "./icons";
+import { ArrowCell } from "./ArrowCell";
 import s from "./ProjectList.module.css";
 
 // images live under /public, which Pages serves below the base path
@@ -48,19 +48,6 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                 </div>
               </div>
 
-              <div className={s.reveal}>
-                <div className={s.revealIn}>
-                  <Link
-                    href={`/projects/${project.slug}`}
-                    className={s.enter}
-                    tabIndex={isOpen ? 0 : -1}
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    Enter
-                    <Arrow />
-                  </Link>
-                </div>
-              </div>
             </div>
 
             <div className={`${s.reveal} ${s.metaCol}`}>
@@ -83,6 +70,18 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                 </ul>
               </div>
             </div>
+
+            {isOpen && (
+              <Link
+                href={`/projects/${project.slug}`}
+                className={s.enter}
+                data-arrow-host
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className={s.enterLabel}>Enter</span>
+                <ArrowCell corner="inline" />
+              </Link>
+            )}
 
             <div
               className={s.cover}

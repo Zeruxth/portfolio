@@ -125,13 +125,14 @@
 /*
  * The hover is the contact row's and the shown tool's: ink comes up. The square
  * in the corner holds how many more images there are, in the site's one solid
- * colour; on hover it flips with the tile and the arrow draws in where the
+ * colour; on hover it flips with the tile and the arrow slides in where the
  * number was. A tile with nothing more to show only gets it on hover.
  */
 .more {
   flex: none;
   width: 40px;
   height: 40px;
+  margin: 0 -16px -16px 0; /* out through the tile's padding, flush in its corner */
   display: grid;
   place-items: center;
   background: var(--ink);
@@ -152,33 +153,34 @@
 
 /* the site's arrow, at the site's size */
 .arrow {
-  width: 30.344px;
-  height: 19.211px;
+  width: var(--arrow-w);
+  height: var(--arrow-h);
   opacity: 0;
   transition: opacity 0.12s ease;
 }
 
-@keyframes drawArrow {
-  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
+/* hidden at rest, so only the second half of the slide */
+@keyframes arrowIn {
+  from { transform: translateX(calc(var(--arrow-w) * -1)); }
+  to   { transform: translateX(0); }
 }
 
 .face:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
 .face:focus-visible .more { background: var(--bg); color: var(--ink); opacity: 1; }
 .face:focus-visible .count { opacity: 0; }
 .face:focus-visible .arrow { opacity: 1; }
-.face:focus-visible .arrow path { animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+.face:focus-visible .arrow g { animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1); }
 
 @media (hover: hover) {
   .face:hover { background: var(--ink); color: var(--bg); }
   .face:hover .more { background: var(--bg); color: var(--ink); opacity: 1; }
   .face:hover .count { opacity: 0; }
   .face:hover .arrow { opacity: 1; }
-  .face:hover .arrow path { animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+  .face:hover .arrow g { animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arrow path { animation: none !important; }
+  .arrow g { animation: none !important; }
 }
 
 /* ---- the opened tile ---- */

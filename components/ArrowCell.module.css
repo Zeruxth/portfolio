@@ -1,0 +1,72 @@
+/*
+ * The arrow always sits in this box, docked into a corner of its grid cell. It
+ * draws only the sides facing into the cell: the grid already draws the others.
+ *
+ * Whatever holds it sets data-arrow-host, so hovering the whole link moves it.
+ * A host that fills on hover sets --arrow-cell-bg and --arrow-cell-fg to flip it.
+ */
+.cell {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, color 0.2s ease, opacity 0.12s ease;
+}
+.arrow {
+  display: block;
+  width: var(--arrow-w);
+  height: var(--arrow-h);
+}
+
+.cell[data-corner="bottomRight"] {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-top: 1px solid currentColor;
+  border-left: 1px solid currentColor;
+}
+.cell[data-corner="topLeft"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+}
+/* beside a label, inside a host that is itself docked */
+.cell[data-corner="inline"] { border-left: 1px solid currentColor; }
+
+[data-arrow-host]:hover .cell,
+[data-arrow-host]:focus-visible .cell {
+  background: var(--arrow-cell-bg, var(--ink));
+  color: var(--arrow-cell-fg, var(--bg));
+}
+
+/* the svg clips to its own box, so the arrow leaves one side and returns on the other */
+@keyframes arrowSlide {
+  0%     { transform: translateX(0); }
+  49.9%  { transform: translateX(var(--arrow-w)); }
+  50%    { transform: translateX(calc(var(--arrow-w) * -1)); }
+  100%   { transform: translateX(0); }
+}
+[data-arrow-host]:hover .cell:not([data-hidden]) g,
+[data-arrow-host]:focus-visible .cell:not([data-hidden]) g {
+  animation: arrowSlide 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* hidden at rest, so it only does the second half of the slide */
+@keyframes arrowIn {
+  from { transform: translateX(calc(var(--arrow-w) * -1)); }
+  to   { transform: translateX(0); }
+}
+.cell[data-hidden] { opacity: 0; }
+[data-arrow-host]:hover .cell[data-hidden],
+[data-arrow-host]:focus-visible .cell[data-hidden] { opacity: 1; }
+[data-arrow-host]:hover .cell[data-hidden] g,
+[data-arrow-host]:focus-visible .cell[data-hidden] g {
+  animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell g { animation: none !important; }
+}

@@ -10,9 +10,13 @@
 .nav { display: flex; flex-direction: column; }
 
 .row {
+  position: relative;
   display: block;
   width: 100%;
   padding: 16px;
+  /* the box flips against the row's own colour */
+  --arrow-cell-bg: var(--on);
+  --arrow-cell-fg: var(--c);
   border-bottom: 1px solid var(--ink);
   color: var(--ink);
   background: transparent;
@@ -29,21 +33,6 @@
   white-space: nowrap;
 }
 
-.arrow {
-  flex: none;
-  width: 30.344px;
-  height: 19.211px;
-  opacity: 0;
-  transition: opacity 0.12s ease;
-}
-
-/* Menu rows: the arrow inks itself in, left to right. pathLength=1 on both
-   subpaths means one dash value drives the shaft and the head together. */
-@keyframes drawArrow {
-  from { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
-}
-
 .exp {
   display: grid;
   grid-template-rows: 0fr;
@@ -54,7 +43,7 @@
   /* block, not inline: an inline box draws its border-top on EVERY wrapped line */
   display: block;
   margin-top: 16px;
-  padding-top: 8px;
+  padding: 8px 32px 0 0; /* clear of the arrow's box in the corner */
   border-top: 1px solid currentColor;
   font-family: var(--mono);
   font-size: 15px;
@@ -71,23 +60,17 @@
 .row:not([data-active="true"]):hover,
 .row:not([data-active="true"]):focus-visible { background: var(--c); color: var(--on); }
 
-.row:not([data-active="true"]):hover .arrow,
-.row:not([data-active="true"]):focus-visible .arrow { opacity: 1; }
-
-.row:not([data-active="true"]):hover .arrow path,
-.row:not([data-active="true"]):focus-visible .arrow path {
-  animation: drawArrow 0.46s cubic-bezier(0.33, 0, 0.67, 1);
-}
-
 .row:not([data-active="true"]):hover .exp,
 .row:not([data-active="true"]):focus-visible .exp { grid-template-rows: 1fr; }
 
 .contact {
+  position: relative;
   border-top: 1px solid var(--ink);
-  padding: 16px;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
+  padding: 16px 48px 16px 16px; /* clear of the arrow's box in the corner */
+  display: block;
+  /* the row fills with ink, so the box flips to the page colour */
+  --arrow-cell-bg: var(--bg);
+  --arrow-cell-fg: var(--ink);
   font-size: 22px;
   text-transform: uppercase;
   line-height: 1.3;
@@ -97,34 +80,6 @@
 }
 .contact em { font-style: italic; }
 .contact:hover, .contact:focus-visible { background: var(--ink); color: var(--bg); }
-
-.contactArrow {
-  flex: none;
-  width: 30.344px;
-  height: 19.211px;
-}
-/*
- * Contact: the arrow wipes itself away and comes back. Distinct from the
- * menu rows, which only draw in — this one erases first, so it reads as the
- * mark redrawing rather than arriving.
- *
- * The dash offset runs 0 -> -1 to clear it, then jumps to +1 so it redraws
- * from the same end it left, rather than unwinding backwards.
- */
-@keyframes eraseRedraw {
-  0%   { stroke-dasharray: 1; stroke-dashoffset: 0; }
-  45%  { stroke-dasharray: 1; stroke-dashoffset: -1; }
-  46%  { stroke-dasharray: 1; stroke-dashoffset: 1; }
-  100% { stroke-dasharray: 1; stroke-dashoffset: 0; }
-}
-.contact:hover .contactArrow path,
-.contact:focus-visible .contactArrow path {
-  animation: eraseRedraw 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .arrow path, .contactArrow path { animation: none !important; }
-}
 
 @media (max-width: 1100px) {
   .rail { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }

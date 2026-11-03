@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { Media, MediaRow, Project } from "@/content/projects";
 import { useIsomorphicLayoutEffect } from "@/lib/use-isomorphic-layout-effect";
-import { Arrow } from "./icons";
+import { ArrowCell } from "./ArrowCell";
 import ZooLabels from "./ZooLabels";
 import ZooLogo from "./ZooLogo";
 import ZooSyrups from "./ZooSyrups";
@@ -232,8 +232,8 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
               ref={(el) => { blocks.current[0] = el; }}
             >
               <div data-head className={s.introHead}>
-                <Link href="/projects" className={s.back} aria-label="Back to Projects">
-                  <Arrow className={s.backArrow} />
+                <Link href="/projects" className={s.back} aria-label="Back to Projects" data-arrow-host>
+                  <ArrowCell corner="topLeft" />
                 </Link>
                 <h1 className={s.title} onClick={() => goTo(0)}>
                   {project.title}
@@ -301,9 +301,9 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
           </div>
 
           <div className={s.foot}>
-            <Link href={`/projects/${next.slug}`} className={s.next}>
-              Next project
-              <Arrow className={s.nextArrow} />
+            <Link href={`/projects/${next.slug}`} className={s.next} data-arrow-host>
+              <span className={s.nextLabel}>Next project</span>
+              <ArrowCell corner="inline" />
             </Link>
           </div>
         </aside>

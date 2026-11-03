@@ -20,7 +20,7 @@
 .sound:focus-visible { outline: 1px solid #F5F7F5; outline-offset: 2px; }
 .icon { width: 30.344px; height: 19.211px; display: block; }
 
-/* the waves (or the cross) draw on when the state changes and on hover, as the arrow does */
+/* the waves (or the cross) draw on when the state changes and on hover */
 @keyframes draw {
   from { stroke-dasharray: 1; stroke-dashoffset: 1; }
   to   { stroke-dasharray: 1; stroke-dashoffset: 0; }
