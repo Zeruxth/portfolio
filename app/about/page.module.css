@@ -1,0 +1,169 @@
+.page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- the photo and the intro ---- */
+
+/*
+ * The photo is sized from this row's height, so it always fills its cell and
+ * there is never a gap under the caption. The row takes what the roles below
+ * leave, down to a floor that keeps the photo in proportion: past that, the page
+ * scrolls rather than the photo shrinking further.
+ */
+.top {
+  flex: 1 1 0;
+  min-height: max(380px, (100vw - var(--rail) - 50px) * 0.3 + 58px);
+  container-type: size;
+  display: flex;
+  border-bottom: 1px solid var(--ink);
+}
+
+/* 58 is the padding, the caption and the gap between them; the cap leaves the intro its room */
+.me {
+  --photo: min(100cqh - 58px, 55cqw);
+  flex: none;
+  width: calc(var(--photo) + 33px);
+  padding: 16px;
+  border-right: 1px solid var(--ink);
+}
+.photo {
+  display: block;
+  width: var(--photo);
+  height: var(--photo);
+  object-fit: cover;
+}
+.caption {
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 18px;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.introCell {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+}
+.intro {
+  padding: 16px;
+  font-size: 30px;
+  line-height: 38px;
+  text-transform: uppercase;
+}
+
+/* ---- where I've been ---- */
+
+.role {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  padding: 16px;
+  border-bottom: 1px solid var(--ink);
+}
+.name {
+  flex: none;
+  width: 246px;
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 38px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.note { font-size: 22px; line-height: 28px; }
+
+.meta {
+  flex: none;
+  width: 147px;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 21px; /* whole pixels keep the stacked rules crisp */
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+.meta li + li { margin-top: 16px; }
+
+.text {
+  flex: 1 1 0;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1.3;
+  letter-spacing: 0.18px;
+}
+
+.role:last-of-type { border-bottom: 0; }
+
+/* ---- also on ---- */
+
+/*
+ * Docked into the intro cell's top right corner, as the arrow's box docks: 40px
+ * with its rules, drawing only the sides that face into the cell.
+ */
+.elsewhere {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.alsoOn {
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+
+.social {
+  align-self: stretch;
+  width: 64px;
+  display: grid;
+  place-items: center;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.social svg { display: block; width: auto; height: 22px; }
+/* a wide, solid envelope looks bigger than the logos at their height */
+.social:last-child svg { height: 19px; }
+/* fills like the contact row */
+.social:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+@media (hover: hover) {
+  .social:hover { background: var(--ink); color: var(--bg); }
+}
+
+/* the intro drops a size before it can run into the links, so the photo keeps its cell */
+@media (max-width: 1260px) {
+  .intro { font-size: 24px; line-height: 30px; }
+}
+
+/* stacked, there's no corner to dock into, so the links close the page instead */
+@media (max-width: 1100px), (max-aspect-ratio: 1/1) {
+  .top, .introCell { display: contents; }
+  .me { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }
+  .photo { width: 100%; height: auto; aspect-ratio: 1; }
+  .intro { flex: none; border-bottom: 1px solid var(--ink); }
+  .elsewhere { position: static; order: 1; flex: none; border-left: 0; border-bottom: 0; border-top: 1px solid var(--ink); }
+  .alsoOn { margin-right: auto; }
+}
+
+@media (max-width: 1100px) {
+  .page { overflow-y: visible; }
+  .role { flex-direction: column; gap: 16px; }
+  .name { width: auto; white-space: normal; }
+  .meta { width: auto; }
+  .text { flex: none; font-size: 18px; }
+}
