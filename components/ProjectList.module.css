@@ -70,7 +70,7 @@
   line-height: 40px;
   letter-spacing: 0.2px;
   text-transform: uppercase;
-  animation: enterIn 0.24s ease 0.1s backwards;
+  animation: enterIn 0.24s ease 0.3s backwards;
 }
 .enterLabel { padding: 0 16px; }
 
@@ -101,8 +101,8 @@
   background-position: center;
   /* grey until you point at the row or open it */
   filter: grayscale(1);
-  transition: width 0.34s cubic-bezier(0.2, 0.7, 0.3, 1),
-              height 0.34s cubic-bezier(0.2, 0.7, 0.3, 1),
+  transition: width 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
+              height 0.8s cubic-bezier(0.22, 0.61, 0.36, 1),
               filter 0.3s ease;
 }
 .row:hover .cover,
@@ -131,7 +131,7 @@
 .reveal {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition: grid-template-rows 0.8s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 .revealIn { overflow: hidden; min-height: 0; }
 .row[data-open="true"] .reveal { grid-template-rows: 1fr; }

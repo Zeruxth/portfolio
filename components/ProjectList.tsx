@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Project } from "@/content/projects";
 import { placeholderTile } from "@/lib/placeholder";
 import { ArrowCell } from "./ArrowCell";
@@ -10,14 +11,48 @@ import s from "./ProjectList.module.css";
 // images live under /public, which Pages serves below the base path
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
+// the pointer rests this long on a row before it opens, so crossing the list opens nothing
+const HOVER_DELAY = 120;
+// how long a row takes to open (.reveal and .cover): nothing else opens until it has
+const OPEN_MS = 800;
+
 export default function ProjectList({ projects }: { projects: Project[] }) {
-  // the page opens with every row closed; a click opens one at a time, and a
-  // second click on the same row closes it again
+  // the page opens with every row closed. A mouse opens the row it rests on, and
+  // that row stays open until another takes over; clicking a row goes into it.
+  // Touch has no hover, so its first tap opens and its second goes in
+  const router = useRouter();
   const [open, setOpen] = useState<string | null>(null);
   const toggle = (slug: string) => setOpen((o) => (o === slug ? null : slug));
 
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const pending = useRef<string | null>(null);
+  const settled = useRef(0);
+  const pointer = useRef({ x: -1, y: -1 });
+
+  const cancel = () => {
+    clearTimeout(timer.current);
+    pending.current = null;
+  };
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const hover = (slug: string, e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse") return;
+    // a row sliding under a still pointer, or a scroll, is not the pointer moving
+    if (e.clientX === pointer.current.x && e.clientY === pointer.current.y) return;
+    pointer.current = { x: e.clientX, y: e.clientY };
+    if (slug === open) return cancel();
+    if (slug === pending.current) return;
+    cancel();
+    pending.current = slug;
+    timer.current = setTimeout(() => {
+      pending.current = null;
+      settled.current = performance.now() + OPEN_MS;
+      setOpen(slug);
+    }, Math.max(HOVER_DELAY, settled.current - performance.now()));
+  };
+
   return (
-    <div className={s.list}>
+    <div className={s.list} onPointerLeave={cancel}>
       {projects.map((project, i) => {
         const isOpen = open === project.slug;
         return (
@@ -29,7 +64,16 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             tabIndex={0}
             aria-expanded={isOpen}
             role="button"
-            onClick={() => toggle(project.slug)}
+            onPointerMove={(e) => hover(project.slug, e)}
+            onClick={(e) => {
+              // dragging across the description to copy it isn't a click on the row
+              if (window.getSelection()?.toString()) return;
+              if (isOpen || (e.nativeEvent as PointerEvent).pointerType === "mouse") {
+                router.push(`/projects/${project.slug}`);
+              } else {
+                setOpen(project.slug);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.target !== e.currentTarget) return;
               if (e.key === "Enter" || e.key === " ") {
