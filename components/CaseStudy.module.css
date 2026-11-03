@@ -31,7 +31,8 @@
   position: sticky;
   top: 0;
   height: 100cqh;
-  overflow: hidden;
+  /* clip, not hidden: focusing a link below the view mustn't scroll the stack itself */
+  overflow: clip;
 }
 
 /* every block is placed by CaseStudy.tsx; they only ever move vertically */
@@ -46,8 +47,9 @@
 }
 .intro { border-top: 0; }
 
-/* the text is always there; a later block covers it rather than it folding away */
-.body { display: grid; }
+/* the text is always there; a later block covers it rather than it folding away.
+   Text too long for the view moves up inside this box, cut off under the heading */
+.body { display: grid; overflow: clip; }
 .bodyIn { min-height: 0; }
 
 .introHead { border-bottom: 1px solid var(--ink); }
@@ -70,6 +72,10 @@
   line-height: 38px; /* the 70px Figma frame; whole pixels keep the stacked rules crisp */
   text-transform: uppercase;
 }
+
+/* the heading takes the click; this is the way in for a keyboard */
+.go { all: unset; display: block; width: 100%; }
+.go:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 /* headings are the way back to their block once they have stacked */
 .block[data-folded="true"] .title,

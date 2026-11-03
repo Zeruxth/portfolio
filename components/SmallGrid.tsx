@@ -306,17 +306,23 @@ function Tags({ tags }: { tags: string[] }) {
 
 const src = (image: SmallImage) => `${BASE}${image.src}`;
 
+/** the project's name, and which of its images this is when it has several */
+function altFor(project: SmallProject, image: SmallImage) {
+  const { title, images } = project;
+  return images.length > 1 ? `${title}, image ${images.indexOf(image) + 1} of ${images.length}` : title;
+}
+
 /** an image or video at its own shape; given no width, it takes its share of the row */
-function Img({ image, width }: { image: SmallImage; width?: number }) {
+function Img({ image, alt, width }: { image: SmallImage; alt: string; width?: number }) {
   const ratio = image.w / image.h;
   const style =
     width === undefined ? { aspectRatio: ratio, flexGrow: ratio * 100 } : { aspectRatio: ratio, width, flex: "none" };
-  if (image.video) return <LoopVideo image={image} style={style} />;
-  return <img style={style} src={src(image)} alt="" draggable={false} decoding="async" />;
+  if (image.video) return <LoopVideo image={image} alt={alt} style={style} />;
+  return <img style={style} src={src(image)} alt={alt} draggable={false} decoding="async" />;
 }
 
 /** a muted loop, playing only while it's near the screen, as in the case studies */
-function LoopVideo({ image, style }: { image: SmallImage; style?: React.CSSProperties }) {
+function LoopVideo({ image, alt, style }: { image: SmallImage; alt: string; style?: React.CSSProperties }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = ref.current;
@@ -337,6 +343,7 @@ function LoopVideo({ image, style }: { image: SmallImage; style?: React.CSSPrope
       style={style}
       src={`${BASE}${image.video}`}
       poster={src(image)}
+      aria-label={alt}
       preload="metadata"
       muted
       loop
@@ -383,7 +390,7 @@ const columnWidth = (row: SmallImage[][], column: SmallImage[], width: number) =
   return (h - GAP * (column.length - 1)) * columnRatio(column);
 };
 
-function Mosaic({ rows, width }: { rows: Composition; width: number }) {
+function Mosaic({ project, rows, width }: { project: SmallProject; rows: Composition; width: number }) {
   return (
     <div className={s.mosaic}>
       {rows.map((row, i) => (
@@ -391,7 +398,7 @@ function Mosaic({ rows, width }: { rows: Composition; width: number }) {
           {row.map((column) => (
             <div key={column[0].src} className={s.mosaicColumn}>
               {column.map((image) => (
-                <Img key={image.src} image={image} width={columnWidth(row, column, width)} />
+                <Img key={image.src} image={image} alt={altFor(project, image)} width={columnWidth(row, column, width)} />
               ))}
             </div>
           ))}
@@ -513,7 +520,7 @@ function Opened({
     >
       <div className={s.flow} data-flow data-beside={shape.beside}>
         <div className={s.images} data-images style={{ width: imagesWidth }}>
-          <Mosaic rows={shape.rows} width={imagesWidth} />
+          <Mosaic project={project} rows={shape.rows} width={imagesWidth} />
         </div>
         <div className={s.openCaption}>
           <div className={s.line}>
@@ -875,6 +882,7 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                     type="button"
                     className={s.face}
                     data-face
+                    aria-label={`${project.title}, ${project.tags.join(" / ")}`}
                     aria-expanded={isOpen}
                     tabIndex={isOpen ? -1 : 0}
                     onClick={(e) => open(project.slug, e)}
@@ -883,7 +891,7 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                       {rows.map((images, r) => (
                         <span key={r} className={s.tileRow}>
                           {images.map((image) => (
-                            <Img key={image.src} image={image} />
+                            <Img key={image.src} image={image} alt={altFor(project, image)} />
                           ))}
                         </span>
                       ))}

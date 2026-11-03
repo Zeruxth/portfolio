@@ -1,5 +1,4 @@
-/** PLACEHOLDER — swap for the address you actually want people mailing. */
-export const CONTACT_EMAIL = "hello@akiyamin.com";
+export const CONTACT_EMAIL = "akiwipz@gmail.com";
 
 export type SectionKey = "home" | "projects" | "about" | "smaller" | "tools";
 
@@ -15,8 +14,6 @@ export interface Section {
   ink: string;
   /** null means the row hovers to the arrow only, with no explainer */
   explainer: string | null;
-  /** shown on the rule when the measure treatment is on */
-  count: string;
 }
 
 export const SECTIONS: Section[] = [
@@ -28,7 +25,6 @@ export const SECTIONS: Section[] = [
     color: "#222222",
     ink: "#DEDEDE",
     explainer: null,
-    count: "",
   },
   {
     key: "projects",
@@ -39,7 +35,6 @@ export const SECTIONS: Section[] = [
     ink: "#222222",
     explainer:
       "A closer look at some of the projects I’ve worked on, and all the thinking and making that went into them.",
-    count: "12 projects",
   },
   {
     key: "about",
@@ -50,7 +45,6 @@ export const SECTIONS: Section[] = [
     ink: "#222222",
     explainer:
       "A little more about me, what I do, the things I like making and how I ended up working across so many different parts of visual design.",
-    count: "Since 2019",
   },
   {
     key: "smaller",
@@ -61,18 +55,16 @@ export const SECTIONS: Section[] = [
     ink: "#222222",
     explainer:
       "One-offs, and other things worth sharing without the whole case study.",
-    count: "147 things",
   },
   {
     key: "tools",
     href: "/tools",
     label: "Tools",
     word: "TOOLS",
-    color: "#199329",
+    color: "#E35D31",
     ink: "#222222",
     explainer:
       "Little things I built because I needed them, got curious, or just wanted to see if I could. Some are useful, some are just fun. Feel free to give them a try.",
-    count: "4 tools",
   },
 ];
 

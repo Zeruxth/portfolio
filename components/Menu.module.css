@@ -52,16 +52,20 @@
 }
 
 .row[data-active="true"] { background: #222222; color: #DEDEDE; }
+.row[data-active="true"]:focus-visible { outline-color: var(--bg); }
 
 /*
  * The row for the page you are already on is inert: it stays black, gets no
  * arrow and does not expand. There is nothing to preview about where you are.
  */
-.row:not([data-active="true"]):hover,
 .row:not([data-active="true"]):focus-visible { background: var(--c); color: var(--on); }
-
-.row:not([data-active="true"]):hover .exp,
 .row:not([data-active="true"]):focus-visible .exp { grid-template-rows: 1fr; }
+
+/* a tap leaves :hover stuck on a touch screen */
+@media (hover: hover) {
+  .row:not([data-active="true"]):hover { background: var(--c); color: var(--on); }
+  .row:not([data-active="true"]):hover .exp { grid-template-rows: 1fr; }
+}
 
 .contact {
   position: relative;
@@ -79,7 +83,10 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 .contact em { font-style: italic; }
-.contact:hover, .contact:focus-visible { background: var(--ink); color: var(--bg); }
+.contact:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+@media (hover: hover) {
+  .contact:hover { background: var(--ink); color: var(--bg); }
+}
 
 @media (max-width: 1100px) {
   .rail { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }

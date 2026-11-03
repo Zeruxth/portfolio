@@ -36,7 +36,7 @@ export default function Shell({ children }: { children: ReactNode }) {
       >
         <div className={s.upper}>
           {!inner && !closed && <Menu />}
-          <div className={s.stage}>{children}</div>
+          <main className={s.stage}>{children}</main>
         </div>
         {/* the band belongs to the homepage only — no other designed frame has it */}
         {active.key === "home" && !closed && (

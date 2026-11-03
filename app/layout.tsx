@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
+import { SITE_URL } from "@/lib/meta";
 import { SectionHoverProvider } from "@/lib/section-hover";
 import { TabsProvider } from "@/lib/tabs";
 import Shell from "@/components/Shell";
@@ -15,7 +16,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://akiwip.work"),
+  metadataBase: new URL(SITE_URL),
   title: "AKI_WIP",
   description:
     "Aki Yamin — multidisciplinary visual designer. Print, screen, motion and objects.",

@@ -29,7 +29,7 @@ function LoopVideo({ src, poster, style }: { src: string; poster?: string; style
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     const v = ref.current;
-    if (!v) return;
+    if (!v || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) v.play().catch(() => {});
       else v.pause();
@@ -123,23 +123,30 @@ function Rows({ rows }: { rows: MediaRow[] }) {
  * it and stops just under its heading, so the stack reads
  * title / THE BOOK / THE WEBSITE as you go. NEXT PROJECT sits at the very end.
  *
+ * On a short screen a block's text can run past the bottom. Its heading still
+ * stops at the stack, but the text keeps moving with the page, up under the
+ * heading, until its last line shows. A block only rests below the one above
+ * ends, so that last line arrives just as the next block does.
+ *
  * Positions are written straight to the DOM on scroll — no React render per frame.
  */
 export default function CaseStudy({ project, next }: { project: Project; next: Project }) {
-  const study = project.study!;
+  const study = project.study;
   const scroller = useRef<HTMLDivElement>(null);
   const side = useRef<HTMLElement>(null);
+  const foot = useRef<HTMLDivElement>(null);
   const blocks = useRef<(HTMLElement | null)[]>([]);
   const anchors = useRef<(HTMLElement | null)[]>([]);
-  // measured: where each block rests, its heading height and its full height
-  const geo = useRef<{ rest: number[]; shut: number[]; open: number[] }>({
-    rest: [], shut: [], open: [],
+  // measured: where each block rests, its heading height and its full height;
+  // and for text that doesn't fit, how far it moves and over which stretch of the page
+  const geo = useRef<{ rest: number[]; shut: number[]; open: number[]; over: number[]; from: number[]; run: number[] }>({
+    rest: [], shut: [], open: [], over: [], from: [], run: [],
   });
 
   const place = useCallback(() => {
     const el = scroller.current;
     if (!el) return;
-    const { rest, shut, open } = geo.current;
+    const { rest, shut, open, over, from, run } = geo.current;
     const top = el.scrollTop;
     let stack = 0;
     const ys: number[] = [];
@@ -158,6 +165,12 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
       const hidden = Math.max(0, Math.round(open[i]) - room);
       b.style.clipPath = hidden ? `inset(0 0 ${hidden}px 0)` : "";
       b.dataset.folded = String(hidden > 0);
+      // only a stacked heading is on screen and has somewhere to go back to
+      const go = b.querySelector<HTMLElement>("[data-go]");
+      if (go) go.tabIndex = hidden > 0 ? 0 : -1;
+      const moved = run[i] ? over[i] * Math.min(1, Math.max(0, (top - from[i]) / run[i])) : 0;
+      const text = b.querySelector<HTMLElement>("[data-body]")?.firstElementChild as HTMLElement | null;
+      if (text) text.style.transform = moved ? `translateY(${-Math.round(moved)}px)` : "";
     }
   }, []);
 
@@ -181,7 +194,22 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
       const anchor = i === 0 ? 0 : anchors.current[i]?.offsetTop ?? 0;
       rest[i] = i === 0 ? 0 : Math.max(anchor, rest[i - 1] + open[i - 1]);
     }
-    geo.current = { rest, shut, open };
+    // what the text has to clear: the bottom of the view, and for the last block NEXT PROJECT
+    const view = scroller.current?.clientHeight ?? 0;
+    const last = (scroller.current?.scrollHeight ?? 0) - view;
+    const over: number[] = [];
+    const from: number[] = [];
+    const run: number[] = [];
+    let stack = 0;
+    for (let i = 0; i < rest.length; i++) {
+      const limit = i === rest.length - 1 ? view - (foot.current?.offsetHeight ?? 0) : view;
+      over[i] = Math.max(0, Math.max(stack, rest[i] - last) + open[i] - limit);
+      // from where it stops at the stack, or earlier if the page would end first
+      from[i] = Math.min(rest[i] - stack, Math.max(0, last - over[i]));
+      run[i] = Math.min(over[i], last - from[i]);
+      stack += shut[i] - overlap(i);
+    }
+    geo.current = { rest, shut, open, over, from, run };
     place();
   }, [place]);
 
@@ -222,11 +250,21 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
     el.scrollTo({ top: Math.max(0, rest[i] - stack), behavior: "smooth" });
   };
 
+  // tabbing to a link that's still below the view brings the end of its text up
+  const reveal = (e: React.FocusEvent<HTMLElement>) => {
+    const el = scroller.current;
+    const i = blocks.current.indexOf(e.target.closest("section"));
+    if (!el || i === -1 || !geo.current.over[i]) return;
+    if (e.target.getBoundingClientRect().bottom > el.getBoundingClientRect().bottom) {
+      el.scrollTop = geo.current.from[i] + geo.current.run[i];
+    }
+  };
+
   return (
     <div className={s.scroller} ref={scroller}>
       <div className={s.layout}>
         <aside className={s.side} ref={side}>
-          <div className={s.stack}>
+          <div className={s.stack} onFocus={reveal}>
             <section
               className={`${s.block} ${s.intro}`}
               ref={(el) => { blocks.current[0] = el; }}
@@ -236,7 +274,9 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                   <ArrowCell corner="topLeft" />
                 </Link>
                 <h1 className={s.title} onClick={() => goTo(0)}>
-                  {project.title}
+                  <button type="button" className={s.go} data-go tabIndex={-1}>
+                    {project.title}
+                  </button>
                 </h1>
               </div>
               <div data-body className={s.body}>
@@ -289,7 +329,9 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                 ref={(el) => { blocks.current[i + 1] = el; }}
               >
                 <h2 data-head className={s.label} onClick={() => goTo(i + 1)}>
-                  {c.label}
+                  <button type="button" className={s.go} data-go tabIndex={-1}>
+                    {c.label}
+                  </button>
                 </h2>
                 <div data-body className={s.body}>
                   <div className={s.bodyIn}>
@@ -300,7 +342,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
             ))}
           </div>
 
-          <div className={s.foot}>
+          <div className={s.foot} ref={foot}>
             <Link href={`/projects/${next.slug}`} className={s.next} data-arrow-host>
               <span className={s.nextLabel}>Next project</span>
               <ArrowCell corner="inline" />

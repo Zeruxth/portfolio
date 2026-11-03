@@ -46,8 +46,10 @@
   background: var(--bg);
   transition: background 0.18s ease;
 }
-.tab:not([data-active="true"]):hover::before,
 .tab:not([data-active="true"]):has(:focus-visible)::before { background: var(--ink); }
+@media (hover: hover) {
+  .tab:not([data-active="true"]):hover::before { background: var(--ink); }
+}
 
 .inner {
   position: relative;
@@ -61,8 +63,10 @@
 /* only the first tab draws a left edge; the rest sit under the previous diagonal */
 .bar > .tab:first-child .inner { border-left: 1px solid var(--ink); }
 
-.tab:not([data-active="true"]):hover .inner,
 .tab:not([data-active="true"]):has(:focus-visible) .inner { color: var(--bg); }
+@media (hover: hover) {
+  .tab:not([data-active="true"]):hover .inner { color: var(--bg); }
+}
 
 /* the logo tab is exactly as wide as the rail: rail - 71 + the 72px diagonal */
 .logoTab .inner { width: calc(var(--rail) - 71px); padding: 0; position: relative; }
@@ -108,5 +112,8 @@
   color: inherit;
 }
 .close svg { display: block; width: 100%; height: 100%; stroke: currentColor; }
+/* the mark stays small, the place to hit it doesn't */
+.close { position: relative; }
+.close::after { content: ""; position: absolute; inset: -14px; }
 
 .link { display: flex; align-items: stretch; color: inherit; }

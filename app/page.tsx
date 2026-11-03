@@ -8,5 +8,10 @@ import { HOME_OPEN } from "@/lib/site";
 export const metadata: Metadata = HOME_OPEN ? {} : { robots: { index: false, follow: false } };
 
 export default function Home() {
-  return HOME_OPEN ? <KineticIntro text={INTRO} /> : <ClosedHome />;
+  return (
+    <>
+      <h1 className="sr-only">Aki Yamin</h1>
+      {HOME_OPEN ? <KineticIntro text={INTRO} /> : <ClosedHome />}
+    </>
+  );
 }

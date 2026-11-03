@@ -113,7 +113,7 @@ export const SMALL_PROJECTS: SmallProject[] = [
     open: [[1]],
     tags: ["Print Design", "Illustration"],
     description:
-      "A punch card I designed for my sister-in-law's home bakery. I went with bright colors and playful food illustrations to make something a little more fun to bring back next time.",
+      "A punch card I designed for my sister-in-law’s home bakery. I went with bright colors and playful food illustrations to make something a little more fun to bring back next time.",
     images: images("daisy", [[1350, 1800]]),
   },
   {
@@ -156,7 +156,7 @@ export const SMALL_PROJECTS: SmallProject[] = [
     open: [[1]],
     tags: ["Poster Design", "Typography"],
     description:
-      "Life can feel like trash sometimes, but that doesn't mean we can't do something about it. A little reminder to take matters into our own hands, made using a typeface by my friend @yonatanalperin123.",
+      "Life can feel like trash sometimes, but that doesn’t mean we can’t do something about it. A little reminder to take matters into our own hands, made using a typeface by my friend @yonatanalperin123.",
     link: { text: "@yonatanalperin123", href: "https://www.instagram.com/yonatanalperin123/" },
     images: images("life-is-trash", [[1438, 1800]]),
   },
@@ -187,7 +187,7 @@ export const SMALL_PROJECTS: SmallProject[] = [
     open: [[1]],
     tags: ["Motion Design", "Event Graphics"],
     description:
-      "An animated poster I made for a friend's Halloween party. It moves between pumpkins, skulls, spiders, and other Halloween imagery, with bright iridescent colors against a dark background.",
+      "An animated poster I made for a friend’s Halloween party. It moves between pumpkins, skulls, spiders, and other Halloween imagery, with bright iridescent colors against a dark background.",
     images: [{ src: "/smaller-projects/halloween-night/1.jpg", w: 864, h: 1080, video: "/smaller-projects/halloween-night/loop.mp4" }],
   },
   {
@@ -209,7 +209,7 @@ export const SMALL_PROJECTS: SmallProject[] = [
     open: [[1]],
     tags: ["Postcard Design", "Illustration"],
     description:
-      "A postcard I made for a Hanukkah exchange between students. Pixel-style illustrations, oversized typography, and a holiday greeting that isn't exactly traditional.",
+      "A postcard I made for a Hanukkah exchange between students. Pixel-style illustrations, oversized typography, and a holiday greeting that isn’t exactly traditional.",
     images: images("happy-hanukkah", [[1180, 1770]]),
   },
 ];

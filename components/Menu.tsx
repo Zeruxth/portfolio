@@ -28,7 +28,7 @@ export default function Menu() {
             data-active={section.key === active.key}
             aria-current={section.key === active.key ? "page" : undefined}
             style={{ "--c": section.color, "--on": section.ink } as React.CSSProperties}
-            onPointerEnter={() => setHovered(section.key)}
+            onPointerEnter={(e) => e.pointerType !== "touch" && setHovered(section.key)}
             onFocus={() => setHovered(section.key)}
             onBlur={() => setHovered(null)}
           >

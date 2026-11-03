@@ -36,10 +36,15 @@
 /* beside a label, inside a host that is itself docked */
 .cell[data-corner="inline"] { border-left: 1px solid currentColor; }
 
-[data-arrow-host]:hover .cell,
 [data-arrow-host]:focus-visible .cell {
   background: var(--arrow-cell-bg, var(--ink));
   color: var(--arrow-cell-fg, var(--bg));
+}
+@media (hover: hover) {
+  [data-arrow-host]:hover .cell {
+    background: var(--arrow-cell-bg, var(--ink));
+    color: var(--arrow-cell-fg, var(--bg));
+  }
 }
 
 /* the svg clips to its own box, so the arrow leaves one side and returns on the other */
@@ -49,9 +54,13 @@
   50%    { transform: translateX(calc(var(--arrow-w) * -1)); }
   100%   { transform: translateX(0); }
 }
-[data-arrow-host]:hover .cell:not([data-hidden]) g,
 [data-arrow-host]:focus-visible .cell:not([data-hidden]) g {
   animation: arrowSlide 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+}
+@media (hover: hover) {
+  [data-arrow-host]:hover .cell:not([data-hidden]) g {
+    animation: arrowSlide 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+  }
 }
 
 /* hidden at rest, so it only does the second half of the slide */
@@ -60,11 +69,15 @@
   to   { transform: translateX(0); }
 }
 .cell[data-hidden] { opacity: 0; }
-[data-arrow-host]:hover .cell[data-hidden],
 [data-arrow-host]:focus-visible .cell[data-hidden] { opacity: 1; }
-[data-arrow-host]:hover .cell[data-hidden] g,
 [data-arrow-host]:focus-visible .cell[data-hidden] g {
   animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1);
+}
+@media (hover: hover) {
+  [data-arrow-host]:hover .cell[data-hidden] { opacity: 1; }
+  [data-arrow-host]:hover .cell[data-hidden] g {
+    animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

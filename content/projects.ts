@@ -4,9 +4,7 @@
  *
  * `image` is a path under /public. One square image per project is enough —
  * the collapsed row shows it at 48px in luminosity blend, the open row at 363px
- * in full colour. Null falls back to generated placeholder art.
- *
- * TODO(aki): titles below are real; everything marked PLACEHOLDER needs your copy.
+ * in full colour.
  */
 export interface Project {
   slug: string;
@@ -18,9 +16,9 @@ export interface Project {
   year: string;
   /** optional third metadata line, e.g. "Graduation project" */
   note?: string;
-  image: string | null;
-  /** the inner page; projects without one fall back to the scaffold */
-  study?: CaseStudy;
+  image: string;
+  /** the inner page */
+  study: CaseStudy;
 }
 
 /**
@@ -135,7 +133,7 @@ const seaImg = img("in-front-of-the-sea");
 const seaVid = vid("in-front-of-the-sea");
 
 const RIOT_SUMMARY =
-  "Polyflora is a speculative, plant-based alternative to conventional plastics, designed to disappear when no longer needed. Built around the idea “Isn't Made to Last,” the project explores a different approach to everyday materials, combining organic textures, translucent forms, and structured typography to balance the natural and the engineered.";
+  "Polyflora is a speculative, plant-based alternative to conventional plastics, designed to disappear when no longer needed. Built around the idea “Isn’t Made to Last,” the project explores a different approach to everyday materials, combining organic textures, translucent forms, and structured typography to balance the natural and the engineered.";
 
 const riotImg = img("blooming-riot");
 const riotVid = vid("blooming-riot");
@@ -144,7 +142,7 @@ const riotVid = vid("blooming-riot");
 const RIOT_PAGE = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/blooming-riot/index.html`;
 
 const INDEX_SUMMARY =
-  "Index Gallery is a proposed visual identity for an exhibition space connected to the University of Haifa's main library. The concept extends the library's role of collecting, organizing, and sharing knowledge into the gallery, treating each exhibition as an entry in an ever-growing visual index.";
+  "Index Gallery is a proposed visual identity for an exhibition space connected to the University of Haifa’s main library. The concept extends the library’s role of collecting, organizing, and sharing knowledge into the gallery, treating each exhibition as an entry in an ever-growing visual index.";
 
 const indexImg = img("index-gallery");
 const indexVid = vid("index-gallery");
@@ -153,16 +151,6 @@ const indexVid = vid("index-gallery");
 const INDEX_PAGE = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/index-gallery/index.html`;
 
 export const PROJECTS: Project[] = [
-  {
-    slug: "my-life-is-a-beautiful-attack",
-    title: "My life is a beautiful attack",
-    description:
-      "A research book and interactive website exploring the visual language of monsters.",
-    disciplines: ["Editorial", "Web", "Research"],
-    year: "2026",
-    note: "Graduation project",
-    image: null,
-  },
   {
     slug: "the-monster-archetype",
     title: "The monster archetype",
@@ -431,7 +419,7 @@ export const PROJECTS: Project[] = [
       chapters: [
         {
           label: "The visual system",
-          text: "The visual system operates on two levels. The gallery's main identity draws from the structure and visual language of books, while individual exhibitions use a more detailed system inspired by indexes, catalogues, and classification. The contrast in scale and typography creates a distinction between the gallery and its exhibitions, while allowing both identities to work together.",
+          text: "The visual system operates on two levels. The gallery’s main identity draws from the structure and visual language of books, while individual exhibitions use a more detailed system inspired by indexes, catalogues, and classification. The contrast in scale and typography creates a distinction between the gallery and its exhibitions, while allowing both identities to work together.",
           rows: [
             [
               indexImg("Poster on the wall", "wall-poster.jpg"),

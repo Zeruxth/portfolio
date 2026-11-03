@@ -45,6 +45,10 @@
   text-transform: uppercase;
 }
 
+/* the outline goes on the whole row */
+.toggle { all: unset; display: block; cursor: pointer; }
+.toggle:focus-visible { outline: none; }
+
 .desc {
   font-family: var(--mono);
   font-size: 18px;
@@ -106,7 +110,7 @@
               filter 0.3s ease;
 }
 .row:hover .cover,
-.row:focus-visible .cover { filter: none; }
+.row:has(.toggle:focus-visible) .cover { filter: none; }
 /* Collapsed, the description and ENTER are zero-height but still flex children:
    the 16px gap survives and space-between pushes the title off centre, which
    also inflates the row past its 81px. */
@@ -136,7 +140,7 @@
 .revealIn { overflow: hidden; min-height: 0; }
 .row[data-open="true"] .reveal { grid-template-rows: 1fr; }
 
-.row:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.row:has(.toggle:focus-visible) { outline: 2px solid var(--ink); outline-offset: -4px; }
 
 @media (prefers-reduced-motion: reduce) {
   .row { animation: none; }

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/content/projects";
-import { placeholderTile } from "@/lib/placeholder";
 import { ArrowCell } from "./ArrowCell";
 import s from "./ProjectList.module.css";
 
@@ -22,7 +21,6 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
   // Touch has no hover, so its first tap opens and its second goes in
   const router = useRouter();
   const [open, setOpen] = useState<string | null>(null);
-  const toggle = (slug: string) => setOpen((o) => (o === slug ? null : slug));
 
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const pending = useRef<string | null>(null);
@@ -61,9 +59,6 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             className={s.row}
             style={{ animationDelay: `${i * 55}ms` }}
             data-open={isOpen}
-            tabIndex={0}
-            aria-expanded={isOpen}
-            role="button"
             onPointerMove={(e) => hover(project.slug, e)}
             onClick={(e) => {
               // dragging across the description to copy it isn't a click on the row
@@ -74,18 +69,16 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
                 setOpen(project.slug);
               }
             }}
-            onKeyDown={(e) => {
-              if (e.target !== e.currentTarget) return;
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggle(project.slug);
-              }
-            }}
           >
             <div className={s.main}>
               <div>
-                <h2 className={s.title}>{project.title}</h2>
-                <div className={s.reveal}>
+                <h2 className={s.title}>
+                  {/* the row takes the click; this is the way in for a keyboard or a screen reader */}
+                  <button type="button" className={s.toggle} aria-expanded={isOpen}>
+                    {project.title}
+                  </button>
+                </h2>
+                <div className={s.reveal} inert={!isOpen}>
                   <div className={s.revealIn}>
                     <p className={s.desc}>{project.description}</p>
                   </div>
@@ -94,7 +87,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
 
             </div>
 
-            <div className={`${s.reveal} ${s.metaCol}`}>
+            <div className={`${s.reveal} ${s.metaCol}`} inert={!isOpen}>
               <div className={s.revealIn}>
                 <ul className={s.meta}>
                   <li>
@@ -129,11 +122,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
 
             <div
               className={s.cover}
-              style={{
-                backgroundImage: project.image
-                  ? `url('${BASE}${project.image}')`
-                  : placeholderTile(i),
-              }}
+              style={{ backgroundImage: `url('${BASE}${project.image}')` }}
             />
           </div>
         );

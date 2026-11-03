@@ -1,40 +1,25 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PROJECTS } from "@/content/projects";
 import CaseStudy from "@/components/CaseStudy";
-import s from "../../page.module.css";
+import { pageMeta } from "@/lib/meta";
+
+type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
   return PROJECTS.map((p) => ({ slug: p.slug }));
 }
 
-export default async function ProjectPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const project = PROJECTS.find((p) => p.slug === slug);
+  if (!project) return {};
+  return pageMeta(project.title, project.description, `/projects/${slug}/`, project.image);
+}
+
+export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
   const i = PROJECTS.findIndex((p) => p.slug === slug);
   if (i === -1) notFound();
-  const project = PROJECTS[i];
-
-  if (project.study) {
-    return <CaseStudy project={project} next={PROJECTS[(i + 1) % PROJECTS.length]} />;
-  }
-
-  return (
-    <>
-      <div className={s.head}>
-        <span>{project.title}</span>
-        <span>
-          {project.disciplines.join("/")} &middot; {project.year}
-        </span>
-      </div>
-      <div className={s.body}>
-        <p className={s.prose}>
-          Case study copy goes here. This template is scaffolding — the project page
-          has not been designed yet.
-        </p>
-      </div>
-    </>
-  );
+  return <CaseStudy project={PROJECTS[i]} next={PROJECTS[(i + 1) % PROJECTS.length]} />;
 }
