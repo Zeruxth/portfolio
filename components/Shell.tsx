@@ -40,7 +40,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         </div>
         {/* the band belongs to the homepage only — no other designed frame has it */}
         {active.key === "home" && !closed && (
-          <Band section={shown} open={hot && hovered !== "home"} />
+          <Band section={shown} />
         )}
       </div>
     </div>
