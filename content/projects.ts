@@ -9,7 +9,10 @@
 export interface Project {
   slug: string;
   title: string;
-  /** one or two sentences, set in mono under the title */
+  /**
+   * the short preview set in mono under the title on the projects list (and the
+   * page's meta description); the inner page carries the longer `study.summary`
+   */
   description: string;
   /** rendered slash-joined, spaced slashes: ["Editorial","Web"] -> EDITORIAL / WEB */
   disciplines: string[];
@@ -110,6 +113,12 @@ const tmaVid = vid("the-monster-archetype");
 const MONSTER_SUMMARY =
   "A research-based visual project exploring how monsters are depicted across cultures, and the recurring traits that shape the idea of the “monster.” Drawing on Rorschach as a way of looking at projection and interpretation, the project connects mythology, emotion and the way we continue to create monsters today.";
 
+const ATTACK_SUMMARY =
+  "A vinyl record and lyric booklet for Alon Eder’s My Life Is a Beautiful Attack. Inspired by the contrast between harshness and tenderness, the illustrations pair sharp, thorny plants with delicate objects and imagery drawn from the lyrics and meanings of the songs, bringing these opposing qualities together into one visual language.";
+
+const attackImg = img("my-life-is-a-beautiful-attack");
+const attackVid = vid("my-life-is-a-beautiful-attack");
+
 const ZOO_SUMMARY =
   "ZOO is an Israeli distillery imagined as a living zoo, where every spirit becomes an animal and every botanical ingredient becomes part of its habitat. The identity builds this world through a restrained system of animal and botanical illustrations, playful language and packaging that turns each bottle into a different resident of the ZOO.";
 
@@ -155,7 +164,7 @@ export const PROJECTS: Project[] = [
     slug: "the-monster-archetype",
     title: "The monster archetype",
     // meta and copy are from the inner page (Figma 2123:4301), thumbnail from 2129:611
-    description: MONSTER_SUMMARY,
+    description: "A 296-page illustrated book and interactive website examining how monsters represent emotions across cultures, combining visual research, original illustrations, and Rorschach-inspired experiences.",
     disciplines: ["Editorial Design", "Illustration", "Web Design"],
     year: "2026",
     note: "Graduation project",
@@ -212,10 +221,36 @@ export const PROJECTS: Project[] = [
     },
   },
   {
+    slug: "my-life-is-a-beautiful-attack",
+    title: "My life is a beautiful attack",
+    // meta and copy are from the inner page (Figma 2312:1463), thumbnail from 2316:1922
+    description: "Vinyl artwork and a lyric booklet for Alon Eder’s album, pairing thorny plants and delicate objects with imagery drawn from the songs.",
+    disciplines: ["Album Artwork", "Editorial Design", "Typography", "Illustration"],
+    year: "2025",
+    note: "Student project",
+    image: "/projects/my-life-is-a-beautiful-attack/thumb.jpg",
+    study: {
+      summary: ATTACK_SUMMARY,
+      // stills flattened from their Figma frames at 2x; the booklet is a video
+      intro: [
+        [attackImg("Record sleeve, opened", "sleeve.jpg", WIDE)],
+        [attackImg("Birds", "birds.jpg"), attackImg("Heart in thorns", "heart.jpg")],
+        [attackImg("Thorns at dusk", "thorns.jpg"), attackImg("Night", "night.jpg")],
+        // the booklet flipping through, at the size and crop of its Figma frame (2312:1546)
+        [attackVid("Lyric booklet, flipped through", "booklet", WIDE, {
+          ground: "#000000",
+          frame: { left: 11.227, top: -25.328, width: 77.546, height: 150.656 },
+        })],
+        [attackImg("Vinyl in the grass", "vinyl.jpg"), attackImg("Sleeves in the grass", "sleeves.jpg")],
+      ],
+      chapters: [],
+    },
+  },
+  {
     slug: "zoo-distillery",
     title: "Zoo distillery",
     // meta and copy are from the inner page (Figma 2135:722), thumbnail from 2135:981
-    description: ZOO_SUMMARY,
+    description: "An imagined Israeli distillery where every spirit becomes an animal, connecting its character and habitat to the botanical ingredients used to make it.",
     disciplines: ["Branding", "Packaging", "Illustration"],
     year: "2026",
     note: "Student project",
@@ -265,7 +300,7 @@ export const PROJECTS: Project[] = [
     slug: "we-are-screwed",
     title: "We are screwed",
     // meta and copy are from the inner page (Figma 2176:614)
-    description: SCREWED_SUMMARY,
+    description: "An interactive book about questionable decisions throughout history, inviting readers to revisit stupid decisions, consider alternatives, while trying to survive your choices.",
     disciplines: ["Book design", "Typography"],
     year: "2025",
     note: "Student project",
@@ -300,7 +335,7 @@ export const PROJECTS: Project[] = [
     slug: "haifa-film-festival",
     title: "Haifa International Film Festival",
     // meta and copy are from the inner page (Figma 2183:2758), thumbnail from 2183:2844
-    description: HAIFA_SUMMARY,
+    description: "A festival identity inspired by camera optics and viewfinders, using framing, focus, and image-driven gradients to create a flexible visual language.",
     disciplines: ["Festival Branding", "Visual Identity", "Web Design"],
     year: "2025",
     note: "Student project",
@@ -343,7 +378,7 @@ export const PROJECTS: Project[] = [
     slug: "in-front-of-the-sea",
     title: "In front of the sea Caesarea",
     // meta and copy are from the inner page (Figma 2196:667), thumbnail from 2196:783
-    description: SEA_SUMMARY,
+    description: "A boutique hospitality brand in Caesarea, drawing inspiration from ancient mosaics, natural textures, and the surrounding Mediterranean landscape.",
     disciplines: ["Brand Identity", "Web Design"],
     year: "2025",
     image: "/projects/in-front-of-the-sea/thumb.jpg",
@@ -365,9 +400,9 @@ export const PROJECTS: Project[] = [
   },
   {
     slug: "blooming-riot",
-    title: "Blooming Riot",
+    title: "Blooming Riot // Polyflora",
     // meta and copy are from the inner page (Figma 2210:2076), thumbnail the poster's leaf
-    description: RIOT_SUMMARY,
+    description: "A speculative plant-based alternative to conventional plastics, developed around the idea that everyday products shouldn’t have to last forever.",
     disciplines: ["Brand Identity", "Visual Design", "Web Design"],
     year: "2025",
     note: "Student project",
@@ -394,7 +429,7 @@ export const PROJECTS: Project[] = [
     slug: "index-gallery",
     title: "Index gallery",
     // meta and copy are from the inner page (Figma 2224:2239), thumbnail from 2224:2352
-    description: INDEX_SUMMARY,
+    description: "A proposed identity for a university gallery connected to a library, treating each exhibition as an entry in an ever-growing visual index.",
     disciplines: ["Visual Identity", "Typography", "Exhibition Design", "Web Design"],
     year: "2025",
     note: "Student project",
