@@ -168,6 +168,13 @@
   gap: 16px;
 }
 .grid[data-compact="true"] .tagsAndMore .tags { padding-top: 0; }
+/*
+ * On a phone a tile's caption is one line: its name and how many more images
+ * there are. The tags don't fit beside a name at this width, so they wait for
+ * the opened view (the button's label still reads them out).
+ */
+.grid[data-compact="true"] .face .tags { display: none; }
+.grid[data-compact="true"] .caption > :first-child { font-size: 18px; line-height: 24px; }
 .grid[data-compact="true"] .tags,
 .grid[data-compact="true"] .tags * { white-space: nowrap; flex-wrap: nowrap; }
 .grid[data-compact="true"] .tags > span,

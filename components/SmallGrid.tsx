@@ -22,9 +22,8 @@ const GAP = 8;
 const TEXT_GAP = 16;
 /**
  * The caption's height. Wide, every caption is this tall, title and tags beside the
- * corner square. On a phone-width grid the square becomes a "+N" at the end of the
- * tags (SmallGrid.module.css, [data-compact]) and each caption hugs its own text:
- * one line when the title and tags fit side by side, two when they don't. Those heights
+ * corner square. On a phone-width grid the caption is one line, the title and a
+ * "+N" (SmallGrid.module.css, [data-compact]), hugging its text. Those heights
  * are measured on the page; this is the guess before they are.
  */
 const CAPTION = 102;
