@@ -144,25 +144,8 @@
 
 /* ---- a phone-width grid ([data-compact], SmallGrid.tsx) ---- */
 
-/* the count rides on the images' corner, so the caption holds only text */
-.badge { display: none; }
-.grid[data-compact="true"] .frame { position: relative; }
-.grid[data-compact="true"] .badge {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: var(--bg);
-  font-family: var(--ui);
-  font-size: 22px;
-  line-height: 28px;
-  transition: background 0.2s ease, color 0.2s ease;
-}
+/* the count is a word at the end of the tags' line; the square has no room here */
+.moreText { display: none; }
 .grid[data-compact="true"] .more { display: none; }
 
 /*
@@ -176,8 +159,25 @@
   align-items: baseline;
   gap: 4px 16px;
 }
-.grid[data-compact="true"] .tagsAndMore { flex: 0 1 auto; min-width: 0; }
+/* the tags and the count: one line that never breaks, at the phone's label size */
+.grid[data-compact="true"] .tagsAndMore {
+  flex: 0 0 auto;
+  min-width: 0;
+  flex-direction: row;
+  align-items: baseline;
+  gap: 16px;
+}
 .grid[data-compact="true"] .tagsAndMore .tags { padding-top: 0; }
+.grid[data-compact="true"] .tags,
+.grid[data-compact="true"] .tags * { white-space: nowrap; flex-wrap: nowrap; }
+.grid[data-compact="true"] .tags > span,
+.grid[data-compact="true"] .moreText {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12px;
+  text-transform: uppercase;
+}
+.grid[data-compact="true"] .moreText { display: inline; }
 
 .count,
 .arrow { grid-area: 1 / 1; }
@@ -210,7 +210,6 @@
 .face:focus-visible .arrow g { animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1); }
 
 @media (hover: hover) {
-  .face:hover .badge { background: var(--bg); color: var(--ink); }
   .face:hover { background: var(--ink); color: var(--bg); }
   .face:hover .more { background: var(--bg); color: var(--ink); opacity: 1; }
   .face:hover .count { opacity: 0; }

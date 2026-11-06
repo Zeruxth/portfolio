@@ -22,9 +22,9 @@ const GAP = 8;
 const TEXT_GAP = 16;
 /**
  * The caption's height. Wide, every caption is this tall, title and tags beside the
- * corner square. On a phone-width grid the square moves onto the images
- * (SmallGrid.module.css, [data-compact]) and each caption hugs its own text: one
- * line when the title and tags fit side by side, two when they don't. Those heights
+ * corner square. On a phone-width grid the square becomes a "+N" at the end of the
+ * tags (SmallGrid.module.css, [data-compact]) and each caption hugs its own text:
+ * one line when the title and tags fit side by side, two when they don't. Those heights
  * are measured on the page; this is the guess before they are.
  */
 const CAPTION = 102;
@@ -930,8 +930,6 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                     onClick={(e) => open(project.slug, e)}
                   >
                     <span className={s.frame}>
-                      {/* a phone's way to say there's more: on the images' corner, off the text */}
-                      {more > 0 && <span className={s.badge}>+{more}</span>}
                       {rows.map((images, r) => (
                         <span key={r} className={s.tileRow}>
                           {images.map((image) => (
@@ -946,6 +944,8 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                         <span className={s.tags}>
                           <Tags tags={project.tags} />
                         </span>
+                        {/* a phone's way to say there's more: a word at the end of the line */}
+                        {more > 0 && <span className={s.moreText}>+{more}</span>}
                         <span className={s.more}>
                           {more > 0 && <span className={s.count}>+{more}</span>}
                           <Arrow className={s.arrow} />
