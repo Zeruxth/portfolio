@@ -166,14 +166,14 @@
 .grid[data-compact="true"] .more { display: none; }
 
 /*
- * The title and the tags share a line, the tags level with the middle of the
- * title, when they fit; when they don't, the tags drop under it. Either way
- * the caption hugs its text, so the padding is the same on every side.
+ * The title and the tags share a line, sitting on the same baseline, when
+ * they fit; when they don't, the tags drop under it. Either way the caption
+ * hugs its text, so the padding is the same on every side.
  */
 .grid[data-compact="true"] .caption {
   min-height: 0;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   gap: 4px 16px;
 }
 .grid[data-compact="true"] .tagsAndMore { flex: 0 1 auto; min-width: 0; }
