@@ -16,7 +16,10 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 /** the layout width to work from before the page has measured itself */
 const DESIGN_WIDTH = 1110;
 const PAD = 16;
-const GAP = 16;
+/** between images: half the padding, so a set reads as one thing inside its frame */
+const GAP = 8;
+/** between the images and the opened text */
+const TEXT_GAP = 16;
 /** the padding, the gap under the images and the caption around a tile's images */
 const CHROME = PAD * 2 + 8 + 102;
 
@@ -458,14 +461,14 @@ function openShapeOf(project: SmallProject, width: number, screen: number, extra
   };
 
   // text beside a tall composition, unless the room it takes would stop the images growing
-  const besideRoom = edge + GAP + TEXT_BESIDE;
+  const besideRoom = edge + TEXT_GAP + TEXT_BESIDE;
   const beside = (width >= 820 || (single && width >= 640)) && 1 / a < 1.6 && (single || growth(width - besideRoom) >= 1.15);
   const around = beside ? besideRoom : edge;
   const under = (text: number): Line => ({ a, b: gaps + text + 1 - a * edge });
   const line = beside ? { a, b: gaps + edge - a * around } : under(extra);
   // padding, gap, title and gap, then the text's lines at the width it's likely to get
   const textLines = Math.ceil((project.description.length * 11) / Math.min(708, width * 0.64 - 33));
-  const pick = beside ? line : under(PAD * 2 + GAP + 54 + textLines * 23.4 + (project.site ? 38 : 0));
+  const pick = beside ? line : under(PAD * 2 + TEXT_GAP + 54 + textLines * 23.4 + (project.site ? 38 : 0));
 
   // with the whole width, one image stops at a screenful, unless the tile was already that big
   const tallest = Math.max(280, screen * 0.96 * (project.openSize ?? 1) - edge);

@@ -52,15 +52,16 @@
   flex: none;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
-/* images keep their own shape: Img sets each one's ratio and its share of the row */
+/* 8px between images (GAP in SmallGrid.tsx), against 16px of padding around them.
+   images keep their own shape: Img sets each one's ratio and its share of the row */
 .tileRow,
 .mosaicRow {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  gap: 8px;
 }
 .tileRow img,
 .tileRow video {
@@ -72,7 +73,7 @@
 .mosaicColumn {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 .mosaicColumn img,
 .mosaicColumn video {
@@ -259,5 +260,5 @@
 }
 
 /* Mosaic: everything at once, in rows of one height */
-.mosaic { display: flex; flex-direction: column; gap: 16px; }
+.mosaic { display: flex; flex-direction: column; gap: 8px; }
 
