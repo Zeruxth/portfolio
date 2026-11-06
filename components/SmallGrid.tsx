@@ -22,8 +22,9 @@ const GAP = 8;
 const TEXT_GAP = 16;
 /**
  * The caption's height. Wide, every caption is this tall, title and tags beside the
- * corner square. On a phone-width grid the caption is one line, the title and a
- * "+N" (SmallGrid.module.css, [data-compact]), hugging its text. Those heights
+ * corner square. On a phone-width grid the caption is one line, the title, hugging
+ * its text, and the square sits in the corner beside it (SmallGrid.module.css,
+ * [data-compact]). Those heights
  * are measured on the page; this is the guess before they are.
  */
 const CAPTION = 102;
@@ -943,8 +944,6 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                         <span className={s.tags}>
                           <Tags tags={project.tags} />
                         </span>
-                        {/* a phone's way to say there's more: a word at the end of the line */}
-                        {more > 0 && <span className={s.moreText}>+{more}</span>}
                         <span className={s.more}>
                           {more > 0 && <span className={s.count}>+{more}</span>}
                           <Arrow className={s.arrow} />

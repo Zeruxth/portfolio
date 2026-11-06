@@ -144,47 +144,23 @@
 
 /* ---- a phone-width grid ([data-compact], SmallGrid.tsx) ---- */
 
-/* the count is a word at the end of the tags' line; the square has no room here */
-.moreText { display: none; }
-.grid[data-compact="true"] .more { display: none; }
-
 /*
- * The title and the tags share a line, sitting on the same baseline, when
- * they fit; when they don't, the tags drop under it. Either way the caption
- * hugs its text, so the padding is the same on every side.
+ * On a phone a tile's caption is one line, its name, hugging its text so the
+ * padding is the same on every side. The tags don't fit beside a name at this
+ * width, so they wait for the opened view (the button's label still reads them).
  */
-.grid[data-compact="true"] .caption {
-  min-height: 0;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 16px;
-}
-/* the tags and the count: one line that never breaks, at the phone's label size */
-.grid[data-compact="true"] .tagsAndMore {
-  flex: 0 0 auto;
-  min-width: 0;
-  flex-direction: row;
-  align-items: baseline;
-  gap: 16px;
-}
-.grid[data-compact="true"] .tagsAndMore .tags { padding-top: 0; }
-/*
- * On a phone a tile's caption is one line: its name and how many more images
- * there are. The tags don't fit beside a name at this width, so they wait for
- * the opened view (the button's label still reads them out).
- */
-.grid[data-compact="true"] .face .tags { display: none; }
+.grid[data-compact="true"] .caption { min-height: 0; align-items: baseline; }
 .grid[data-compact="true"] .caption > :first-child { font-size: 18px; line-height: 24px; }
+.grid[data-compact="true"] .face .tags { display: none; }
+
+/* the square, as on desktop, flush in the tile's corner: its top meets the
+   caption line's, since that line and the padding under it make its 40px */
+.grid[data-compact="true"] .more { position: absolute; right: 0; bottom: 0; margin: 0; }
+
+/* the opened view's tags: one line at the phone's label size */
 .grid[data-compact="true"] .tags,
 .grid[data-compact="true"] .tags * { white-space: nowrap; flex-wrap: nowrap; }
-.grid[data-compact="true"] .tags > span,
-.grid[data-compact="true"] .moreText {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: 0.12px;
-  text-transform: uppercase;
-}
-.grid[data-compact="true"] .moreText { display: inline; }
+.grid[data-compact="true"] .tags > span { font-size: 12px; letter-spacing: 0.12px; }
 
 .count,
 .arrow { grid-area: 1 / 1; }
