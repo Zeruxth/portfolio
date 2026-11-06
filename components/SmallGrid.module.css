@@ -153,9 +153,13 @@
 .grid[data-compact="true"] .caption > :first-child { font-size: 18px; line-height: 24px; }
 .grid[data-compact="true"] .face .tags { display: none; }
 
-/* the square, as on desktop, flush in the tile's corner: its top meets the
-   caption line's, since that line and the padding under it make its 40px */
-.grid[data-compact="true"] .more { position: absolute; right: 0; bottom: 0; margin: 0; }
+/*
+ * The square, as on desktop, flush in the tile's corner. 34px rather than 40,
+ * so it clears the images by what the title's letters do (8px of gap plus the
+ * room above the caps in its 24px line), at the title's own 18px.
+ */
+.grid[data-compact="true"] .more { position: absolute; right: 0; bottom: 0; margin: 0; width: 34px; height: 34px; }
+.grid[data-compact="true"] .count { font-size: 18px; line-height: 24px; }
 
 /* the opened view's tags: one line at the phone's label size */
 .grid[data-compact="true"] .tags,
