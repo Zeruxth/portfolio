@@ -9,6 +9,10 @@
 
 .nav { display: flex; flex-direction: column; }
 
+/* the fold only exists below the desktop layout; up there the rail is always open */
+.toggle { display: none; }
+.drawer, .drawerIn { display: contents; }
+
 .row {
   position: relative;
   display: block;
@@ -92,4 +96,64 @@
 
 @media (max-width: 1100px) {
   .rail { width: 100%; border-right: 0; border-bottom: 1px solid var(--ink); }
+
+  /*
+   * The MENU row: a menu row, its mark the tab's close turned into a plus
+   * while shut, in a box ruled off on its inner side the way an arrow's is.
+   */
+  .toggle {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    width: 100%;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .toggle > .title { padding: 12px 16px; }
+  .toggle:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+  .toggleMark {
+    flex: none;
+    width: 48px;
+    display: grid;
+    place-items: center;
+    border-left: 1px solid var(--ink);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .toggleMark svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .rail:not([data-open="true"]) .toggleMark svg { transform: rotate(45deg); }
+  /* the box fills on hover, as an arrow's does */
+  .toggle:focus-visible .toggleMark { background: var(--ink); color: var(--bg); }
+  @media (hover: hover) {
+    .toggle:hover .toggleMark { background: var(--ink); color: var(--bg); }
+  }
+
+  .drawer {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s;
+  }
+  .drawerIn { display: block; overflow: hidden; min-height: 0; }
+  /* shut: out of the tab order too, once it has finished folding */
+  .rail:not([data-open="true"]) .drawer {
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition: grid-template-rows 0.3s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.3s;
+  }
+  .rail[data-open="true"] .toggle { border-bottom: 1px solid var(--ink); }
+
+  /* stacked straight under the last row, so the rule is already there */
+  .contact { border-top: 0; }
+
+  /* a list to pick from, not a page title: smaller than the headings below it */
+  .title { font-size: 18px; line-height: 24px; }
+  .row { padding: 12px 16px; }
+  .contact { font-size: 18px; padding: 12px 48px 12px 16px; }
 }

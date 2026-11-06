@@ -28,8 +28,10 @@ export default function Band({ section }: { section: Section }) {
 
     const measure = () => {
       const panel = el.parentElement;
+      const cs = getComputedStyle(el);
+      const inner = el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const byWidth =
-        (el.clientWidth - GAPS - RULE_MIN) /
+        (inner - GAPS - RULE_MIN) /
         (MONO_ADVANCE * (PREFIX.length + LONGEST_WORD));
       const byHeight = panel
         ? (panel.clientHeight * BAND_SHARE - 32) / LINE

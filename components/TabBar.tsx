@@ -42,6 +42,8 @@ export default function TabBar() {
         <div
           key={tab.id}
           className={s.tab}
+          // a tab on the way to the current one; a phone only has room for the last
+          data-mid={i < tabs.length - 1 || undefined}
           style={{ zIndex: tabs.length - i }}
         >
           <div className={s.inner}>

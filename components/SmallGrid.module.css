@@ -87,7 +87,7 @@
  */
 .caption {
   flex: none;
-  min-height: 102px;
+  min-height: var(--caption-h, 102px); /* CAPTION in SmallGrid.tsx */
   display: flex;
   justify-content: space-between;
   align-items: stretch;
@@ -141,6 +141,9 @@
   transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 [data-empty="true"] > .more { opacity: 0; }
+
+/* a compact grid: the square sits in the tile's corner without a row of its own */
+.grid[data-compact="true"] .more { position: absolute; right: 0; bottom: 0; margin: 0; }
 
 .count,
 .arrow { grid-area: 1 / 1; }

@@ -151,4 +151,11 @@
   .meta { width: 120px; font-size: 13px; }
   .title { font-size: 24px; }
   .desc { font-size: 15px; }
+  .enter { font-size: 16px; }
+}
+
+/* a phone: rows never open (a tap goes straight in), so the room the
+   metadata column keeps for an open row goes back to the title */
+@media (max-width: 700px) {
+  .metaCol { display: none; }
 }

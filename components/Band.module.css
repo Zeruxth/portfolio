@@ -40,3 +40,8 @@
   margin-bottom: var(--band-baseline, 1px);
   background-color: var(--accent);
 }
+
+/* stacked layouts: the words keep clear of the frame instead of touching it */
+@media (max-width: 1100px) {
+  .band { padding: 16px; }
+}

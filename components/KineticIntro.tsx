@@ -26,6 +26,8 @@ export default function KineticIntro({ text }: { text: string }) {
     const instance: KineticInstance = mountKinetic(
       { stage, intro: introEl, cells: cells.current, cols: cols.current, peri: peri.current, panels: panels.current },
       text,
+      // no hover to drive it, so it plays itself — always the grid, which reads best on a phone
+      window.matchMedia("(hover: hover)").matches ? {} : { autoplay: true, only: "Grid cell flip" },
     );
     return () => instance.destroy();
   }, [text]);

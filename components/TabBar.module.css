@@ -1,4 +1,6 @@
 .bar {
+  /* how wide each tab's diagonal runs */
+  --edge: 72px;
   flex: none;
   display: flex;
   align-items: stretch;
@@ -27,10 +29,10 @@
   position: relative;
   display: flex;
   align-items: stretch;
-  margin-right: -71px;
+  margin-right: calc(1px - var(--edge));
   color: var(--ink);
 }
-.tab + .tab .inner { padding-left: 74px; }
+.tab + .tab .inner { padding-left: calc(var(--edge) + 2px); }
 
 /*
  * The whole tab silhouette — rectangle plus diagonal — as ONE shape.
@@ -41,7 +43,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  clip-path: polygon(0 0, calc(100% - 72px) 0, 100% 100%, 0 100%);
+  clip-path: polygon(0 0, calc(100% - var(--edge)) 0, 100% 100%, 0 100%);
   /* opaque, so an earlier tab occludes the one behind it the way real tabs stack */
   background: var(--bg);
   transition: background 0.18s ease;
@@ -69,7 +71,7 @@
 }
 
 /* the logo tab is exactly as wide as the rail: rail - 71 + the 72px diagonal */
-.logoTab .inner { width: calc(var(--rail) - 71px); padding: 0; position: relative; }
+.logoTab .inner { width: calc(var(--rail) + 1px - var(--edge)); padding: 0; position: relative; }
 /*
  * Placed rather than padded. The mark is 36.5px tall in a 60px tab, so a 16px
  * padding box is shorter than the mark and align-items:center clamps it to the
@@ -87,7 +89,7 @@
 
 .edge {
   position: relative;
-  width: 72px;
+  width: var(--edge);
   height: var(--tab-h);
   flex: none;
   display: block;
@@ -117,3 +119,22 @@
 .close::after { content: ""; position: absolute; inset: -14px; }
 
 .link { display: flex; align-items: stretch; color: inherit; }
+
+/*
+ * A phone: the same folders, shorter and narrower. The logo tab stops being as
+ * wide as the rail (the rail is a full-width row up here), tabs on the way to
+ * the current one step aside, and a long name runs out under its diagonal.
+ */
+@media (max-width: 700px) {
+  .bar { --tab-h: 44px; --edge: 53px; }
+  .tab[data-mid] { display: none; }
+  .inner { padding: 12px; gap: 16px; }
+  .label { font-size: 18px; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .tab:not(.logoTab) { min-width: 0; }
+  .tab:not(.logoTab) .inner { min-width: 0; }
+  .logoTab { flex: none; }
+  .logoTab .inner { width: 62px; padding: 0; }
+  /* the 60px tab's mark at 44/60 */
+  .logo { left: 9.4px; top: 8.1px; width: 36.05px; height: 26.78px; }
+  .close { width: 9px; height: 9px; }
+}

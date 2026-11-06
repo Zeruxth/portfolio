@@ -129,6 +129,10 @@ function Rows({ rows }: { rows: MediaRow[] }) {
  * ends, so that last line arrives just as the next block does.
  *
  * Positions are written straight to the DOM on scroll — no React render per frame.
+ *
+ * Below the desktop layout there is no room beside the images, so the column
+ * comes apart: each block goes in front of its own chapter's images (--o is
+ * that reading order) and NEXT PROJECT goes after the last of them.
  */
 export default function CaseStudy({ project, next }: { project: Project; next: Project }) {
   const study = project.study;
@@ -267,6 +271,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
           <div className={s.stack} onFocus={reveal}>
             <section
               className={`${s.block} ${s.intro}`}
+              style={{ "--o": 0 } as React.CSSProperties}
               ref={(el) => { blocks.current[0] = el; }}
             >
               <div data-head className={s.introHead}>
@@ -326,6 +331,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
               <section
                 key={c.label}
                 className={s.block}
+                style={{ "--o": 2 * (i + 1) } as React.CSSProperties}
                 ref={(el) => { blocks.current[i + 1] = el; }}
               >
                 <h2 data-head className={s.label} onClick={() => goTo(i + 1)}>
@@ -343,6 +349,11 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
           </div>
 
           <div className={s.foot} ref={foot}>
+            {/* the way back, down here too once the top is a long scroll away; phone only */}
+            <Link href="/projects" className={s.prev} data-arrow-host>
+              <ArrowCell corner="inline" />
+              <span className={s.nextLabel}>Back</span>
+            </Link>
             <Link href={`/projects/${next.slug}`} className={s.next} data-arrow-host>
               <span className={s.nextLabel}>Next project</span>
               <ArrowCell corner="inline" />
@@ -351,11 +362,14 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
         </aside>
 
         <div className={s.media}>
-          <Rows rows={study.intro} />
+          <div className={s.chapter} style={{ "--o": 1 } as React.CSSProperties}>
+            <Rows rows={study.intro} />
+          </div>
           {study.chapters.map((c, i) => (
             <div
               key={c.label}
               className={s.chapter}
+              style={{ "--o": 2 * (i + 1) + 1 } as React.CSSProperties}
               ref={(el) => { anchors.current[i + 1] = el; }}
             >
               <Rows rows={c.rows} />

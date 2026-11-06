@@ -20,8 +20,18 @@ const PAD = 16;
 const GAP = 8;
 /** between the images and the opened text */
 const TEXT_GAP = 16;
+/**
+ * The caption's height. A phone-width grid has every tile full width and no hover,
+ * so the corner square stops holding a row of its own there (SmallGrid.module.css,
+ * [data-compact]) and the caption only has to hold the title and the tags.
+ */
+const CAPTION = 102;
+const CAPTION_COMPACT = 64;
+/** below this grid width the captions go compact */
+const COMPACT = 700;
+const captionFor = (width: number) => (width < COMPACT ? CAPTION_COMPACT : CAPTION);
 /** the padding, the gap under the images and the caption around a tile's images */
-const CHROME = PAD * 2 + 8 + 102;
+const chromeFor = (caption: number) => PAD * 2 + 8 + caption;
 
 const ratioOf = (row: SmallImage[]) => row.reduce((sum, image) => sum + image.w / image.h, 0);
 
@@ -42,12 +52,12 @@ function rowsOf(project: SmallProject) {
  */
 type Line = { a: number; b: number };
 
-function lineOf(project: SmallProject): Line {
+function lineOf(project: SmallProject, caption: number): Line {
   const rows = rowsOf(project);
   const a = rows.reduce((sum, row) => sum + 1 / ratioOf(row), 0);
   const gaps =
     GAP * (rows.length - 1) - rows.reduce((sum, row) => sum + (GAP * (row.length - 1)) / ratioOf(row), 0);
-  return { a, b: gaps + CHROME - PAD * 2 * a };
+  return { a, b: gaps + chromeFor(caption) - PAD * 2 * a };
 }
 
 const stacked = (lines: Line[]): Line => ({
@@ -597,9 +607,10 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
   const opened = openAt < 0 ? null : projects[openAt];
   const space = width ?? DESIGN_WIDTH;
 
+  const caption = captionFor(space);
   const lines = useMemo(
-    () => Object.fromEntries(projects.map((p) => [p.slug, lineOf(p)])) as Lines,
-    [projects],
+    () => Object.fromEntries(projects.map((p) => [p.slug, lineOf(p, caption)])) as Lines,
+    [projects, caption],
   );
   const mins = useMemo(
     () => Object.fromEntries(projects.map((p) => [p.slug, narrowest(p)])) as Record<string, number>,
@@ -856,7 +867,8 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
         ref={grid}
         className={s.grid}
         data-ready={width !== null}
-        style={{ height }}
+        data-compact={caption === CAPTION_COMPACT}
+        style={{ height, "--caption-h": `${caption}px` } as React.CSSProperties}
       >
           {projects.map((project) => {
             const isOpen = project.slug === anchor?.slug;

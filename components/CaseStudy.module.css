@@ -165,6 +165,11 @@
 }
 .nextLabel { padding: 0 16px; }
 
+/* BACK mirrors it in the bottom left corner: the box first, its rule on the inside */
+.prev { display: none; }
+.prev > span:first-child { border-left: 0; border-right: 1px solid currentColor; }
+.prev svg { transform: rotate(180deg); }
+
 /* images flush to the rule and the frame, 16px between everything */
 .media {
   flex: 1 1 0;
@@ -223,14 +228,53 @@
   .link, .inlineLink { animation: none !important; }
 }
 
-/* Not designed yet: below the desktop layout the sidebar simply sits on top. */
+/*
+ * Below the desktop layout the sidebar comes apart into the page: the side
+ * column, its stack and the media column dissolve (display: contents), so
+ * every block and every chapter is one item in a single column, put in
+ * reading order by --o. Each chapter's text sits in front of its images, and
+ * NEXT PROJECT closes the page. The script's positions are overridden here.
+ */
 @media (max-width: 1100px) {
   .scroller { overflow: visible; container-type: normal; }
-  .layout { flex-direction: column; align-items: stretch; }
-  .side { width: auto; border-right: 0; border-bottom: 1px solid var(--ink); }
-  .stack { position: static; height: auto; overflow: visible; }
-  .foot { position: static; }
-  .block { position: static; transform: none !important; }
-  .block { clip-path: none !important; }
-  .media { padding: 16px 0; }
+  .layout { flex-direction: column; align-items: stretch; gap: 16px; }
+  .side, .stack, .media { display: contents; }
+
+  .block,
+  .chapter { order: var(--o); }
+  .block {
+    position: static;
+    transform: none !important;
+    clip-path: none !important;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    /* images meet the rules flush, as they meet the frame */
+    margin: -16px 0;
+  }
+  /* the panel's frame is already above the first one */
+  .intro { border-top: 0; margin-top: 0; }
+  /* the script slides long text up under its heading; here it is all in view */
+  .bodyIn { transform: none !important; }
+  .block[data-folded="true"] .title,
+  .block[data-folded="true"] .label { cursor: auto; }
+
+  .foot { position: static; order: 9999; justify-content: space-between; }
+  .prev {
+    display: flex;
+    font-family: var(--mono);
+    line-height: 40px;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+  }
+
+  /*
+   * The phone's type steps down from desktop's by one ratio, so it keeps the
+   * same order of sizes: titles 24, body 15, details 13, labels 12, the
+   * corner links 16 (desktop 30/32, 18, 16, 14, 20). Chrome is 18 (desktop 22).
+   */
+  .title { font-size: 24px; line-height: 30px; }
+  .text { font-size: 15px; }
+  .meta { font-size: 13px; line-height: 1.3; gap: 12px 20px; }
+  .label { font-size: 12px; }
+  .next, .prev { font-size: 16px; }
 }

@@ -73,7 +73,14 @@ function faceMetrics(el: HTMLElement): FaceMetrics {
   return { base, capR: cap / base, descR: desc / base, blTopR: blFromTop / base, blBotR: (base - blFromTop) / base };
 }
 
-export function mountKinetic(h: KineticHandles, rawText: string): KineticInstance {
+export interface KineticOptions {
+  /** a touch screen has no cursor to play with, so a stand-in one plays on its own */
+  autoplay?: boolean;
+  /** play this one mechanic (by name) every time instead of dealing all seven */
+  only?: string;
+}
+
+export function mountKinetic(h: KineticHandles, rawText: string, opts: KineticOptions = {}): KineticInstance {
   const TEXT = rawText.replace(/\s+/g, " ").trim().toUpperCase();
   const WORDS = TEXT.split(" ");
   const ORIGINAL = h.intro.innerHTML;
@@ -110,6 +117,10 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
      because a mechanic mounted DURING an entry never hears about it: listeners
      added while an event is being dispatched do not receive that event. */
   let enterHook: (() => void) | null = null;
+
+  /* How big the grid's next burst is, as multiples of its usual reach and hold.
+     A real cursor always gets 1; the autoplay stand-in varies it per hop. */
+  const burst = { reach: 1, hold: 1 };
   function onStageEnter(fn: () => void) {
     enterHook = fn;
     h.stage.addEventListener("pointerenter", fn, sig());
@@ -198,16 +209,17 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
 
     // a small ragged patch, never the whole frame
     function flood(px: number, py: number) {
+      const R = reach * burst.reach, hold = HOLD * burst.hold;
       for (const b of blocks) {
-        const d = Math.hypot((b.cx - px) / reach, (b.cy - py) / (reach * 1.15));
+        const d = Math.hypot((b.cx - px) / R, (b.cy - py) / (R * 1.15));
         if (d > 1) continue;
         if (Math.random() > 0.22 + (1 - d) * 0.72) continue;
         if (b.on) clearTimeout(b.on);
         if (b.off) clearTimeout(b.off);
         b.on = later(() => {
           b.el.classList.add("is-on");
-          b.off = later(() => b.el.classList.remove("is-on"), HOLD + rnd(HOLD_JIT));
-        }, (d * reach * SPREAD) / 100);
+          b.off = later(() => b.el.classList.remove("is-on"), hold + rnd(HOLD_JIT));
+        }, (d * R * SPREAD) / 100);
       }
     }
 
@@ -680,7 +692,9 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
   /* Dealt from a shuffled bag, so a visitor meets all seven before any one
      repeats. Picking at random could leave some unseen for many entries. */
   let order: number[] = [];
+  const onlyIndex = MECHANICS.findIndex(([name]) => name === opts.only);
   function nextIndex(): number {
+    if (onlyIndex !== -1) return onlyIndex;
     if (!order.length) {
       order = MECHANICS.map((_, i) => i);
       for (let i = order.length - 1; i > 0; i--) {
@@ -732,10 +746,151 @@ export function mountKinetic(h: KineticHandles, rawText: string): KineticInstanc
   roll();
   void document.fonts?.ready.then(() => onResize?.());
 
+  const stopGhost = opts.autoplay ? ghost() : null;
+
+  /*
+   * AUTOPLAY. Every mechanic answers the cursor, and a phone has none, so a
+   * stand-in hops about the frame and sends the events a mouse would: moves,
+   * the paragraph's phrases entering, leaving the frame. Each hop eases in and
+   * out and then rests a beat, so the cells go off in bursts rather than a
+   * smear. Most bursts are small; now and then one fills most of the frame,
+   * and the frame always clears again after it, so the paragraph keeps
+   * coming back. On arrival the paragraph is left alone long enough to read. Dealing several mechanics, it stays a while with each, steps out
+   * and comes back in — which deals the next one, as a real cursor re-entering
+   * does; holding one, it never leaves. It only plays while on screen.
+   */
+  function ghost(): () => void {
+    const STAY = onlyIndex !== -1 ? Infinity : 6500, AWAY = 700;
+    const HOP = 420;
+    // the paragraph alone, before anything moves
+    const FIRST_READ = 2600;
+    const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+    // where the hop started, where it lands, and when it began
+    let from = { u: range(0.2, 0.8), v: range(0.2, 0.8) };
+    let to = from;
+    let hopAt = 0, rest = 260, hops = 0, lastBig = -9;
+    let first = true;
+    let frameId = 0, timer = 0;
+    let inside = false, inIntro = false, visible = false;
+    let over: Element | null = null;
+
+    const fire = (el: Element, type: string, x: number, y: number) =>
+      el.dispatchEvent(new PointerEvent(type, {
+        clientX: x, clientY: y, pointerType: "mouse", isPrimary: true,
+        bubbles: type === "pointermove",
+      }));
+    const hit = (r: DOMRect, x: number, y: number) => x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+
+    // a fresh spot a fair way off, kept clear of the very edges
+    function nextHop(now: number) {
+      from = to;
+      hops++;
+      // the first few stay small; a big one never follows another closely
+      const roll = Math.random();
+      const big = hops > 3 && hops - lastBig > 4 && roll < 0.2;
+      const medium = !big && hops > 2 && roll < 0.45;
+      let u = 0, v = 0;
+      if (big) {
+        // a fill starts near the middle, so it reaches every side
+        u = range(0.3, 0.7); v = range(0.3, 0.7);
+        lastBig = hops;
+        burst.reach = range(3.2, 4.4); burst.hold = 1.5;
+        rest = range(1500, 2100); // long enough to clear and read again
+      } else {
+        do { u = range(0.06, 0.94); v = range(0.08, 0.92); }
+        while (Math.hypot(u - from.u, v - from.v) < 0.3);
+        burst.reach = medium ? range(1.5, 2.1) : range(0.75, 1.1);
+        burst.hold = 1;
+        // every so often a longer breath with nothing going off
+        rest = Math.random() < 0.18 ? range(1000, 1500) : range(180, 340);
+      }
+      to = { u, v };
+      hopAt = now;
+    }
+    function point(now = performance.now()) {
+      const k = ease(clamp((now - hopAt) / HOP, 0, 1));
+      const r = h.stage.getBoundingClientRect();
+      const u = from.u + (to.u - from.u) * k, v = from.v + (to.v - from.v) * k;
+      return { x: r.left + u * r.width, y: r.top + v * r.height };
+    }
+
+    function enter() {
+      const { x, y } = point();
+      over = null;
+      inside = true;
+      fire(h.stage, "pointerenter", x, y); // deals the next mechanic, as a real entry does
+      // holding one mechanic it never steps out (and a timeout of Infinity would fire at once)
+      if (STAY !== Infinity) timer = window.setTimeout(leave, STAY);
+    }
+    function leave() {
+      const { x, y } = point();
+      if (inIntro) fire(h.intro, "pointerleave", x, y);
+      fire(h.stage, "pointerleave", x, y);
+      inside = inIntro = false;
+      over = null;
+      timer = window.setTimeout(enter, AWAY);
+    }
+
+    function step(now: number) {
+      frameId = requestAnimationFrame(step);
+      if (!inside) return;
+      if (now - hopAt > HOP + rest) nextHop(now);
+      // resting: a still cursor sends nothing
+      if (now - hopAt > HOP + 34) return;
+      const { x, y } = point(now);
+      const nowIn = hit(h.intro.getBoundingClientRect(), x, y);
+      if (inIntro && !nowIn) fire(h.intro, "pointerleave", x, y);
+      inIntro = nowIn;
+      fire(nowIn ? h.intro : h.stage, "pointermove", x, y);
+      // the phrases some mechanics build answer their own entry
+      let seg: Element | null = null;
+      if (nowIn) {
+        for (const el of h.intro.querySelectorAll(".k-zseg, .k-seg")) {
+          if (Array.from(el.getClientRects()).some((r) => hit(r, x, y))) { seg = el; break; }
+        }
+      }
+      if (seg !== over) {
+        over = seg;
+        if (seg) fire(seg, "pointerenter", x, y);
+      }
+    }
+
+    function play() {
+      if (visible) return;
+      visible = true;
+      frameId = requestAnimationFrame(step);
+      if (first) {
+        first = false;
+        timer = window.setTimeout(enter, FIRST_READ);
+      } else enter();
+    }
+    function pause() {
+      if (!visible) return;
+      visible = false;
+      cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+      if (inside) leave();
+      clearTimeout(timer);
+    }
+
+    // a real tap would knock the stand-in out of step, so the frame only hears it
+    h.stage.style.pointerEvents = "none";
+    const io = new IntersectionObserver(([e]) => (e.isIntersecting ? play() : pause()), { threshold: 0.2 });
+    io.observe(h.stage);
+
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+      h.stage.style.pointerEvents = "";
+    };
+  }
+
   return {
     reroll: roll,
     current: () => (currentIndex < 0 ? "" : MECHANICS[currentIndex][0]),
     destroy() {
+      stopGhost?.();
       teardown();
       h.stage.removeEventListener("pointerenter", handleEnter);
       delete h.stage.dataset.mechanic;

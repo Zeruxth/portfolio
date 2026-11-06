@@ -14,11 +14,14 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const HOVER_DELAY = 120;
 // how long a row takes to open (.reveal and .cover): nothing else opens until it has
 const OPEN_MS = 800;
+// below this a row has no room to open (ProjectList.module.css)
+const narrow = () => window.matchMedia("(max-width: 700px)").matches;
 
 export default function ProjectList({ projects }: { projects: Project[] }) {
   // the page opens with every row closed. A mouse opens the row it rests on, and
   // that row stays open until another takes over; clicking a row goes into it.
-  // Touch has no hover, so its first tap opens and its second goes in
+  // A tap goes straight in too. Only the keyboard opens a row first (Enter),
+  // then goes in (Enter again). A phone never opens one: there is no room
   const router = useRouter();
   const [open, setOpen] = useState<string | null>(null);
 
@@ -34,7 +37,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const hover = (slug: string, e: React.PointerEvent) => {
-    if (e.pointerType !== "mouse") return;
+    if (e.pointerType !== "mouse" || narrow()) return;
     // a row sliding under a still pointer, or a scroll, is not the pointer moving
     if (e.clientX === pointer.current.x && e.clientY === pointer.current.y) return;
     pointer.current = { x: e.clientX, y: e.clientY };
@@ -63,7 +66,8 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             onClick={(e) => {
               // dragging across the description to copy it isn't a click on the row
               if (window.getSelection()?.toString()) return;
-              if (isOpen || (e.nativeEvent as PointerEvent).pointerType === "mouse") {
+              // a keyboard's click has no position (detail 0); any pointer's has
+              if (isOpen || e.detail > 0 || narrow()) {
                 router.push(`/projects/${project.slug}`);
               } else {
                 setOpen(project.slug);
