@@ -49,6 +49,8 @@
   font-size: 15px;
   line-height: 1.2;
   text-transform: uppercase;
+  /* no paragraph ends on a lone word ("TRY."); Firefox ignores it and wraps as before */
+  text-wrap: pretty;
 }
 
 .row[data-active="true"] { background: #222222; color: #DEDEDE; }
