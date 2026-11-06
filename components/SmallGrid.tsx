@@ -21,12 +21,14 @@ const GAP = 8;
 /** between the images and the opened text */
 const TEXT_GAP = 16;
 /**
- * The caption's height. A phone-width grid has every tile full width and no hover,
- * so the corner square stops holding a row of its own there (SmallGrid.module.css,
- * [data-compact]) and the caption only has to hold the title and the tags.
+ * The caption's height. Wide, every caption is this tall, title and tags beside the
+ * corner square. On a phone-width grid the square moves onto the images
+ * (SmallGrid.module.css, [data-compact]) and each caption hugs its own text: one
+ * line when the title and tags fit side by side, two when they don't. Those heights
+ * are measured on the page; this is the guess before they are.
  */
 const CAPTION = 102;
-const CAPTION_COMPACT = 64;
+const CAPTION_COMPACT = 30;
 /** below this grid width the captions go compact */
 const COMPACT = 700;
 const captionFor = (width: number) => (width < COMPACT ? CAPTION_COMPACT : CAPTION);
@@ -608,9 +610,16 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
   const space = width ?? DESIGN_WIDTH;
 
   const caption = captionFor(space);
+  const compact = caption === CAPTION_COMPACT;
+  // each compact caption's own height, measured; missing until it has been
+  const [captions, setCaptions] = useState<Record<string, number>>({});
+  const captionsSettling = useRef({ key: "", tries: 0 });
   const lines = useMemo(
-    () => Object.fromEntries(projects.map((p) => [p.slug, lineOf(p, caption)])) as Lines,
-    [projects, caption],
+    () =>
+      Object.fromEntries(
+        projects.map((p) => [p.slug, lineOf(p, compact ? captions[p.slug] ?? caption : caption)]),
+      ) as Lines,
+    [projects, caption, compact, captions],
   );
   const mins = useMemo(
     () => Object.fromEntries(projects.map((p) => [p.slug, narrowest(p)])) as Record<string, number>,
@@ -704,6 +713,24 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
       : here.x <= 1;
     change(() => setAnchor({ slug, left }));
   };
+
+  // a compact caption is as tall as its text wrapped at its tile's width. That width
+  // can follow the height when tiles share a band, so it gets a few tries per width
+  useLayoutEffect(() => {
+    const el = grid.current;
+    if (!el || !compact) return;
+    const found: Record<string, number> = {};
+    el.querySelectorAll<HTMLElement>("[data-caption]").forEach((c) => {
+      found[c.dataset.caption!] = Math.ceil(c.getBoundingClientRect().height);
+    });
+    const changed = Object.entries(found).some(([slug, h]) => Math.abs((captions[slug] ?? -9) - h) > 0.5);
+    const key = `${space}|${fontsLoaded}`;
+    if (captionsSettling.current.key !== key) captionsSettling.current = { key, tries: 0 };
+    if (changed && captionsSettling.current.tries < 4) {
+      captionsSettling.current.tries += 1;
+      setCaptions(found);
+    }
+  });
 
   useLayoutEffect(() => {
     const el = grid.current;
@@ -867,7 +894,7 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
         ref={grid}
         className={s.grid}
         data-ready={width !== null}
-        data-compact={caption === CAPTION_COMPACT}
+        data-compact={compact}
         style={{ height, "--caption-h": `${caption}px` } as React.CSSProperties}
       >
           {projects.map((project) => {
@@ -903,6 +930,8 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                     onClick={(e) => open(project.slug, e)}
                   >
                     <span className={s.frame}>
+                      {/* a phone's way to say there's more: on the images' corner, off the text */}
+                      {more > 0 && <span className={s.badge}>+{more}</span>}
                       {rows.map((images, r) => (
                         <span key={r} className={s.tileRow}>
                           {images.map((image) => (
@@ -911,7 +940,7 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                         </span>
                       ))}
                     </span>
-                    <span className={s.caption}>
+                    <span className={s.caption} data-caption={project.slug}>
                       <span className={p.title}>{project.title}</span>
                       <span className={s.tagsAndMore} data-empty={more === 0}>
                         <span className={s.tags}>

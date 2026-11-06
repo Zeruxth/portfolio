@@ -142,8 +142,42 @@
 }
 [data-empty="true"] > .more { opacity: 0; }
 
-/* a compact grid: the square sits in the tile's corner without a row of its own */
-.grid[data-compact="true"] .more { position: absolute; right: 0; bottom: 0; margin: 0; }
+/* ---- a phone-width grid ([data-compact], SmallGrid.tsx) ---- */
+
+/* the count rides on the images' corner, so the caption holds only text */
+.badge { display: none; }
+.grid[data-compact="true"] .frame { position: relative; }
+.grid[data-compact="true"] .badge {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--ui);
+  font-size: 22px;
+  line-height: 28px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.grid[data-compact="true"] .more { display: none; }
+
+/*
+ * The title and the tags share a line, the tags level with the middle of the
+ * title, when they fit; when they don't, the tags drop under it. Either way
+ * the caption hugs its text, so the padding is the same on every side.
+ */
+.grid[data-compact="true"] .caption {
+  min-height: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+.grid[data-compact="true"] .tagsAndMore { flex: 0 1 auto; min-width: 0; }
+.grid[data-compact="true"] .tagsAndMore .tags { padding-top: 0; }
 
 .count,
 .arrow { grid-area: 1 / 1; }
@@ -176,6 +210,7 @@
 .face:focus-visible .arrow g { animation: arrowIn 0.4s cubic-bezier(0.33, 0, 0.35, 1); }
 
 @media (hover: hover) {
+  .face:hover .badge { background: var(--bg); color: var(--ink); }
   .face:hover { background: var(--ink); color: var(--bg); }
   .face:hover .more { background: var(--bg); color: var(--ink); opacity: 1; }
   .face:hover .count { opacity: 0; }
