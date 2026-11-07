@@ -121,15 +121,33 @@
 .link { display: flex; align-items: stretch; color: inherit; }
 
 /*
+ * A name too long for its tab (TabBar.tsx, Name): it holds, eases along until
+ * its end shows, holds there, and eases back. --run and --run-time are measured.
+ */
+.run { display: inline-block; white-space: nowrap; }
+@keyframes run {
+  0%, 15%  { transform: translateX(0); }
+  50%, 65% { transform: translateX(var(--run)); }
+  100%     { transform: translateX(0); }
+}
+.label[data-run="true"] .run { animation: run var(--run-time, 6s) ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .label[data-run="true"] .run { animation: none; }
+}
+
+/*
  * A phone: the same folders, shorter and narrower. The logo tab stops being as
  * wide as the rail (the rail is a full-width row up here), tabs on the way to
- * the current one step aside, and a long name runs out under its diagonal.
+ * the current one step aside, and a long name slides (.run) rather than being cut.
  */
 @media (max-width: 700px) {
   .bar { --tab-h: 44px; --edge: 53px; }
   .tab[data-mid] { display: none; }
   .inner { padding: 12px; gap: 16px; }
-  .label { font-size: 18px; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .label { font-size: 18px; overflow: hidden; min-width: 0; }
+  /* the last tab doesn't tuck under anything, so it keeps its whole diagonal:
+     a long name stretches it until that diagonal meets the frame's right edge */
+  .tab:last-child { margin-right: 0; }
   .tab:not(.logoTab) { min-width: 0; }
   .tab:not(.logoTab) .inner { min-width: 0; }
   .logoTab { flex: none; }
