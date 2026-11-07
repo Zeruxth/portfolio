@@ -121,16 +121,21 @@
 .link { display: flex; align-items: stretch; color: inherit; }
 
 /*
- * A name too long for its tab (TabBar.tsx, Name): it holds, eases along until
- * its end shows, holds there, and eases back. --run and --run-time are measured.
+ * A name too long for its tab (TabBar.tsx, Name) runs: it travels left at a
+ * steady pace and a second pass follows it in after a gap, so the loop never
+ * stops or jumps. --run (one name plus the gap) and --run-time are measured.
  */
-.run { display: inline-block; white-space: nowrap; }
+.run { display: inline-flex; white-space: nowrap; }
+.pass { flex: none; }
+.pass + .pass { display: none; }
+.label[data-run="true"] .pass { margin-right: var(--run-gap); }
+.label[data-run="true"] .pass + .pass { display: inline; }
 @keyframes run {
-  0%, 15%  { transform: translateX(0); }
-  50%, 65% { transform: translateX(var(--run)); }
-  100%     { transform: translateX(0); }
+  from { transform: translateX(0); }
+  to   { transform: translateX(var(--run)); }
 }
-.label[data-run="true"] .run { animation: run var(--run-time, 6s) ease-in-out infinite; }
+.label[data-run="true"] .run { animation: run var(--run-time, 8s) linear infinite; }
+/* still, a long name shows its start */
 @media (prefers-reduced-motion: reduce) {
   .label[data-run="true"] .run { animation: none; }
 }

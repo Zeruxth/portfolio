@@ -17,43 +17,55 @@ function Edge() {
   );
 }
 
+/** the space between the end of a running name and its next pass */
+const RUN_GAP = 40;
+/** how fast a running name travels, px a second */
+const RUN_SPEED = 40;
+
 /**
- * A tab's name. When the tab has less room than the name, it slides along to
- * show the end, holds, and slides back, the way a train's destination board
- * runs a long name, rather than cutting it off.
+ * A tab's name. When the tab has less room than the name, it runs: the name
+ * travels left without stopping and a second pass follows it in, the way a
+ * train's destination board loops a long name, rather than cutting it off.
  */
 function Name({ text }: { text: string }) {
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const run = ref.current;
-    const box = run?.parentElement;
-    if (!run || !box) return;
+    const first = ref.current;
+    const box = first?.parentElement?.parentElement;
+    if (!first || !box) return;
     const measure = () => {
-      const over = run.scrollWidth - box.clientWidth;
-      if (over > 1) {
+      const w = first.getBoundingClientRect().width;
+      if (w - box.clientWidth > 1) {
         box.dataset.run = "true";
-        box.style.setProperty("--run", `${-Math.ceil(over)}px`);
-        // about 40px a second each way; the moves are 70% of the loop, the holds the rest
-        box.style.setProperty("--run-time", `${Math.max(4, (over / 40) * 2 / 0.7).toFixed(2)}s`);
+        box.style.setProperty("--run", `${-(w + RUN_GAP)}px`);
+        box.style.setProperty("--run-gap", `${RUN_GAP}px`);
+        box.style.setProperty("--run-time", `${((w + RUN_GAP) / RUN_SPEED).toFixed(2)}s`);
       } else {
         delete box.dataset.run;
         box.style.removeProperty("--run");
+        box.style.removeProperty("--run-gap");
         box.style.removeProperty("--run-time");
       }
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(box);
-    ro.observe(run);
+    ro.observe(first);
     // the webfont is narrower than the fallback, so measure again once it is in
     void document.fonts?.ready.then(measure);
     return () => ro.disconnect();
   }, [text]);
 
   return (
-    <span ref={ref} className={s.run}>
-      {text}
+    <span className={s.run}>
+      <span ref={ref} className={s.pass}>
+        {text}
+      </span>
+      {/* the pass that follows it in; only shown while the name runs */}
+      <span className={s.pass} aria-hidden="true">
+        {text}
+      </span>
     </span>
   );
 }
