@@ -1,4 +1,4 @@
-import { Instagram, LinkedIn, Mail } from "@/components/icons";
+import { Instagram, LinkedIn, Mail, Spotify } from "@/components/icons";
 import { pageMeta } from "@/lib/meta";
 import { BY_KEY, CONTACT_EMAIL } from "@/lib/sections";
 import s from "./page.module.css";
@@ -30,6 +30,7 @@ const ROLES = [
 const ELSEWHERE = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/aki-yamin-8a8333357/", Icon: LinkedIn },
   { label: "Instagram", href: "https://www.instagram.com/aki_wip/", Icon: Instagram },
+  { label: "Spotify", href: "https://open.spotify.com/user/11186282724", Icon: Spotify },
   { label: "Email", href: `mailto:${CONTACT_EMAIL}`, Icon: Mail },
 ];
 
