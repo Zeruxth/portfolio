@@ -39,6 +39,7 @@ export default function Menu() {
         <div className={s.drawerIn}>
           <nav
             className={s.nav}
+            style={{ "--rows": SECTIONS.length } as React.CSSProperties}
             aria-label="Main"
             onPointerLeave={() => setHovered(null)}
           >

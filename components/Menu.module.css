@@ -9,6 +9,21 @@
 
 .nav { display: flex; flex-direction: column; }
 
+/*
+ * Desktop: the nav keeps the height of its closed rows (each 60px + its rule),
+ * so an opening explainer lies over the space below rather than pushing the
+ * contact block down; on a short screen the longest one (Tools) would. The
+ * rows carry the page colour so whatever they cover stays hidden.
+ */
+@media (min-width: 1101px) {
+  .nav {
+    flex: none;
+    height: calc(var(--rows) * 61px);
+    position: relative;
+    z-index: 1;
+  }
+}
+
 /* the fold only exists below the desktop layout; up there the rail is always open */
 .toggle { display: none; }
 .drawer, .drawerIn { display: contents; }
@@ -23,7 +38,8 @@
   --arrow-cell-fg: var(--c);
   border-bottom: 1px solid var(--ink);
   color: var(--ink);
-  background: transparent;
+  /* the page colour, not transparent: an open row may lie over the contact block */
+  background: var(--bg);
   transition: background 0.2s ease, color 0.2s ease;
 }
 
