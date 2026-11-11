@@ -139,6 +139,8 @@
 .social svg { display: block; width: auto; height: 22px; }
 /* a wide, solid envelope looks bigger than the logos at their height */
 .social:last-child svg { height: 19px; }
+/* the solid handset too, a touch smaller than the logos */
+.social[href^="tel:"] svg { height: 19px; }
 /* fills like the contact row */
 .social:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
 @media (hover: hover) {

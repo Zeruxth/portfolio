@@ -1,4 +1,4 @@
-import { Instagram, LinkedIn, Mail, Spotify } from "@/components/icons";
+import { Instagram, LinkedIn, Mail, Phone, Spotify } from "@/components/icons";
 import { pageMeta } from "@/lib/meta";
 import { BY_KEY, CONTACT_EMAIL } from "@/lib/sections";
 import s from "./page.module.css";
@@ -31,6 +31,7 @@ const ELSEWHERE = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/aki-yamin-8a8333357/", Icon: LinkedIn },
   { label: "Instagram", href: "https://www.instagram.com/aki_wip/", Icon: Instagram },
   { label: "Spotify", href: "https://open.spotify.com/user/11186282724", Icon: Spotify },
+  { label: "Phone", href: "tel:+972524477235", Icon: Phone },
   { label: "Email", href: `mailto:${CONTACT_EMAIL}`, Icon: Mail },
 ];
 
@@ -64,7 +65,7 @@ export default function About() {
                 href={href}
                 aria-label={label}
                 // the portfolio stays where you left it, as it does for every outbound link
-                {...(!href.startsWith("mailto:") && { target: "_blank", rel: "noopener noreferrer" })}
+                {...(href.startsWith("http") && { target: "_blank", rel: "noopener noreferrer" })}
               >
                 <Icon />
               </a>
