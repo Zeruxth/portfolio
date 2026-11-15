@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>inbetween</title>
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=gambarino@400&display=swap" />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=chillax@400,500,600&display=swap" />
+    <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@400,500&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Martian+Mono:wdth,wght@75..112.5,300..600&family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Bagel+Fat+One&family=Gluten:wght@800&display=swap" />
+    <script>
+      // apply saved type theme before first paint
+      try {
+        const p = JSON.parse(localStorage.getItem("storyboard-motion:prefs") || "{}");
+        const types = ["studio", "poster", "editorial", "wide"];
+        document.documentElement.dataset.type = types.includes(p.type) ? p.type : "wide";
+        if (p.theme && p.theme !== "system") document.documentElement.dataset.theme = p.theme;
+      } catch { document.documentElement.dataset.type = "wide"; }
+    </script>
+    <script type="module" crossorigin src="./assets/index-CDNXWnC-.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-YT3NT_Eh.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
