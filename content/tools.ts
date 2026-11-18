@@ -28,6 +28,18 @@ export interface Tool {
 
 export const TOOLS: Tool[] = [
   {
+    slug: "inbetween",
+    title: "inbetween",
+    description:
+      "Turn storyboards into animations with Claude. Build your frames, set the timing, and describe how they should move. Refine the animation manually on the timeline or ask Claude/ChatGPT for changes.",
+    kind: "Web app",
+    platform: "Browser",
+    year: "2026",
+    image: "/tools/covers/inbetween.jpg",
+    // the web beta is hosted here, so one click opens it
+    actions: [{ label: "Open", href: "/tools/inbetween/", kind: "open" }],
+  },
+  {
     slug: "chomp",
     title: "Chomp",
     description:
