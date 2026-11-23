@@ -1,5 +1,5 @@
 import { Instagram, LinkedIn, Mail, Phone, Spotify } from "@/components/icons";
-import { pageMeta } from "@/lib/meta";
+import { JsonLd, PERSON_ID, PROFILES, SITE_ID, SITE_URL, pageMeta } from "@/lib/meta";
 import { BY_KEY, CONTACT_EMAIL } from "@/lib/sections";
 import s from "./page.module.css";
 
@@ -28,8 +28,8 @@ const ROLES = [
 ];
 
 const ELSEWHERE = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/aki-yamin-8a8333357/", Icon: LinkedIn },
-  { label: "Instagram", href: "https://www.instagram.com/aki_wip/", Icon: Instagram },
+  { label: "LinkedIn", href: PROFILES.linkedin, Icon: LinkedIn },
+  { label: "Instagram", href: PROFILES.instagram, Icon: Instagram },
   { label: "Spotify", href: "https://open.spotify.com/user/11186282724", Icon: Spotify },
   { label: "Phone", href: "tel:+972524477235", Icon: Phone },
   { label: "Email", href: `mailto:${CONTACT_EMAIL}`, Icon: Mail },
@@ -39,6 +39,15 @@ export default function About() {
   return (
     <div className={s.page}>
       <h1 className="sr-only">About</h1>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ProfilePage",
+          url: `${SITE_URL}/about/`,
+          mainEntity: { "@id": PERSON_ID },
+          isPartOf: { "@id": SITE_ID },
+        }}
+      />
 
       <div className={s.top}>
         <figure className={s.me}>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
-import { SITE_URL } from "@/lib/meta";
+import { JsonLd, NAME, ROLE, SITE_GRAPH, SITE_URL } from "@/lib/meta";
 import { SectionHoverProvider } from "@/lib/section-hover";
 import { TabsProvider } from "@/lib/tabs";
 import Shell from "@/components/Shell";
@@ -15,11 +15,16 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
+const TITLE = `${NAME} — ${ROLE} · AKI_WIP`;
+const DESCRIPTION = `${NAME} — multidisciplinary visual designer in Tel Aviv. Print, screen, motion and objects.`;
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "AKI_WIP",
-  description:
-    "Aki Yamin — multidisciplinary visual designer. Print, screen, motion and objects.",
+  title: TITLE,
+  description: DESCRIPTION,
+  authors: [{ name: NAME, url: SITE_URL }],
+  openGraph: { title: TITLE, description: DESCRIPTION, siteName: "AKI_WIP", type: "website", url: "/" },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css" />
       </head>
       <body>
+        <JsonLd data={SITE_GRAPH} />
         <SectionHoverProvider>
           <TabsProvider>
             {/* the band and the tab bar live here, not in the pages, so they survive navigation */}

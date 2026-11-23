@@ -52,7 +52,9 @@ function LoopVideo({ src, poster, style }: { src: string; poster?: string; style
   );
 }
 
-function Tile({ media }: { media: Media }) {
+function Tile({ media, subject }: { media: Media; subject: string }) {
+  // "Labels" alone says nothing to image search; "Zoo distillery — Labels" does
+  const name = `${subject} — ${media.label}`;
   const style = { aspectRatio: String(media.ratio) };
   if (media.kind !== "live" && !media.src) {
     return (
@@ -86,7 +88,7 @@ function Tile({ media }: { media: Media }) {
         className={`${s.tile} ${s.videoTile}`}
         style={{ ...style, background: media.ground }}
         role="img"
-        aria-label={media.label}
+        aria-label={name}
       >
         <LoopVideo
           src={media.src}
@@ -103,14 +105,14 @@ function Tile({ media }: { media: Media }) {
       </div>
     );
   }
-  return <img className={s.tile} style={style} src={BASE + media.src} alt={media.label} />;
+  return <img className={s.tile} style={style} src={BASE + media.src} alt={name} />;
 }
 
-function Rows({ rows }: { rows: MediaRow[] }) {
+function Rows({ rows, subject }: { rows: MediaRow[]; subject: string }) {
   return rows.map((row, i) => (
     <div key={i} className={s.row}>
       {row.map((m, k) => (
-        <Tile key={k} media={m} />
+        <Tile key={k} media={m} subject={subject} />
       ))}
     </div>
   ));
@@ -363,7 +365,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
 
         <div className={s.media}>
           <div className={s.chapter} style={{ "--o": 1 } as React.CSSProperties}>
-            <Rows rows={study.intro} />
+            <Rows rows={study.intro} subject={project.title} />
           </div>
           {study.chapters.map((c, i) => (
             <div
@@ -372,7 +374,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
               style={{ "--o": 2 * (i + 1) + 1 } as React.CSSProperties}
               ref={(el) => { anchors.current[i + 1] = el; }}
             >
-              <Rows rows={c.rows} />
+              <Rows rows={c.rows} subject={project.title} />
             </div>
           ))}
         </div>
