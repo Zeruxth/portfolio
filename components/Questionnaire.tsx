@@ -82,8 +82,8 @@ export default function Questionnaire() {
         </p>
       </div>
 
-      <div className={s.body}>
-      <div className={s.bodyIn} data-fold-rows>
+      <div className={s.body} data-fold>
+      <div className={s.bodyIn}>
 
       <label className={s.row}>
         <span className={s.q}>

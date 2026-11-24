@@ -63,8 +63,8 @@ export default function ContactForm() {
         )}
       </div>
 
-      <div className={s.body}>
-        <div className={`${s.bodyIn} ${s.twoRows}`} data-fold-rows>
+      <div className={s.body} data-fold>
+        <div className={`${s.bodyIn} ${s.twoRows}`}>
           <label className={s.row}>
             <span className={s.q}>
               <span className={s.ask}>Your email</span>

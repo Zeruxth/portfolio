@@ -5,18 +5,18 @@ import { useWipe, type WipeRun } from "./wipe";
 
 /** long enough to read the reply line before the wipe takes you home */
 const READ = 1800;
-/** each row folds over this long, the next one starting this much later */
-const FOLD = 650;
-const STAGGER = 55;
-/** a strong ease in and out, so each row gathers, then snaps shut */
+/** the fold: one movement, the form's bottom edge rising to the opening line */
+const FOLD = 900;
+/** the long form glides back to the top first, so the fold happens in view */
+const GLIDE = 600;
+/** a strong ease in and out: it gathers, then closes */
 const EASE = "cubic-bezier(0.76, 0, 0.24, 1)";
 
 export type SentPhase = "idle" | "sent";
 
 /**
- * What a form does once it has gone through: `done` folds the questions shut,
- * row by row from the bottom up (from where you pressed Send), and starts the
- * opening line's scramble into the reply; `swapped`, called once the reply is
+ * What a form does once it has gone through: `done` folds the form up into
+ * its opening line and starts that line's scramble into the reply; `swapped`, called once the reply is
  * in, waits a beat for it to be read, then wipes home.
  */
 export function useSent(words: Omit<WipeRun, "to">) {
@@ -40,34 +40,63 @@ export function useSent(words: Omit<WipeRun, "to">) {
   return [phase, done, swapped] as const;
 }
 
-function fold(): Promise<void> {
-  const host = document.querySelector<HTMLElement>("[data-fold-rows]");
-  if (!host) return Promise.resolve();
+/**
+ * Folds the form up like a blind: its bottom edge, drawn as a rule, rises
+ * until it meets the opening line. A long form first glides back to the top,
+ * so all of this happens where it can be seen.
+ */
+async function fold(): Promise<void> {
+  const body = document.querySelector<HTMLElement>("[data-fold]");
+  if (!body) return;
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    host.style.display = "none";
-    return Promise.resolve();
+    body.style.display = "none";
+    return;
   }
-  // every row, part labels included, in reading order; the send box rides along with the last
-  const rows = [...host.querySelectorAll<HTMLElement>(":scope > *, :scope > section > *")].filter(
-    (el) => el.tagName !== "SECTION" && getComputedStyle(el).position !== "absolute" && el.offsetHeight > 0,
-  );
-  const send = host.querySelector<HTMLElement>("[data-send]");
-  send?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: "forwards" });
-
-  const anims = rows.reverse().map((row, i) => {
-    const cs = getComputedStyle(row);
-    row.style.overflow = "hidden";
-    return row.animate(
-      [
-        { height: `${row.offsetHeight}px`, minHeight: "0px", borderBottomWidth: cs.borderBottomWidth },
-        { height: "0px", minHeight: "0px", borderBottomWidth: "0px" },
-      ],
-      { duration: FOLD, delay: i * STAGGER, easing: EASE, fill: "forwards" },
-    ).finished;
+  body.querySelector<HTMLElement>("[data-send]")?.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: 200,
+    fill: "forwards",
   });
-  return Promise.all(anims).then(() => {
-    host.style.display = "none";
-    window.scrollTo(0, 0);
-    document.querySelectorAll("form").forEach((f) => f.scrollTo(0, 0));
+
+  // the page scrolls in the form on a wide screen, in the window on a phone
+  const form = body.closest("form");
+  const scroller = form && form.scrollHeight > form.clientHeight + 1 ? form : null;
+  await glideToTop(scroller);
+
+  // fold only what's on screen; anything further down is already out of sight
+  const top = body.getBoundingClientRect().top;
+  const frame = (scroller ?? document.documentElement).getBoundingClientRect();
+  const bottom = Math.min(body.getBoundingClientRect().bottom, frame.bottom, window.innerHeight);
+  const height = Math.max(bottom - top, 0);
+
+  Object.assign(body.style, {
+    flex: "none",
+    height: `${height}px`,
+    overflow: "hidden",
+    boxSizing: "border-box",
+    borderBottom: "1px solid var(--ink)",
+  });
+  await body.animate([{ height: `${height}px` }, { height: "0px" }], {
+    duration: FOLD,
+    easing: EASE,
+    fill: "forwards",
+  }).finished;
+  body.style.display = "none";
+}
+
+/** an eased scroll back to the top, so the fold starts from the opening line */
+function glideToTop(scroller: HTMLElement | null): Promise<void> {
+  const from = scroller ? scroller.scrollTop : window.scrollY;
+  if (from <= 0) return Promise.resolve();
+  const set = (y: number) => (scroller ? (scroller.scrollTop = y) : window.scrollTo(0, y));
+  const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+  return new Promise((done) => {
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const k = Math.min((now - t0) / GLIDE, 1);
+      set(from * (1 - ease(k)));
+      if (k < 1) requestAnimationFrame(step);
+      else done();
+    };
+    requestAnimationFrame(step);
   });
 }
