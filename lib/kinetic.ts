@@ -60,7 +60,7 @@ interface FaceMetrics {
  * Guessing these leaves dead strips wherever the caps fall short of the box —
  * and Trade Gothic and the Roboto Condensed fallback do not agree.
  */
-function faceMetrics(el: HTMLElement): FaceMetrics {
+export function faceMetrics(el: HTMLElement): FaceMetrics {
   const cs = getComputedStyle(el);
   const base = parseFloat(cs.fontSize);
   const ctx = document.createElement("canvas").getContext("2d")!;

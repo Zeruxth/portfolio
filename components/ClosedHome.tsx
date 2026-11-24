@@ -1,4 +1,5 @@
-import { CONTACT_EMAIL } from "@/lib/sections";
+import Link from "next/link";
+import { CONTACT_HREF } from "@/lib/sections";
 import { ArrowCell } from "./ArrowCell";
 import intro from "./KineticIntro.module.css";
 import menu from "./Menu.module.css";
@@ -8,12 +9,12 @@ export default function ClosedHome() {
   return (
     <>
       <p className={intro.intro}>Hi, I’m Aki Yamin. The portfolio is closed for now, back soon.</p>
-      <a className={menu.contact} href={`mailto:${CONTACT_EMAIL}`} style={{ marginTop: "auto" }} data-arrow-host>
+      <Link className={menu.contact} href={CONTACT_HREF} style={{ marginTop: "auto" }} data-arrow-host>
         <p>
           Need something in the meantime? <em>Let’s talk</em>
         </p>
         <ArrowCell />
-      </a>
+      </Link>
     </>
   );
 }

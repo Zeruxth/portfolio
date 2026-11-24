@@ -105,6 +105,7 @@
   transition: background 0.2s ease, color 0.2s ease;
 }
 .contact em { font-style: italic; }
+.contact[data-active="true"] { background: var(--ink); color: var(--bg); cursor: default; }
 .contact:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
 @media (hover: hover) {
   .contact:hover { background: var(--ink); color: var(--bg); }

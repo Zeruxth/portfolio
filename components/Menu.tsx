@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CONTACT_EMAIL, SECTIONS, sectionForPath } from "@/lib/sections";
+import { CONTACT_HREF, SECTIONS, formPageFor, isContactPath, sectionForPath } from "@/lib/sections";
 import { useSectionHover } from "@/lib/section-hover";
 import { ArrowCell } from "./ArrowCell";
 import { Close } from "./icons";
@@ -12,7 +12,9 @@ import s from "./Menu.module.css";
 export default function Menu() {
   const pathname = usePathname();
   const { setHovered } = useSectionHover();
-  const active = sectionForPath(pathname);
+  const onContact = isContactPath(pathname);
+  // on a form page no section row is yours; on the contact page the contact row is
+  const activeKey = formPageFor(pathname) ? null : sectionForPath(pathname).key;
 
   // Below the desktop layout the rail folds into one MENU row. It starts shut
   // on every page, home included, and arriving on a new page shuts it again.
@@ -48,9 +50,9 @@ export default function Menu() {
                 key={section.key}
                 href={section.href}
                 className={s.row}
-                data-arrow-host={section.key === active.key ? undefined : true}
-                data-active={section.key === active.key}
-                aria-current={section.key === active.key ? "page" : undefined}
+                data-arrow-host={section.key === activeKey ? undefined : true}
+                data-active={section.key === activeKey}
+                aria-current={section.key === activeKey ? "page" : undefined}
                 style={{ "--c": section.color, "--on": section.ink } as React.CSSProperties}
                 onPointerEnter={(e) => e.pointerType !== "touch" && setHovered(section.key)}
                 onFocus={() => setHovered(section.key)}
@@ -59,7 +61,7 @@ export default function Menu() {
                 <span className={s.head}>
                   <span className={s.title}>{section.label}</span>
                 </span>
-                {section.key !== active.key && <ArrowCell hidden />}
+                {section.key !== activeKey && <ArrowCell hidden />}
                 {section.explainer && (
                   <span className={s.exp}>
                     <span className={s.expInner}>
@@ -71,12 +73,18 @@ export default function Menu() {
             ))}
           </nav>
 
-          <a className={s.contact} href={`mailto:${CONTACT_EMAIL}`} data-arrow-host>
+          <Link
+            className={s.contact}
+            href={CONTACT_HREF}
+            data-arrow-host={onContact ? undefined : true}
+            data-active={onContact}
+            aria-current={onContact ? "page" : undefined}
+          >
             <p>
               Have a project, a job or some cool shit in mind? <em>Let’s talk</em>
             </p>
-            <ArrowCell />
-          </a>
+            {!onContact && <ArrowCell />}
+          </Link>
         </div>
       </div>
     </div>

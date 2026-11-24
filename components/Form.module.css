@@ -1,0 +1,219 @@
+/*
+ * Shared by Contact and the questionnaire, so the two look the same.
+ * The Design System's pieces: UI/Intro for the opening line, Mono/Label for
+ * each part's chapter label, UI/Case title for the questions and for what people write,
+ * Mono/Label for the "Pick any" hint, UI/Menu for the picks. 1px rules, 16 padding,
+ * square, and ink fill for a chosen pick. The one addition, asked for, is the
+ * prompt in an empty answer: ink at 40%.
+ */
+.page {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* UI/Intro */
+.intro { flex: none; padding: 16px; border-bottom: 1px solid var(--ink); }
+/* the full width, so it never breaks early and leaves a stub on its own line */
+.lead {
+  font-size: 36px;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+/* a question and its answer, on the form's two shared columns */
+.row {
+  display: grid;
+  grid-template-columns: subgrid;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+}
+/* the cursor in the answer is the focus; no ring drawn inside the row */
+
+.q {
+  min-width: 0;
+  padding: 16px;
+  border-right: 1px solid var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+/* Mono/Label: the "Pick any" hint */
+.n {
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+/* UI/Case title */
+.ask {
+  font-size: 30px;
+  line-height: 38px;
+  text-transform: uppercase;
+}
+
+/* Mono/Body, written straight into the row */
+.answer {
+  min-width: 0;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  /* UI/Case title, the same size as the question it answers */
+  font-family: var(--ui);
+  font-size: 30px;
+  line-height: 38px;
+  text-transform: uppercase;
+}
+/* one-line answers sit on the question's first line; long ones fill the row */
+input.answer { align-self: start; }
+.long { min-height: 200px; resize: none; }
+
+/* the prompt: what to write, in ink held back, gone once you type */
+.answer::placeholder { color: var(--ink); opacity: 0.4; }
+
+/* each part opens with its chapter label, as a case study's chapters do: Mono/Label */
+.part { display: contents; }
+.partTitle {
+  flex: none;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--ink);
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.3;
+  letter-spacing: 0.14px;
+  text-transform: uppercase;
+}
+
+/* picks are menu rows: stacked, ruled between, filling with ink when chosen */
+.picks {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pick {
+  padding: 16px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  font-family: var(--ui);
+  font-size: 22px;
+  line-height: 28px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.pick:last-child { border-bottom: 0; }
+.pick[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.pick:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+.pick[aria-pressed="true"]:focus-visible { outline-color: var(--bg); }
+@media (hover: hover) {
+  .pick:not([aria-pressed="true"]):hover { background: var(--ink); color: var(--bg); }
+}
+
+.trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+
+/* Mono/Meta */
+.error {
+  flex: none;
+  padding: 16px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+
+/* Mono/Meta, under the opening line; the link has the drawn underline */
+.aside {
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.3;
+  letter-spacing: 0.16px;
+  text-transform: uppercase;
+}
+.aside a, .error a {
+  text-transform: none;
+  background: linear-gradient(currentColor, currentColor) left 92% / 100% 1px no-repeat;
+}
+
+/*
+ * Everything under the opening line. Once sent it folds shut, the way the
+ * menu's drawer does, while the line scrambles into the reply (Scramble.tsx).
+ */
+.body {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+/*
+ * The questions and answers are one grid, so the question column hugs the
+ * longest question (never past half) and every answer starts on the same line.
+ */
+.bodyIn {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: fit-content(50%) minmax(0, 1fr);
+  align-content: start;
+}
+.bodyIn > *, .part > * { grid-column: 1 / -1; }
+/* Contact: the message row takes the rest of the height */
+.twoRows { grid-template-rows: auto 1fr; align-content: stretch; }
+.page[data-phase="sent"] .body { grid-template-rows: 0fr; }
+.page[data-phase="sent"] .intro { border-bottom: 0; }
+.fill .answer { align-self: stretch; }
+
+/*
+ * Send is the site's Enter (ProjectList .enter: a label, then the arrow's
+ * box), docked into the last row's bottom right corner instead of the bottom
+ * left, so it draws the rules facing into the row: top and left.
+ */
+.foot { position: absolute; right: 0; bottom: 0; }
+.send {
+  position: static;
+  border: 0;
+  border-top: 1px solid var(--ink);
+  border-left: 1px solid var(--ink);
+  border-radius: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  animation: none;
+}
+.send:disabled { cursor: progress; }
+/* the last answer keeps clear of it */
+.last .answer { padding-bottom: 56px; }
+
+@media (max-width: 1260px) {
+  .ask, .answer { font-size: 24px; line-height: 30px; }
+  .lead { font-size: 30px; }
+}
+
+@media (max-width: 1100px) {
+  .page { overflow-y: visible; }
+  /* stacked: the question above its answer */
+  .bodyIn { display: flex; flex-direction: column; }
+  .row { display: flex; flex-direction: column; }
+  .fill { flex: 1 1 auto; }
+  .q { border-right: 0; border-bottom: 1px solid var(--ink); }
+  .lead { font-size: 24px; line-height: 30px; }
+  .fill { min-height: 260px; }
+}

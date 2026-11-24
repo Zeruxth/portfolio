@@ -11,6 +11,22 @@
       "port": 3000
     },
     {
+      "name": "forms-worker",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--prefix",
+        "worker",
+        "wrangler",
+        "dev",
+        "--config",
+        "worker/wrangler.jsonc",
+        "--port",
+        "8790"
+      ],
+      "port": 8790,
+      "autoPort": false
+    },
+    {
       "name": "halach-alenu",
       "runtimeExecutable": "node",
       "runtimeArgs": [

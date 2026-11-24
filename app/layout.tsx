@@ -3,6 +3,7 @@ import { IBM_Plex_Mono } from "next/font/google";
 import { JsonLd, NAME, ROLE, SITE_GRAPH, SITE_URL } from "@/lib/meta";
 import { SectionHoverProvider } from "@/lib/section-hover";
 import { TabsProvider } from "@/lib/tabs";
+import { WipeProvider } from "@/lib/wipe";
 import Shell from "@/components/Shell";
 import ScrollLine from "@/components/ScrollLine";
 import "./globals.css";
@@ -39,7 +40,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SectionHoverProvider>
           <TabsProvider>
             {/* the band and the tab bar live here, not in the pages, so they survive navigation */}
-            <Shell>{children}</Shell>
+            <WipeProvider>
+              <Shell>{children}</Shell>
+            </WipeProvider>
           </TabsProvider>
         </SectionHoverProvider>
         <ScrollLine />

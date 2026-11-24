@@ -16,3 +16,9 @@ exports/blooming-riot/poster-originals/
 # the raw capture and preview renders (capture.py, composite.sh); the web copy goes in public/
 exports/blooming-riot/window.mp4
 exports/blooming-riot/out/
+
+# wrangler dev: local D1 and the emails it would have sent
+.wrangler/
+
+# local secrets for wrangler dev
+.dev.vars

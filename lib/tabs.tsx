@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { PROJECTS } from "@/content/projects";
-import { SECTIONS } from "./sections";
+import { SECTIONS, formPageFor } from "./sections";
 
 export interface Tab {
   id: string;
@@ -29,6 +29,9 @@ export function tabsForPath(pathname: string): Tab[] {
       { id: `project:${project.slug}`, label: project.title, href: `/projects/${project.slug}` },
     ];
   }
+
+  const form = formPageFor(path);
+  if (form) return [{ id: form.id, label: form.label, href: form.href }];
 
   const section = SECTIONS.find((s) => s.href !== "/" && s.href === path);
   return section ? [{ id: section.key, label: section.label, href: section.href }] : [];

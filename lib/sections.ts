@@ -1,5 +1,36 @@
 export const CONTACT_EMAIL = "akiwipz@gmail.com";
 
+/** where both Let’s talk rows lead; not a menu section, so no row of its own */
+export const CONTACT_HREF = "/contact";
+
+/**
+ * The forms Worker (worker/). `next dev` talks to `wrangler dev` on 8790, so a
+ * test message never reaches the real inbox or database.
+ */
+export const FORMS_ENDPOINT =
+  process.env.NEXT_PUBLIC_FORMS_ENDPOINT ??
+  (process.env.NODE_ENV === "development"
+    ? "http://localhost:8790/submit"
+    : "https://api.akiwip.work/submit");
+
+/** the brand questionnaire; unlisted, sent to clients as a link */
+export const QUESTIONNAIRE_HREF = "/questionnaire";
+
+/** pages that belong to no menu section: each opens its own tab and shows no band */
+export const FORM_PAGES = [
+  { id: "contact", href: CONTACT_HREF, label: "Contact" },
+  { id: "questionnaire", href: QUESTIONNAIRE_HREF, label: "Questionnaire" },
+] as const;
+
+export function formPageFor(pathname: string) {
+  const path = pathname.replace(/\/+$/, "");
+  return FORM_PAGES.find((p) => p.href === path) ?? null;
+}
+
+export function isContactPath(pathname: string): boolean {
+  return formPageFor(pathname)?.id === "contact";
+}
+
 export type SectionKey = "home" | "projects" | "about" | "smaller" | "tools";
 
 export interface Section {

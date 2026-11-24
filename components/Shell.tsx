@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { useSectionHover } from "@/lib/section-hover";
-import { BY_KEY, sectionForPath } from "@/lib/sections";
+import { BY_KEY, formPageFor, sectionForPath } from "@/lib/sections";
 import { HOME_OPEN } from "@/lib/site";
 import TabBar from "./TabBar";
 import Menu from "./Menu";
@@ -15,6 +15,8 @@ export default function Shell({ children }: { children: ReactNode }) {
   const { hovered } = useSectionHover();
 
   const active = sectionForPath(pathname);
+  // the form pages belong to no section: they fall through to home, but are not it
+  const formPage = formPageFor(pathname) !== null;
   const shown = hovered ? BY_KEY[hovered] : active;
   const hot = hovered !== null;
   // a project's inner page gives the whole panel to the project — no menu rail
@@ -36,10 +38,13 @@ export default function Shell({ children }: { children: ReactNode }) {
       >
         <div className={s.upper}>
           {!inner && !closed && <Menu />}
-          <main className={s.stage}>{children}</main>
+          {/* what the send wipe covers: the content frame, as the hero's panels do */}
+          <main className={s.stage} data-wipe-area>
+            {children}
+          </main>
         </div>
         {/* the band belongs to the homepage only — no other designed frame has it */}
-        {active.key === "home" && !closed && (
+        {active.key === "home" && !formPage && !closed && (
           <Band section={shown} />
         )}
       </div>
