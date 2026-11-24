@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Leads — AKI_WIP</title>
+<!-- the site's own fonts: the Trade Gothic kit, Plex Mono, and the condensed fallback the site names -->
+<link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Roboto+Condensed&display=swap">
+<style>
+  /*
+   * Everything here is from the Design System page: one ground and one ink,
+   * two typefaces in the sheet's text styles, square corners, 1px rules,
+   * 16 padding. Ink fill means state (the item you're on), as in the menu.
+   */
+  :root {
+    --bg: #DEDEDE;
+    --ink: #222222;
+    --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --arrow-w: 22px;
+    --arrow-h: 16px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
+  button, input, textarea { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
+  button { cursor: pointer; text-align: left; }
+  :focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
+  * { scrollbar-width: none; }
+  *::-webkit-scrollbar { display: none; }
+
+  /* ---- the sheet's text styles ---- */
+  .ui-title   { font-family: var(--ui); font-size: 32px; line-height: 1.2; text-transform: uppercase; }
+  .ui-case    { font-family: var(--ui); font-size: 30px; line-height: 38px; text-transform: uppercase; }
+  .ui-menu    { font-family: var(--ui); font-size: 22px; line-height: 28px; text-transform: uppercase; }
+  .mono-body  { font-family: var(--mono); font-size: 18px; line-height: 1.3; letter-spacing: 0.18px; }
+  .mono-meta  { font-family: var(--mono); font-size: 16px; line-height: 1.3; letter-spacing: 0.16px; text-transform: uppercase; }
+  .mono-label { font-family: var(--mono); font-size: 14px; line-height: 1.3; letter-spacing: 0.14px; text-transform: uppercase; }
+
+  .frame { height: 100%; display: flex; flex-direction: column; }
+
+  /* ---- top: title, then the filters as menu rows laid side by side ---- */
+  header { flex: none; display: flex; border-bottom: 1px solid var(--ink); }
+  h1 { flex: none; padding: 16px; border-right: 1px solid var(--ink); font-weight: 400; }
+  .filters { flex: 1; min-width: 0; display: flex; overflow-x: auto; }
+  .filters .gap { flex: 1; }
+  .cell { flex: none; padding: 16px; white-space: nowrap; border-right: 1px solid var(--ink); display: flex; align-items: center; transition: background 0.2s ease, color 0.2s ease; }
+  .gap + .cell { border-left: 1px solid var(--ink); }
+  .cell[aria-pressed="true"] { background: var(--ink); color: var(--bg); cursor: default; }
+  .cell:not([aria-pressed="true"]):focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+  @media (hover: hover) { .cell:not([aria-pressed="true"]):hover { background: var(--ink); color: var(--bg); } }
+
+  main { flex: 1; min-height: 0; display: flex; }
+
+  /*
+   * Each stage takes a page's pair from the menu: its colour with ink on it.
+   * Not relevant takes Home's, which is ink with the ground on it.
+   */
+  [data-stage="new"]          { --c: #E83A3A; --on: #222222; }
+  [data-stage="talking"]      { --c: #E35D31; --on: #222222; }
+  [data-stage="won"]          { --c: #199329; --on: #222222; }
+  [data-stage="not_relevant"] { --c: #222222; --on: #DEDEDE; }
+  .filters .cell[data-stage][aria-pressed="true"],
+  .choices .cell[aria-pressed="true"] { background: var(--c); color: var(--on); }
+  .filters .cell[data-stage]:not([aria-pressed="true"]):focus-visible,
+  .choices .cell:not([aria-pressed="true"]):focus-visible { background: var(--c); color: var(--on); }
+  @media (hover: hover) {
+    .filters .cell[data-stage]:not([aria-pressed="true"]):hover,
+    .choices .cell:not([aria-pressed="true"]):hover { background: var(--c); color: var(--on); }
+  }
+
+  /* ---- the list: rows ruled like the menu, filling with ink as the contact row does ---- */
+  /*
+   * One grid for every row, as the forms are: the name, the follow-up date and
+   * the stage each hug their widest entry, the preview takes what's left, and
+   * every row lines up because the rows share the list's columns.
+   */
+  .list { flex: 1 1 0; min-width: 0; overflow-y: auto; display: grid; grid-template-columns: fit-content(40%) minmax(0, 1fr) max-content max-content; align-content: start; }
+  .list > * { grid-column: 1 / -1; }
+  .row { display: grid; grid-template-columns: subgrid; align-items: baseline; border-bottom: 1px solid var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  .rowMain { display: contents; }
+  .row .who { padding: 16px; }
+  .row .preview { padding: 16px 0; }
+  .row .follow { padding: 16px; }
+  /* the stage, docked to the row's end in its own ruled cell */
+  .stage { align-self: stretch; padding: 16px; border-left: 1px solid var(--ink); background: var(--c); color: var(--on); white-space: nowrap; }
+  .row[aria-current="true"] { background: var(--ink); color: var(--bg); }
+  .row:not([aria-current="true"]):focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+  @media (hover: hover) { .row:not([aria-current="true"]):hover { background: var(--ink); color: var(--bg); } }
+  .row .who { min-width: 0; }
+  .row .who > * { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .who .mono-meta { margin-top: 4px; }
+  .row .preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .follow { text-align: right; white-space: nowrap; }
+  .empty { padding: 16px; }
+
+  /* ---- the open lead ---- */
+  .detail { flex: none; width: min(520px, 45%); border-left: 1px solid var(--ink); overflow-y: auto; display: flex; flex-direction: column; }
+  .detail[hidden] { display: none; }
+  .block { flex: none; padding: 16px; border-bottom: 1px solid var(--ink); }
+  .block > .mono-label:first-child { margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .block .mono-meta { margin-top: 8px; }
+  .message { white-space: pre-wrap; }
+
+  /* the questionnaire: the menu's MENU row and drawer, so it opens and closes */
+  .fold { flex: none; border-bottom: 1px solid var(--ink); }
+  .toggle { display: flex; align-items: stretch; width: 100%; }
+  .toggle .ui-menu { flex: 1; padding: 16px; }
+  .toggle .mono-meta { align-self: center; padding-right: 16px; }
+  .toggleMark { flex: none; width: 48px; display: grid; place-items: center; border-left: 1px solid var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  .toggleMark svg { display: block; width: 14px; height: 14px; stroke: currentColor; transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1); }
+  .fold:not([data-open="true"]) .toggleMark svg { transform: rotate(45deg); }
+  .toggle:focus-visible .toggleMark { background: var(--ink); color: var(--bg); }
+  @media (hover: hover) { .toggle:hover .toggleMark { background: var(--ink); color: var(--bg); } }
+  .drawer { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 0.3s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s; }
+  .drawerIn { overflow: hidden; min-height: 0; }
+  .fold:not([data-open="true"]) .drawer { grid-template-rows: 0fr; visibility: hidden; transition: grid-template-rows 0.3s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.3s; }
+  .answer { padding: 16px; border-top: 1px solid var(--ink); }
+  .answer .mono-label { margin-bottom: 8px; }
+  .answer .mono-body { white-space: pre-wrap; }
+
+  /* the stages run edge to edge, ruled by the block itself */
+  .block.flush { padding: 0; }
+  .block.flush > .mono-label:first-child { padding: 16px 16px 0; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ink); }
+  .choices .cell { border-right: 0; }
+  .choices .cell:nth-child(odd) { border-right: 1px solid var(--ink); }
+  .choices .cell:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }
+
+  /* fields are the block itself: no box inside the box; the block takes the focus ring */
+  .field { display: block; width: 100%; outline: none; }
+  .block:focus-within { outline: 2px solid var(--ink); outline-offset: -4px; }
+  .block.notes { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 200px; border-bottom: 0; }
+  .notes textarea { flex: 1; min-height: 160px; resize: none; }
+  .followRow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .followRow input { width: auto; }
+
+  /* the Link component: UI/Link with the drawn underline */
+  .link { padding-bottom: 4px; font-family: var(--ui); font-size: 14px; line-height: 1.3; letter-spacing: 0.14px; text-transform: uppercase; background: linear-gradient(currentColor, currentColor) left bottom / 100% 1px no-repeat; }
+  @keyframes drawLine { from { background-size: 0% 1px; } to { background-size: 100% 1px; } }
+  .link:hover, .link:focus-visible { animation: drawLine 0.46s cubic-bezier(0.33, 0, 0.67, 1); }
+
+  /* the contact row, with the arrow docked in its box */
+  /* the arrow is part of the row's frame: full height, ruled on its left only */
+  .reply { display: flex; align-items: stretch; margin-top: auto; border-top: 1px solid var(--ink); text-decoration: none; color: var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  .reply .label { flex: 1; padding: 16px; }
+  .reply:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
+  @media (hover: hover) { .reply:hover { background: var(--ink); color: var(--bg); } }
+  .arrowCell { flex: none; width: 60px; display: grid; place-items: center; border-left: 1px solid currentColor; transition: background 0.2s ease, color 0.2s ease; }
+  .arrowCell svg { display: block; width: var(--arrow-w); height: var(--arrow-h); overflow: hidden; }
+  .reply:hover .arrowCell, .reply:focus-visible .arrowCell { background: var(--bg); color: var(--ink); }
+  @keyframes arrowSlide {
+    0% { transform: translateX(0); } 49.9% { transform: translateX(var(--arrow-w)); }
+    50% { transform: translateX(calc(var(--arrow-w) * -1)); } 100% { transform: translateX(0); }
+  }
+  @media (hover: hover) { .reply:hover .arrowCell g { animation: arrowSlide 0.8s cubic-bezier(0.65, 0, 0.35, 1); } }
+  .reply:focus-visible .arrowCell g { animation: arrowSlide 0.8s cubic-bezier(0.65, 0, 0.35, 1); }
+
+  .back { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+
+  @media (max-width: 1100px) {
+    header { flex-direction: column; }
+    h1 { border-right: 0; border-bottom: 1px solid var(--ink); }
+    /* a phone: the name with its date under it, the stage beside them */
+    .list { display: block; }
+    .row { grid-template-columns: minmax(0, 1fr) auto; }
+    .row .who { grid-column: 1; }
+    .row .preview { display: none; }
+    .row .follow { grid-column: 1; padding-top: 0; text-align: left; }
+    .row .follow:empty { display: none; }
+    .stage { grid-column: 2; grid-row: 1 / span 2; }
+    .detail { position: fixed; inset: 0; width: auto; background: var(--bg); border-left: 0; z-index: 1; }
+    .back { display: block; width: 100%; padding: 16px; border-bottom: 1px solid var(--ink); }
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <h1 class="ui-title">Leads</h1>
+    <nav class="filters" id="filters" aria-label="Filter leads"></nav>
+  </header>
+  <main>
+    <div class="list" id="list"></div>
+    <aside class="detail" id="detail" hidden></aside>
+  </main>
+</div>
+
+<script>
+const STATUSES = [
+  ["new", "New"],
+  ["talking", "Talking"],
+  ["won", "Won"],
+  ["not_relevant", "Not relevant"],
+];
+const LABEL = Object.fromEntries(STATUSES);
+const TYPES = [["all", "Both"], ["contact", "Contact"], ["questionnaire", "Questionnaire"]];
+// the site's one arrow (components/icons.tsx)
+const ARROW = `<svg viewBox="0 0 22 16" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.886" stroke-linecap="butt" stroke-linejoin="miter"><path d="M0 8H20"/><path d="M13.37 15.3L20.67 8L13.37 0.7"/></g></svg>`;
+
+// built from the origin, so a password typed into the address bar can't break fetch
+const API = `${location.origin}/admin/api/submissions`;
+
+let leads = [];
+let view = { status: "open", type: "all" };
+let openId = null;
+// questionnaires you've opened stay open while you click around
+const unfolded = new Set();
+const CLOSE = `<svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true"><path d="M10 0.7L0.7 10" stroke-width="1.886"/><path d="M0.7 0.7L10 10" stroke-width="1.886"/></svg>`;
+
+const $ = (sel) => document.querySelector(sel);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const today = () => new Date().toLocaleDateString("en-CA");
+const isOpen = (l) => l.status === "new" || l.status === "talking";
+const isDue = (l) => isOpen(l) && l.follow_up_on && l.follow_up_on <= today();
+const fmtDate = (d) => new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+const kind = (l) => (l.type === "contact" ? "Contact" : "Questionnaire");
+const answers = (l) => { try { return l.answers ? JSON.parse(l.answers) : null; } catch { return null; } };
+const show = (v) => (Array.isArray(v) ? v.join(", ") : v && typeof v === "object" ? JSON.stringify(v) : String(v ?? ""));
+const preview = (l) => l.message || Object.values(answers(l) || {}).map(show).join(" / ");
+const followText = (l) => (l.follow_up_on && isOpen(l) ? `${isDue(l) ? "Due" : "Follow up"} ${fmtDate(l.follow_up_on)}` : "");
+
+async function load() {
+  const res = await fetch(API, { cache: "no-store" });
+  leads = (await res.json()).submissions;
+  render();
+}
+
+function matches(l) {
+  if (view.type !== "all" && l.type !== view.type) return false;
+  if (view.status === "open") return isOpen(l);
+  if (view.status === "due") return isDue(l);
+  if (view.status === "all") return true;
+  return l.status === view.status;
+}
+
+/* due first, then the nearest follow-up, then the newest */
+function sorted(list) {
+  const key = (l) => (isOpen(l) && l.follow_up_on ? l.follow_up_on : "9999");
+  return [...list].sort((a, b) =>
+    (isDue(b) - isDue(a)) || key(a).localeCompare(key(b)) || b.created_at.localeCompare(a.created_at));
+}
+
+function render() {
+  const byType = leads.filter((l) => view.type === "all" || l.type === view.type);
+  const count = (f) => byType.filter(f).length;
+  const views = [
+    ["open", "Open", count(isOpen)],
+    ["due", "Due", count(isDue)],
+    ...STATUSES.map(([k, label]) => [k, label, count((l) => l.status === k)]),
+    ["all", "All", byType.length],
+  ];
+  $("#filters").innerHTML =
+    views.map(([k, label, n]) =>
+      `<button class="cell ui-menu" data-view="${k}"${LABEL[k] ? ` data-stage="${k}"` : ""} aria-pressed="${view.status === k}">${label}&nbsp;${n}</button>`).join("") +
+    `<span class="gap"></span>` +
+    TYPES.map(([k, label]) =>
+      `<button class="cell ui-menu" data-type="${k}" aria-pressed="${view.type === k}">${label}</button>`).join("");
+
+  const shown = sorted(leads.filter(matches));
+  $("#list").innerHTML = shown.length
+    ? shown.map((l) => `
+      <button class="row" data-id="${l.id}" aria-current="${l.id === openId}">
+        <span class="rowMain">
+          <span class="who">
+            <span class="ui-menu">${esc(l.name || l.email)}</span>
+            <span class="mono-meta">${kind(l)} / ${fmtDate(l.created_at)}</span>
+          </span>
+          <span class="preview mono-body">${esc(preview(l))}</span>
+          <span class="follow mono-meta">${followText(l)}</span>
+        </span>
+        <span class="stage ui-menu" data-stage="${l.status}">${LABEL[l.status]}</span>
+      </button>`).join("")
+    : `<p class="empty mono-meta">Nothing here</p>`;
+
+  renderDetail();
+}
+
+function renderDetail() {
+  const l = leads.find((x) => x.id === openId);
+  const el = $("#detail");
+  if (!l) { el.hidden = true; return; }
+  el.hidden = false;
+  const a = answers(l);
+  const subject = encodeURIComponent(l.type === "contact" ? "Re: your message" : "Re: your brand questionnaire");
+  const when = new Date(l.created_at).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+  el.innerHTML = `
+    <button class="back ui-menu" data-close>Back</button>
+    <div class="block">
+      <p class="ui-case">${esc(l.name || l.email)}</p>
+      <p class="mono-meta">${kind(l)} / ${esc(when)}${l.name ? ` / ${esc(l.email)}` : ""}</p>
+    </div>
+    ${l.message ? `<div class="block"><p class="mono-label">Message</p><p class="message mono-body">${esc(l.message)}</p></div>` : ""}
+    ${a ? `<div class="fold" data-open="${unfolded.has(l.id)}">
+      <button class="toggle" data-fold aria-expanded="${unfolded.has(l.id)}">
+        <span class="ui-menu">Questionnaire</span>
+        <span class="mono-meta">${Object.keys(a).length} answers</span>
+        <span class="toggleMark">${CLOSE}</span>
+      </button>
+      <div class="drawer"><div class="drawerIn">${Object.entries(a).map(([k, v]) =>
+        `<div class="answer"><p class="mono-label">${esc(k.replace(/[_-]/g, " "))}</p><p class="mono-body">${esc(show(v))}</p></div>`).join("")}</div></div>
+    </div>` : ""}
+    <div class="block flush">
+      <p class="mono-label">Status</p>
+      <div class="choices">${STATUSES.map(([k, label]) =>
+        `<button class="cell ui-menu" data-status="${k}" data-stage="${k}" aria-pressed="${l.status === k}">${label}</button>`).join("")}</div>
+    </div>
+    <div class="block">
+      <p class="mono-label">Follow up on</p>
+      <div class="followRow">
+        <input class="field mono-body" type="date" id="follow" value="${l.follow_up_on ?? ""}">
+        <button class="link" data-in="3">In 3 days</button>
+        <button class="link" data-in="7">In a week</button>
+        <button class="link" data-in="">Clear</button>
+      </div>
+    </div>
+    <div class="block notes">
+      <p class="mono-label"><span>Notes</span><span id="saved" hidden>Saved</span></p>
+      <textarea class="field mono-body" id="notes">${esc(l.notes)}</textarea>
+    </div>
+    <a class="reply ui-menu" href="mailto:${esc(l.email)}?subject=${subject}"><span class="label">Reply by email</span><span class="arrowCell">${ARROW}</span></a>`;
+}
+
+async function save(id, patch) {
+  const l = leads.find((x) => x.id === id);
+  Object.assign(l, patch);
+  render();
+  const res = await fetch(`${API}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) { alert("That didn’t save. Reload and try again."); return; }
+  const s = $("#saved");
+  if (s) { s.hidden = false; setTimeout(() => { s.hidden = true; }, 1200); }
+}
+
+function addDays(n) {
+  const d = new Date(); d.setDate(d.getDate() + n);
+  return d.toLocaleDateString("en-CA");
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.view) { view.status = t.dataset.view; render(); }
+  else if (t.dataset.type) { view.type = t.dataset.type; render(); }
+  else if (t.dataset.id) { openId = openId === t.dataset.id ? null : t.dataset.id; render(); }
+  else if ("close" in t.dataset) { openId = null; render(); }
+  else if ("fold" in t.dataset) {
+    // flipped in place, not re-rendered, so the drawer animates
+    const fold = t.closest(".fold");
+    const open = fold.dataset.open !== "true";
+    fold.dataset.open = String(open);
+    t.setAttribute("aria-expanded", String(open));
+    open ? unfolded.add(openId) : unfolded.delete(openId);
+  }
+  else if (t.dataset.status) {
+    const patch = { status: t.dataset.status };
+    // a reply usually means checking back in a few days
+    const l = leads.find((x) => x.id === openId);
+    if (t.dataset.status === "talking" && !l.follow_up_on) patch.follow_up_on = addDays(3);
+    save(openId, patch);
+  }
+  else if ("in" in t.dataset) save(openId, { follow_up_on: t.dataset.in ? addDays(+t.dataset.in) : null });
+});
+
+document.addEventListener("change", (e) => {
+  if (e.target.id === "follow") save(openId, { follow_up_on: e.target.value || null });
+});
+// notes save a moment after you stop typing, so closing the tab never loses them
+let notesTimer;
+function saveNotes(id, value) {
+  const l = leads.find((x) => x.id === id);
+  if (!l || (l.notes ?? "") === value.trim()) return;
+  l.notes = value.trim() || null;
+  fetch(`${API}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ notes: value }),
+    keepalive: true,
+  }).then((res) => {
+    const s = $("#saved");
+    if (res.ok && s && openId === id) { s.hidden = false; setTimeout(() => { s.hidden = true; }, 1200); }
+  });
+}
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "notes") return;
+  const id = openId, value = e.target.value;
+  clearTimeout(notesTimer);
+  notesTimer = setTimeout(() => saveNotes(id, value), 600);
+});
+document.addEventListener("focusout", (e) => {
+  if (e.target.id !== "notes") return;
+  clearTimeout(notesTimer);
+  saveNotes(openId, e.target.value);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openId) { openId = null; render(); } });
+
+load();
+</script>
+</body>
+</html>

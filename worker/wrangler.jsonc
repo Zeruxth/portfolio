@@ -1,0 +1,40 @@
+/*
+ * Takes the site's forms (contact now, the brand questionnaire later), keeps
+ * every one in D1 and emails a notification. The site itself stays a static
+ * export on GitHub Pages; this is the only part that runs code.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aki-wip-forms",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "observability": { "enabled": true },
+
+  // api.akiwip.work, on the zone that already holds the site's DNS
+  "routes": [{ "pattern": "api.akiwip.work", "custom_domain": true }],
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "forms",
+      "database_id": "5a25acb6-0f74-4168-9dfb-62f6045117c8",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // sends only as forms@ and only to Aki's verified Email Routing address,
+  // which keeps it on the free plan (other recipients need Workers Paid)
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "akiwipz@gmail.com",
+      "allowed_sender_addresses": ["forms@akiwip.work"]
+    }
+  ],
+
+  "vars": {
+    "NOTIFY_TO": "akiwipz@gmail.com",
+    "NOTIFY_FROM": "forms@akiwip.work",
+    "ALLOWED_ORIGINS": "https://akiwip.work,https://www.akiwip.work,http://localhost:3000"
+  }
+}
