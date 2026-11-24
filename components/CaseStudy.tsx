@@ -280,7 +280,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                 <Link href="/projects" className={s.back} aria-label="Back to Projects" data-arrow-host>
                   <ArrowCell corner="topLeft" />
                 </Link>
-                <h1 className={s.title} onClick={() => goTo(0)}>
+                <h1 className={s.title} data-clickable onClick={() => goTo(0)}>
                   <button type="button" className={s.go} data-go tabIndex={-1}>
                     {project.title}
                   </button>
@@ -336,7 +336,7 @@ export default function CaseStudy({ project, next }: { project: Project; next: P
                 style={{ "--o": 2 * (i + 1) } as React.CSSProperties}
                 ref={(el) => { blocks.current[i + 1] = el; }}
               >
-                <h2 data-head className={s.label} onClick={() => goTo(i + 1)}>
+                <h2 data-head data-clickable className={s.label} onClick={() => goTo(i + 1)}>
                   <button type="button" className={s.go} data-go tabIndex={-1}>
                     {c.label}
                   </button>

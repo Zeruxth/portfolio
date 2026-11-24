@@ -21,12 +21,19 @@
     --mono: "IBM Plex Mono", ui-monospace, monospace;
     --arrow-w: 22px;
     --arrow-h: 16px;
+    /* the site's cursor: one 12px square, ink at rest, the ground over anything you can click */
+    --cur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Crect x='0.5' y='0.5' width='11' height='11' fill='%23222222' stroke='%23DEDEDE'/%3E%3C/svg%3E") 6 6, default;
+    --cur-hot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Crect x='0.5' y='0.5' width='11' height='11' fill='%23DEDEDE' stroke='%23222222'/%3E%3C/svg%3E") 6 6, pointer;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
   body { background: var(--bg); color: var(--ink); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
   button, input, textarea { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
-  button { cursor: pointer; text-align: left; }
+  button { text-align: left; }
+  @media (hover: hover) and (pointer: fine) {
+    html, label, input, textarea { cursor: var(--cur); }
+    :is(a[href], button, label[for], summary, select), :is(a[href], button, label[for], summary) * { cursor: var(--cur-hot); }
+  }
   :focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
   * { scrollbar-width: none; }
   *::-webkit-scrollbar { display: none; }
@@ -48,7 +55,10 @@
   .filters .gap { flex: 1; }
   .cell { flex: none; padding: 16px; white-space: nowrap; border-right: 1px solid var(--ink); display: flex; align-items: center; transition: background 0.2s ease, color 0.2s ease; }
   .gap + .cell { border-left: 1px solid var(--ink); }
-  .cell[aria-pressed="true"] { background: var(--ink); color: var(--bg); cursor: default; }
+  .cell[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  @media (hover: hover) and (pointer: fine) { .cell[aria-pressed="true"], .cell[aria-pressed="true"] * { cursor: var(--cur); } }
+  /* the questionnaire's link, ready to paste to a client; it says so once it's copied */
+  .copy { border-right: 0; }
   .cell:not([aria-pressed="true"]):focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
   @media (hover: hover) { .cell:not([aria-pressed="true"]):hover { background: var(--ink); color: var(--bg); } }
 
@@ -167,9 +177,10 @@
   @media (max-width: 1100px) {
     header { flex-direction: column; }
     h1 { border-right: 0; border-bottom: 1px solid var(--ink); }
+    .copy { border-top: 1px solid var(--ink); }
     /* a phone: the name with its date under it, the stage beside them */
     .list { display: block; }
-    .row { grid-template-columns: minmax(0, 1fr) auto; }
+    .row { width: 100%; grid-template-columns: minmax(0, 1fr) auto; }
     .row .who { grid-column: 1; }
     .row .preview { display: none; }
     .row .follow { grid-column: 1; padding-top: 0; text-align: left; }
@@ -185,6 +196,7 @@
   <header>
     <h1 class="ui-title">Leads</h1>
     <nav class="filters" id="filters" aria-label="Filter leads"></nav>
+    <button class="cell ui-menu copy" id="copy" type="button">Copy questionnaire link</button>
   </header>
   <main>
     <div class="list" id="list"></div>
@@ -401,6 +413,16 @@ document.addEventListener("focusout", (e) => {
   clearTimeout(notesTimer);
   saveNotes(openId, e.target.value);
 });
+const QUESTIONNAIRE = "https://akiwip.work/questionnaire/";
+let copied = 0;
+$("#copy").addEventListener("click", async (e) => {
+  const b = e.currentTarget;
+  try { await navigator.clipboard.writeText(QUESTIONNAIRE); b.textContent = "Copied"; }
+  catch { prompt("Copy the questionnaire link", QUESTIONNAIRE); }
+  clearTimeout(copied);
+  copied = setTimeout(() => { b.textContent = "Copy questionnaire link"; }, 1600);
+});
+
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openId) { openId = null; render(); } });
 
 load();

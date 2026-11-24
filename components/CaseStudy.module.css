@@ -79,7 +79,7 @@
 
 /* headings are the way back to their block once they have stacked */
 .block[data-folded="true"] .title,
-.block[data-folded="true"] .label { cursor: pointer; }
+.block[data-folded="true"] .label { cursor: var(--cur-hot); }
 
 .introBody {
   padding: 16px 16px 24px; /* 16 + the frame's 8px bottom */
@@ -256,7 +256,7 @@
   /* the script slides long text up under its heading; here it is all in view */
   .bodyIn { transform: none !important; }
   .block[data-folded="true"] .title,
-  .block[data-folded="true"] .label { cursor: auto; }
+  .block[data-folded="true"] .label { cursor: var(--cur); }
 
   .foot { position: static; order: 9999; justify-content: space-between; }
   .prev {

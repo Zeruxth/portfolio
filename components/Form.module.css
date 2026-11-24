@@ -131,7 +131,7 @@ input.answer { align-self: start; }
   font-size: 22px;
   line-height: 28px;
   text-transform: uppercase;
-  cursor: pointer;
+  cursor: var(--cur-hot);
   transition: background 0.2s ease, color 0.2s ease;
 }
 .pick:last-child { border-bottom: 0; }
@@ -213,7 +213,7 @@ input.answer { align-self: start; }
   padding: 0;
   background: var(--bg);
   color: var(--ink);
-  cursor: pointer;
+  cursor: var(--cur-hot);
   animation: none;
 }
 .send:disabled { cursor: progress; }

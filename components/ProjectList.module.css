@@ -20,7 +20,7 @@
   text-align: left;
   background: transparent;
   color: var(--ink);
-  cursor: pointer;
+  cursor: var(--cur-hot);
 }
 
 .row[data-open="true"] { align-items: flex-start; }
@@ -46,7 +46,7 @@
 }
 
 /* the outline goes on the whole row */
-.toggle { all: unset; display: block; cursor: pointer; }
+.toggle { all: unset; display: block; cursor: var(--cur-hot); }
 .toggle:focus-visible { outline: none; }
 
 .desc {

@@ -109,7 +109,7 @@
   width: 10.7px;
   height: 10.7px;
   flex: none;
-  cursor: pointer;
+  cursor: var(--cur-hot);
   display: block;
   color: inherit;
 }

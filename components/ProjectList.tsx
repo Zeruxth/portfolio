@@ -62,6 +62,7 @@ export default function ProjectList({ projects }: { projects: Project[] }) {
             className={s.row}
             style={{ animationDelay: `${i * 55}ms` }}
             data-open={isOpen}
+            data-clickable
             onPointerMove={(e) => hover(project.slug, e)}
             onClick={(e) => {
               // dragging across the description to copy it isn't a click on the row

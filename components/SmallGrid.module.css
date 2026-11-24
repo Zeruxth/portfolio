@@ -42,7 +42,7 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  cursor: pointer;
+  cursor: var(--cur-hot);
   transition: background 0.2s ease, color 0.2s ease;
 }
 .face:focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }

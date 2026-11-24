@@ -12,7 +12,7 @@
   color: #F5F7F5;
   /* inverts against the frame behind it, so it reads on the film's bright shots too */
   mix-blend-mode: difference;
-  cursor: pointer;
+  cursor: var(--cur-hot);
   opacity: 0;
   transition: opacity 0.6s ease;
 }

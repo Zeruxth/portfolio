@@ -528,6 +528,7 @@ function Opened({
     <div
       className={s.opened}
       data-opened
+      data-clickable
       onClick={() => {
         // selecting the text isn't a click to close
         if (!window.getSelection()?.toString()) onClose();
@@ -924,6 +925,7 @@ export default function SmallGrid({ projects }: { projects: SmallProject[] }) {
                     type="button"
                     className={s.face}
                     data-face
+                    data-clickable
                     aria-label={`${project.title}, ${project.tags.join(" / ")}`}
                     aria-expanded={isOpen}
                     tabIndex={isOpen ? -1 : 0}

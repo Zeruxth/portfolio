@@ -23,7 +23,7 @@
   gap: 16px;
   padding: 16px;
   border-bottom: 1px solid var(--ink);
-  cursor: default;
+  cursor: var(--cur);
   transition: background 0.2s ease, color 0.2s ease;
 }
 /* the shown tool reads like the menu row for the page you're on */
@@ -125,7 +125,7 @@
   .names { border-right: 0; overflow: visible; }
   .detail { display: none; }
 
-  .name { cursor: pointer; }
+  .name { cursor: var(--cur-hot); }
   .name[data-on="true"] { background: transparent; color: var(--ink); }
   .item[data-open="true"] .name { background: var(--ink); color: var(--bg); }
   .name:focus-visible { outline-color: var(--ink); }

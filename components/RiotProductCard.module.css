@@ -15,7 +15,7 @@
   container-type: inline-size;
   background: #C6C6C6;
   overflow: hidden;
-  cursor: default;
+  cursor: var(--cur);
   --k: calc(100cqw / 473);
   --ink: #02390E;
   /* one hairline for every stroke: exactly one device pixel, so where neighbouring
