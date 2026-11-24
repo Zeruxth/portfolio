@@ -83,7 +83,7 @@ export default function Questionnaire() {
       </div>
 
       <div className={s.body}>
-      <div className={s.bodyIn}>
+      <div className={s.bodyIn} data-fold-rows>
 
       <label className={s.row}>
         <span className={s.q}>
@@ -163,7 +163,7 @@ export default function Questionnaire() {
         </p>
       )}
 
-      <div className={s.foot}>
+      <div className={s.foot} data-send>
         <button className={`${pl.enter} ${s.send}`} type="submit" disabled={status === "sending"} data-arrow-host>
             <span className={pl.enterLabel}>{status === "sending" ? "Sending…" : "Send it"}</span>
             <ArrowCell corner="inline" />

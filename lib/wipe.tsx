@@ -67,6 +67,8 @@ export function WipeProvider({ children }: { children: ReactNode }) {
     const bottom = Math.min(r.bottom, window.innerHeight);
     const box = { top, left: r.left, width: r.width, height: bottom - top };
     stage.current = "closing";
+    // pages that arrive under the panels hold their entrances until they open (Band)
+    document.documentElement.dataset.wipe = "on";
     setLive({
       words: box.width < 760 ? run.short : run.words,
       colours: shuffled(GROUNDS), // dealt now, not at build time, so every run is fresh
@@ -110,6 +112,8 @@ export function WipeProvider({ children }: { children: ReactNode }) {
     const pans = [...panels.current.children] as HTMLElement[];
     pans.forEach((p, i) => { p.style.transitionDelay = `${(pans.length - 1 - i) * STAGGER_OUT}ms`; });
     panels.current.classList.remove("is-in");
+    delete document.documentElement.dataset.wipe;
+    window.dispatchEvent(new Event("wipe-open"));
     later(() => {
       stage.current = "idle";
       setLive(null);

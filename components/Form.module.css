@@ -152,14 +152,14 @@ input.answer { align-self: start; }
 }
 
 /*
- * Everything under the opening line. Once sent it folds shut, the way the
- * menu's drawer does, while the line scrambles into the reply (Scramble.tsx).
+ * Everything under the opening line. Once sent, its rows fold shut one after
+ * another from the bottom up (lib/use-sent.ts) while the line scrambles into
+ * the reply (Scramble.tsx).
  */
 .body {
   flex: 1 1 auto;
   display: grid;
   grid-template-rows: 1fr;
-  transition: grid-template-rows 0.7s cubic-bezier(0.65, 0, 0.35, 1);
 }
 /*
  * The questions and answers are one grid, so the question column hugs the
@@ -176,8 +176,8 @@ input.answer { align-self: start; }
 .bodyIn > *, .part > * { grid-column: 1 / -1; }
 /* Contact: the message row takes the rest of the height */
 .twoRows { grid-template-rows: auto 1fr; align-content: stretch; }
-.page[data-phase="sent"] .body { grid-template-rows: 0fr; }
-.page[data-phase="sent"] .intro { border-bottom: 0; }
+.intro { transition: border-color 0.3s ease; }
+.page[data-phase="sent"] .intro { border-bottom-color: transparent; transition-delay: 1s; }
 .fill .answer { align-self: stretch; }
 
 /*

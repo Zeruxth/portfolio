@@ -82,6 +82,18 @@ export default function Band({ section }: { section: Section }) {
     return () => clearTimeout(t);
   }, [section.word, shown]);
 
+  // the entrance: on arrival, or once the send wipe has opened onto the page
+  const [enter, setEnter] = useState<"wait" | "go">("wait");
+  useEffect(() => {
+    if (fs === null) return;
+    const go = () => requestAnimationFrame(() => setEnter("go"));
+    if (document.documentElement.dataset.wipe === "on") {
+      window.addEventListener("wipe-open", go, { once: true });
+      return () => window.removeEventListener("wipe-open", go);
+    }
+    go();
+  }, [fs]);
+
   const size = fs ?? 200;
   const widthOf = (chars: number) => `${chars * MONO_ADVANCE * size}px`;
 
@@ -90,6 +102,7 @@ export default function Band({ section }: { section: Section }) {
       ref={ref}
       className={s.band}
       data-ready={fs !== null}
+      data-enter={enter}
       style={
         {
           "--band-fs": `${size}px`,

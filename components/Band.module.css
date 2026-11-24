@@ -26,7 +26,7 @@
   transition: width 0.34s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-.glyphs { display: block; transition: opacity 0.11s linear; }
+.glyphs { display: block; transition: opacity 0.11s linear, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
 .glyphs[data-fade="true"] { opacity: 0; }
 
 /* the only element allowed to change size — it absorbs whatever the word doesn't use,
@@ -39,7 +39,17 @@
   /* sits exactly on the cap baseline, measured — not guessed */
   margin-bottom: var(--band-baseline, 1px);
   background-color: var(--accent);
+  transform-origin: left center;
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.12s;
 }
+
+/*
+ * The entrance, inside each word's own clip box: AKI rises from below the
+ * line, the rule draws out from the left, then the word rises after it.
+ */
+.band[data-enter="wait"] .glyphs { transform: translateY(115%); transition: none; }
+.band[data-enter="wait"] .rule { transform: scaleX(0); transition: none; }
+.band[data-enter="go"] .word:last-child .glyphs { transition-delay: 0s, 0.42s; }
 
 /* stacked layouts: the words keep clear of the frame instead of touching it */
 @media (max-width: 1100px) {
