@@ -19,8 +19,8 @@
   --band-fs: 200px;
 
   --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed",
-        "Roboto Condensed", "Arial Narrow", sans-serif;
-  --mono: var(--font-plex-mono), ui-monospace, monospace;
+        var(--font-hebrew), "Roboto Condensed", "Arial Narrow", sans-serif;
+  --mono: var(--font-plex-mono), var(--font-hebrew), ui-monospace, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

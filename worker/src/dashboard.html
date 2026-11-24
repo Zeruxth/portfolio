@@ -284,7 +284,7 @@ function render() {
             <span class="ui-menu">${esc(l.name || l.email)}</span>
             <span class="mono-meta">${kind(l)} / ${fmtDate(l.created_at)}</span>
           </span>
-          <span class="preview mono-body">${esc(preview(l))}</span>
+          <span class="preview mono-body" dir="auto">${esc(preview(l))}</span>
           <span class="follow mono-meta">${followText(l)}</span>
         </span>
         <span class="stage ui-menu" data-stage="${l.status}">${LABEL[l.status]}</span>
@@ -308,7 +308,7 @@ function renderDetail() {
       <p class="ui-case">${esc(l.name || l.email)}</p>
       <p class="mono-meta">${kind(l)} / ${esc(when)}${l.name ? ` / ${esc(l.email)}` : ""}</p>
     </div>
-    ${l.message ? `<div class="block"><p class="mono-label">Message</p><p class="message mono-body">${esc(l.message)}</p></div>` : ""}
+    ${l.message ? `<div class="block"><p class="mono-label">Message</p><p class="message mono-body" dir="auto">${esc(l.message)}</p></div>` : ""}
     ${a ? `<div class="fold" data-open="${unfolded.has(l.id)}">
       <button class="toggle" data-fold aria-expanded="${unfolded.has(l.id)}">
         <span class="ui-menu">Questionnaire</span>
@@ -316,7 +316,7 @@ function renderDetail() {
         <span class="toggleMark">${CLOSE}</span>
       </button>
       <div class="drawer"><div class="drawerIn">${Object.entries(a).map(([k, v]) =>
-        `<div class="answer"><p class="mono-label">${esc(k.replace(/[_-]/g, " "))}</p><p class="mono-body">${esc(show(v))}</p></div>`).join("")}</div></div>
+        `<div class="answer"><p class="mono-label">${esc(k.replace(/[_-]/g, " "))}</p><p class="mono-body" dir="auto">${esc(show(v))}</p></div>`).join("")}</div></div>
     </div>` : ""}
     <div class="block flush">
       <p class="mono-label">Status</p>
@@ -334,7 +334,7 @@ function renderDetail() {
     </div>
     <div class="block notes">
       <p class="mono-label"><span>Notes</span><span id="saved" hidden>Saved</span></p>
-      <textarea class="field mono-body" id="notes">${esc(l.notes)}</textarea>
+      <textarea class="field mono-body" id="notes" dir="auto">${esc(l.notes)}</textarea>
     </div>
     <a class="reply ui-menu" href="mailto:${esc(l.email)}?subject=${subject}"><span class="label">Reply by email</span><span class="arrowCell">${ARROW}</span></a>`;
 }

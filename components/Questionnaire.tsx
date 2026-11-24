@@ -89,7 +89,7 @@ export default function Questionnaire() {
         <span className={s.q}>
           <span className={s.ask}>Your name</span>
         </span>
-        <input className={s.answer} name="name" autoComplete="name" maxLength={120} placeholder="First and last" />
+        <input className={s.answer} name="name" dir="auto" autoComplete="name" maxLength={120} placeholder="First and last" />
       </label>
       <label className={s.row}>
         <span className={s.q}>
@@ -120,6 +120,7 @@ export default function Questionnaire() {
                   <Field
                     className={`${s.answer} ${q.long ? s.long : ""}`}
                     name={q.id}
+                    dir="auto"
                     required={q.required}
                     maxLength={q.long ? 3000 : 300}
                     placeholder={q.prompt}

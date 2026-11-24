@@ -87,6 +87,7 @@ export default function ContactForm() {
             <textarea
               className={`${s.answer} ${s.long}`}
               name="message"
+              dir="auto"
               required
               maxLength={5000}
               placeholder="A project, a job, some cool shit. Spill."

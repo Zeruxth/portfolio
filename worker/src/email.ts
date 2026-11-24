@@ -62,14 +62,14 @@ export function renderLeadEmail(lead: MailLead, origin: string) {
   </td></tr>`;
 
   const message = lead.message
-    ? block(`${label("Message")}<div style="${MONO_BODY}white-space:pre-wrap;">${esc(lead.message)}</div>`)
+    ? block(`${label("Message")}<div dir="auto" style="${MONO_BODY}white-space:pre-wrap;">${esc(lead.message)}</div>`)
     : "";
 
   const answerRows = answers
     .map(
       ([k, v]) => `<tr>
         <td valign="baseline" style="padding:0 16px 8px 0;${MONO_LABEL}white-space:nowrap;">${esc(k.replace(/[_-]/g, " "))}</td>
-        <td valign="baseline" style="padding:0 0 8px;${MONO_BODY}">${esc(show(v))}</td>
+        <td dir="auto" valign="baseline" style="padding:0 0 8px;${MONO_BODY}">${esc(show(v))}</td>
       </tr>`,
     )
     .join("");
