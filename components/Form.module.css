@@ -78,6 +78,24 @@
 input.answer { align-self: start; }
 .long { min-height: 200px; resize: none; }
 
+/*
+ * The answer is the row, so nothing gets drawn inside it: not the site's
+ * focus ring (the cursor shows where you are), and not the browser's autofill
+ * fill either; autofilled text keeps the ground and the ink.
+ */
+.answer:focus,
+.answer:focus-visible { outline: none; }
+.answer:-webkit-autofill,
+.answer:-webkit-autofill:hover,
+.answer:-webkit-autofill:focus,
+.answer:autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+  -webkit-text-fill-color: var(--ink);
+  caret-color: var(--ink);
+  transition: background-color 600000s 0s;
+}
+
 /* the prompt: what to write, in ink held back, gone once you type */
 .answer::placeholder { color: var(--ink); opacity: 0.4; }
 
