@@ -20,7 +20,9 @@
 
   --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed",
         var(--font-hebrew), "Roboto Condensed", "Arial Narrow", sans-serif;
-  --mono: var(--font-plex-mono), var(--font-hebrew), ui-monospace, monospace;
+  /* Plex by its own name, not var(--font-plex-mono): that also carries next/font's
+     metric fallback, a local Arial, which has Hebrew and would beat Cascadia to it */
+  --mono: "IBM Plex Mono", var(--font-hebrew), ui-monospace, monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
