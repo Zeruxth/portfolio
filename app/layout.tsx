@@ -16,11 +16,11 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Trade Gothic and Plex have no Hebrew, so Hebrew letters fall through to this.
+// Trade Gothic and Plex have no Hebrew, so Hebrew letters fall through to this (Cascadia Code Medium).
 // Only the hebrew subset is loaded: its unicode-range keeps it off Latin text.
 const hebrew = Cascadia_Code({
   subsets: ["hebrew"],
-  weight: ["300"],
+  weight: ["500"],
   variable: "--font-hebrew",
   display: "swap",
   preload: false,
