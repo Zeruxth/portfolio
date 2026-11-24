@@ -105,6 +105,10 @@
   .row .preview { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .row .follow { text-align: right; white-space: nowrap; }
   .empty { padding: 16px; }
+  /* adding a lead by hand: the questionnaire's toggle as the list's first row; its plus turns to a close and the row fills while the form is open */
+  .add { border-bottom: 1px solid var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  .add[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .add:not([aria-pressed="true"]) .toggleMark svg { transform: rotate(45deg); }
 
   /* ---- the open lead ---- */
   .detail { flex: none; width: min(520px, 45%); border-left: 1px solid var(--ink); overflow-y: auto; display: flex; flex-direction: column; }
@@ -154,7 +158,7 @@
 
   /* the contact row, with the arrow docked in its box */
   /* the arrow is part of the row's frame: full height, ruled on its left only */
-  .reply { display: flex; align-items: stretch; margin-top: auto; border-top: 1px solid var(--ink); text-decoration: none; color: var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  .reply { width: 100%; display: flex; align-items: stretch; margin-top: auto; border-top: 1px solid var(--ink); text-decoration: none; color: var(--ink); transition: background 0.2s ease, color 0.2s ease; }
   .reply .label { flex: 1; padding: 16px; }
   .reply:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
   @media (hover: hover) { .reply:hover { background: var(--ink); color: var(--bg); } }
@@ -222,6 +226,8 @@ const API = `${location.origin}/admin/api/submissions`;
 let leads = [];
 let view = { status: "open", type: "all" };
 let openId = null;
+// true while the add-a-lead form is in the side panel
+let adding = false;
 // questionnaires you've opened stay open while you click around
 const unfolded = new Set();
 const CLOSE = `<svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true"><path d="M10 0.7L0.7 10" stroke-width="1.886"/><path d="M0.7 0.7L10 10" stroke-width="1.886"/></svg>`;
@@ -232,7 +238,7 @@ const today = () => new Date().toLocaleDateString("en-CA");
 const isOpen = (l) => l.status === "new" || l.status === "talking";
 const isDue = (l) => isOpen(l) && l.follow_up_on && l.follow_up_on <= today();
 const fmtDate = (d) => new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
-const kind = (l) => (l.type === "contact" ? "Contact" : "Questionnaire");
+const kind = (l) => (l.source === "manual" ? "Added" : l.type === "contact" ? "Contact" : "Questionnaire");
 const answers = (l) => { try { return l.answers ? JSON.parse(l.answers) : null; } catch { return null; } };
 const show = (v) => (Array.isArray(v) ? v.join(", ") : v && typeof v === "object" ? JSON.stringify(v) : String(v ?? ""));
 const preview = (l) => l.message || Object.values(answers(l) || {}).map(show).join(" / ");
@@ -276,7 +282,9 @@ function render() {
       `<button class="cell ui-menu" data-type="${k}" aria-pressed="${view.type === k}">${label}</button>`).join("");
 
   const shown = sorted(leads.filter(matches));
-  $("#list").innerHTML = shown.length
+  $("#list").innerHTML =
+    `<button class="toggle add" id="add" type="button" aria-pressed="${adding}"><span class="ui-menu">Add lead</span><span class="toggleMark">${CLOSE}</span></button>` +
+    (shown.length
     ? shown.map((l) => `
       <button class="row" data-id="${l.id}" aria-current="${l.id === openId}">
         <span class="rowMain">
@@ -289,14 +297,33 @@ function render() {
         </span>
         <span class="stage ui-menu" data-stage="${l.status}">${LABEL[l.status]}</span>
       </button>`).join("")
-    : `<p class="empty mono-meta">Nothing here</p>`;
+    : `<p class="empty mono-meta">Nothing here</p>`);
 
-  renderDetail();
+  adding ? renderAdd() : renderDetail();
+}
+
+/* the same blocks as an open lead, empty, with the reply row as its save */
+function renderAdd() {
+  const el = $("#detail");
+  if (el.dataset.mode === "add" && !el.hidden) return; // keep what's typed
+  el.hidden = false;
+  el.dataset.mode = "add";
+  el.innerHTML = `
+    <button class="back ui-menu" data-close>Back</button>
+    <form id="addForm" style="display:contents">
+      <div class="block"><p class="ui-case">New lead</p></div>
+      <label class="block"><p class="mono-label">Name</p><input class="field mono-body" name="name" dir="auto" autocomplete="off"></label>
+      <label class="block"><p class="mono-label">Email</p><input class="field mono-body" name="email" type="email" autocomplete="off"></label>
+      <label class="block notes"><p class="mono-label"><span>Message</span><span id="addErr" hidden></span></p><textarea class="field mono-body" name="message" dir="auto"></textarea></label>
+      <button class="reply ui-menu" type="submit"><span class="label">Save lead</span><span class="arrowCell">${ARROW}</span></button>
+    </form>`;
+  el.querySelector("input").focus();
 }
 
 function renderDetail() {
   const l = leads.find((x) => x.id === openId);
   const el = $("#detail");
+  el.dataset.mode = "";
   if (!l) { el.hidden = true; return; }
   el.hidden = false;
   const a = answers(l);
@@ -306,7 +333,7 @@ function renderDetail() {
     <button class="back ui-menu" data-close>Back</button>
     <div class="block">
       <p class="ui-case">${esc(l.name || l.email)}</p>
-      <p class="mono-meta">${kind(l)} / ${esc(when)}${l.name ? ` / ${esc(l.email)}` : ""}</p>
+      <p class="mono-meta">${kind(l)} / ${esc(when)}${l.name && l.email ? ` / ${esc(l.email)}` : ""}</p>
     </div>
     ${l.message ? `<div class="block"><p class="mono-label">Message</p><p class="message mono-body" dir="auto">${esc(l.message)}</p></div>` : ""}
     ${a ? `<div class="fold" data-open="${unfolded.has(l.id)}">
@@ -336,7 +363,7 @@ function renderDetail() {
       <p class="mono-label"><span>Notes</span><span id="saved" hidden>Saved</span></p>
       <textarea class="field mono-body" id="notes" dir="auto">${esc(l.notes)}</textarea>
     </div>
-    <a class="reply ui-menu" href="mailto:${esc(l.email)}?subject=${subject}"><span class="label">Reply by email</span><span class="arrowCell">${ARROW}</span></a>`;
+    ${l.email ? `<a class="reply ui-menu" href="mailto:${esc(l.email)}?subject=${subject}"><span class="label">Reply by email</span><span class="arrowCell">${ARROW}</span></a>` : ""}`;
 }
 
 async function save(id, patch) {
@@ -363,8 +390,9 @@ document.addEventListener("click", (e) => {
   if (!t) return;
   if (t.dataset.view) { view.status = t.dataset.view; render(); }
   else if (t.dataset.type) { view.type = t.dataset.type; render(); }
-  else if (t.dataset.id) { openId = openId === t.dataset.id ? null : t.dataset.id; render(); }
-  else if ("close" in t.dataset) { openId = null; render(); }
+  else if (t.id === "add") { adding = !adding; if (adding) openId = null; render(); }
+  else if (t.dataset.id) { adding = false; openId = openId === t.dataset.id ? null : t.dataset.id; render(); }
+  else if ("close" in t.dataset) { adding = false; openId = null; render(); }
   else if ("fold" in t.dataset) {
     // flipped in place, not re-rendered, so the drawer animates
     const fold = t.closest(".fold");
@@ -381,6 +409,26 @@ document.addEventListener("click", (e) => {
     save(openId, patch);
   }
   else if ("in" in t.dataset) save(openId, { follow_up_on: t.dataset.in ? addDays(+t.dataset.in) : null });
+});
+
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "addForm") return;
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const body = Object.fromEntries(["name", "email", "message"].map((k) => [k, f.get(k).trim() || null]));
+  const err = $("#addErr");
+  const fail = (text) => { err.textContent = text; err.hidden = false; };
+  if (!body.name && !body.email) return fail("A name or an email");
+  const res = await fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const { field } = await res.json().catch(() => ({}));
+    return fail(field === "email" ? "That email doesn’t look right" : "That didn’t save");
+  }
+  const { submission } = await res.json();
+  leads.unshift(submission);
+  adding = false;
+  openId = submission.id;
+  render();
 });
 
 document.addEventListener("change", (e) => {
@@ -423,7 +471,7 @@ $("#copy").addEventListener("click", async (e) => {
   copied = setTimeout(() => { b.textContent = "Copy questionnaire link"; }, 1600);
 });
 
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && openId) { openId = null; render(); } });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (openId || adding)) { openId = null; adding = false; render(); } });
 
 load();
 </script>

@@ -7,6 +7,7 @@ import page from "./dashboard.html";
 
 const STATUSES = ["new", "talking", "won", "not_relevant"] as const;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function handleAdmin(request: Request, env: Env, url: URL): Promise<Response> {
   if (!env.ADMIN_PASSWORD) {
@@ -37,6 +38,37 @@ export async function handleAdmin(request: Request, env: Env, url: URL): Promise
        FROM submissions ORDER BY created_at DESC LIMIT 1000`,
     ).all();
     return Response.json({ submissions: results }, { headers });
+  }
+
+  // a lead you add yourself: met in person, a DM, a call. Saved as a contact
+  // with source "manual"; the email may be blank, since not every lead has one.
+  if (url.pathname === "/admin/api/submissions" && request.method === "POST") {
+    let body: Record<string, unknown>;
+    try {
+      body = await request.json();
+    } catch {
+      return Response.json({ error: "invalid_json" }, { status: 400, headers });
+    }
+    const text = (v: unknown, max: number): string | null | undefined =>
+      v === undefined || v === null ? null : typeof v !== "string" || v.trim().length > max ? undefined : v.trim() || null;
+    const name = text(body.name, 200);
+    const email = text(body.email, 254);
+    const message = text(body.message, 10000);
+    if (name === undefined) return Response.json({ error: "invalid", field: "name" }, { status: 400, headers });
+    if (email === undefined || (email && !EMAIL_RE.test(email))) {
+      return Response.json({ error: "invalid", field: "email" }, { status: 400, headers });
+    }
+    if (message === undefined) return Response.json({ error: "invalid", field: "message" }, { status: 400, headers });
+    if (!name && !email) return Response.json({ error: "invalid", field: "name" }, { status: 400, headers });
+
+    const row = await env.DB.prepare(
+      `INSERT INTO submissions (id, type, email, name, message, source)
+       VALUES (?, 'contact', ?, ?, ?, 'manual')
+       RETURNING id, type, email, name, message, answers, status, follow_up_on, notes, source, created_at, updated_at`,
+    )
+      .bind(crypto.randomUUID(), email ?? "", name, message)
+      .first();
+    return Response.json({ submission: row }, { status: 201, headers });
   }
 
   const match = url.pathname.match(/^\/admin\/api\/submissions\/([0-9a-f-]{36})$/);
