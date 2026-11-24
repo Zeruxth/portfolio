@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Cascadia_Code, IBM_Plex_Mono } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { JsonLd, NAME, ROLE, SITE_GRAPH, SITE_URL } from "@/lib/meta";
 import { SectionHoverProvider } from "@/lib/section-hover";
 import { TabsProvider } from "@/lib/tabs";
@@ -16,14 +17,17 @@ const plexMono = IBM_Plex_Mono({
   display: "swap",
 });
 
-// Trade Gothic and Plex have no Hebrew, so Hebrew letters fall through to this (Cascadia Code Medium).
-// Only the hebrew subset is loaded: its unicode-range keeps it off Latin text.
-const hebrew = Cascadia_Code({
-  subsets: ["hebrew"],
-  weight: ["500"],
+// Trade Gothic and Plex have no Hebrew, so Hebrew letters fall through to Under.
+// The file is cut down to Hebrew only, so its unicode-range keeps it off Latin text;
+// variable, so it takes whatever weight the text around it asks for.
+const hebrew = localFont({
+  src: "./fonts/under-hebrew.woff2",
+  weight: "100 900",
   variable: "--font-hebrew",
   display: "swap",
   preload: false,
+  adjustFontFallback: false,
+  declarations: [{ prop: "unicode-range", value: "U+0590-05FF, U+FB1D-FB4F, U+20AA" }],
 });
 
 const TITLE = `${NAME} — ${ROLE} · AKI_WIP`;

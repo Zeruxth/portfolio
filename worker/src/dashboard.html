@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Leads — AKI_WIP</title>
-<!-- the site's own fonts: the Trade Gothic kit, Plex Mono, Cascadia Code Medium for Hebrew (neither of the others has it), and the condensed fallback the site names -->
+<!-- the site's own fonts: the Trade Gothic kit, Plex Mono, Under for Hebrew (neither of the others has it, served from the site), and the condensed fallback the site names -->
 <link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Cascadia+Code:wght@500&family=Roboto+Condensed&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Roboto+Condensed&display=swap">
 <style>
+  @font-face { font-family: "Under Hebrew"; src: url(https://akiwip.work/fonts/under-hebrew.woff2) format("woff2"); font-weight: 100 900; font-display: swap; unicode-range: U+0590-05FF, U+FB1D-FB4F, U+20AA; }
   /*
    * Everything here is from the Design System page: one ground and one ink,
    * two typefaces in the sheet's text styles, square corners, 1px rules,
@@ -17,8 +18,8 @@
   :root {
     --bg: #DEDEDE;
     --ink: #222222;
-    --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed", "Cascadia Code", "Roboto Condensed", "Arial Narrow", sans-serif;
-    --mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+    --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed", "Under Hebrew", "Roboto Condensed", "Arial Narrow", sans-serif;
+    --mono: "IBM Plex Mono", "Under Hebrew", ui-monospace, monospace;
     --arrow-w: 22px;
     --arrow-h: 16px;
     /* the site's cursor: one 12px square, ink at rest, the ground over anything you can click; a bar over text */
