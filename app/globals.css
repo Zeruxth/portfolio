@@ -69,14 +69,21 @@ a { color: inherit; text-decoration: none; }
  * The cursor: the system's own, drawn as one 12px square, so it moves
  * exactly like a normal pointer, with the 1px rule every cell has, inside its
  * edge. Ink ruled in the ground's grey at rest; the grey ruled in ink over
- * anything you can click. Touch screens never see any of it.
+ * anything you can click; a bar, ruled the same way, over text and in fields.
+ * Touch screens never see any of it.
  */
 :root {
   --cur: url(/cursor/rest.svg) 6 6, default;
   --cur-hot: url(/cursor/hot.svg) 6 6, pointer;
+  --cur-text: url(/cursor/text.svg) 2 11, text;
 }
 @media (hover: hover) and (pointer: fine) {
-  html, label, input, textarea { cursor: var(--cur); }
+  html, label { cursor: var(--cur); }
+  p, h1, h2, h3, h4, h5, h6, li, dd, dt, blockquote, figcaption,
+  textarea, [contenteditable="true"],
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]) {
+    cursor: var(--cur-text);
+  }
   /* [data-clickable] marks what is clicked through a script rather than being a link or button */
   :is(a[href], button, [role="button"], label[for], summary, select, [data-arrow-host], [data-clickable]),
   :is(a[href], button, [role="button"], label[for], summary, [data-arrow-host], [data-clickable]) * {

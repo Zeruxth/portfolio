@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Leads — AKI_WIP</title>
-<!-- the site's own fonts: the Trade Gothic kit, Plex Mono, and the condensed fallback the site names -->
+<!-- the site's own fonts: the Trade Gothic kit, Plex Mono, Cascadia Code Medium for Hebrew (neither of the others has it), and the condensed fallback the site names -->
 <link rel="stylesheet" href="https://use.typekit.net/wbs6qzg.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Roboto+Condensed&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=Cascadia+Code:wght@500&family=Roboto+Condensed&display=swap">
 <style>
   /*
    * Everything here is from the Design System page: one ground and one ink,
@@ -17,13 +17,14 @@
   :root {
     --bg: #DEDEDE;
     --ink: #222222;
-    --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
-    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --ui: "trade-gothic-next-condensed", "Trade Gothic Next LT Pro Condensed", "Cascadia Code", "Roboto Condensed", "Arial Narrow", sans-serif;
+    --mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
     --arrow-w: 22px;
     --arrow-h: 16px;
-    /* the site's cursor: one 12px square, ink at rest, the ground over anything you can click */
+    /* the site's cursor: one 12px square, ink at rest, the ground over anything you can click; a bar over text */
     --cur: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Crect x='0.5' y='0.5' width='11' height='11' fill='%23222222' stroke='%23DEDEDE'/%3E%3C/svg%3E") 6 6, default;
     --cur-hot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Crect x='0.5' y='0.5' width='11' height='11' fill='%23DEDEDE' stroke='%23222222'/%3E%3C/svg%3E") 6 6, pointer;
+    --cur-text: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='22' viewBox='0 0 4 22' shape-rendering='crispEdges'%3E%3Crect x='0.5' y='0.5' width='3' height='21' fill='%23222222' stroke='%23DEDEDE'/%3E%3C/svg%3E") 2 11, text;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
@@ -31,7 +32,8 @@
   button, input, textarea { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
   button { text-align: left; }
   @media (hover: hover) and (pointer: fine) {
-    html, label, input, textarea { cursor: var(--cur); }
+    html, label { cursor: var(--cur); }
+    p, h1, h2, h3, li, textarea, input { cursor: var(--cur-text); }
     :is(a[href], button, label[for], summary, select), :is(a[href], button, label[for], summary) * { cursor: var(--cur-hot); }
   }
   :focus-visible { outline: 2px solid var(--ink); outline-offset: -4px; }
@@ -143,9 +145,15 @@
   .choices .cell:nth-child(odd) { border-right: 1px solid var(--ink); }
   .choices .cell:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }
 
-  /* fields are the block itself: no box inside the box; the block takes the focus ring */
+  /*
+   * fields are the block itself, so nothing is drawn inside it: no focus ring
+   * (the cursor shows where you are) and no autofill fill, as on the site's forms
+   */
   .field { display: block; width: 100%; outline: none; }
-  .block:focus-within { outline: 2px solid var(--ink); outline-offset: -4px; }
+  .field:-webkit-autofill, .field:-webkit-autofill:hover, .field:-webkit-autofill:focus, .field:autofill {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg) inset; box-shadow: 0 0 0 1000px var(--bg) inset;
+    -webkit-text-fill-color: var(--ink); caret-color: var(--ink); transition: background-color 600000s 0s;
+  }
   .block.notes { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 200px; border-bottom: 0; }
   .notes textarea { flex: 1; min-height: 160px; resize: none; }
   .followRow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
