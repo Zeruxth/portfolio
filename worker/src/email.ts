@@ -20,7 +20,10 @@ const BG = "#DEDEDE";
 const INK = "#222222";
 const RULE = `1px solid ${INK}`;
 const UI = `'trade-gothic-next-condensed','Trade Gothic Next LT Pro Condensed','Roboto Condensed','Arial Narrow',sans-serif`;
-const MONO = `'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace`;
+// Arial before the generic monospace: mail can't load Under, and Arial's Hebrew reads far better than a monospaced one
+const MONO = `'IBM Plex Mono',ui-monospace,Menlo,Consolas,Arial,monospace`;
+// an email is the heads-up, the dashboard is where it's read: long answers are cut here
+const CUT = 220;
 
 // the sheet's text styles
 const UI_CASE = `font-family:${UI};font-size:30px;line-height:38px;text-transform:uppercase;color:${INK};`;
@@ -62,20 +65,16 @@ export function renderLeadEmail(lead: MailLead, origin: string) {
   </td></tr>`;
 
   const message = lead.message
-    ? block(`${label("Message")}<div dir="auto" style="${MONO_BODY}white-space:pre-wrap;">${esc(lead.message)}</div>`)
+    ? block(`${label("Message")}<div dir="auto" style="${MONO_BODY}white-space:pre-wrap;">${esc(cut(lead.message, CUT * 4))}</div>`)
     : "";
 
-  const answerRows = answers
-    .map(
-      ([k, v]) => `<tr>
-        <td valign="baseline" style="padding:0 16px 8px 0;${MONO_LABEL}white-space:nowrap;">${esc(k.replace(/[_-]/g, " "))}</td>
-        <td dir="auto" valign="baseline" style="padding:0 0 8px;${MONO_BODY}">${esc(show(v))}</td>
-      </tr>`,
-    )
-    .join("");
-  const answerBlock = answers.length
-    ? block(`${label("Answers")}<table role="presentation" cellpadding="0" cellspacing="0" border="0">${answerRows}</table>`)
-    : "";
+  // each answer is its own ruled block, the question above it, at the full width of the mail
+  const filled = answers.filter(([, v]) => show(v).trim());
+  const cutAny = filled.some(([, v]) => show(v).length > CUT);
+  const answerBlock = filled
+    .map(([k, v]) => block(`${label(k.replace(/[_-]/g, " "))}<div dir="auto" style="${MONO_BODY}">${esc(cut(show(v), CUT))}</div>`))
+    .join("") +
+    (cutAny ? block(`<div style="${MONO_LABEL}">Long answers are cut short here. All ${filled.length}, in full, under Open leads</div>`) : "");
 
   const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -119,6 +118,13 @@ export function renderLeadEmail(lead: MailLead, origin: string) {
 function preview(lead: MailLead): string {
   const src = lead.message ?? (lead.answers ? Object.values(lead.answers).map(show).join(" / ") : "");
   return src.slice(0, 140);
+}
+
+function cut(text: string, max: number): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  const head = t.slice(0, max);
+  return `${head.slice(0, Math.max(head.lastIndexOf(" "), max - 20)).trimEnd()}…`;
 }
 
 function show(v: unknown): string {

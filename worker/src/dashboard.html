@@ -30,7 +30,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; }
   body { background: var(--bg); color: var(--ink); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
-  button, input, textarea { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
+  button, input, textarea, select { font: inherit; color: inherit; background: none; border: 0; border-radius: 0; }
   button { text-align: left; }
   @media (hover: hover) and (pointer: fine) {
     html, label { cursor: var(--cur); }
@@ -114,7 +114,13 @@
   .add:not([aria-pressed="true"]) .toggleMark svg { transform: rotate(45deg); }
 
   /* ---- the open lead ---- */
-  .detail { flex: none; width: min(520px, 45%); border-left: 1px solid var(--ink); overflow-y: auto; display: flex; flex-direction: column; }
+  .detail { flex: none; width: var(--detail-w, min(520px, 45%)); border-left: 1px solid var(--ink); overflow-y: auto; display: flex; flex-direction: column; container-type: inline-size; }
+  /* the panel's left rule is a handle: drag it to make the panel wider or narrower, double-click to reset */
+  .grip { flex: none; position: relative; width: 0; z-index: 2; }
+  .grip::before { content: ""; position: absolute; top: 0; bottom: 0; left: -5px; width: 10px; cursor: col-resize; }
+  .grip[hidden] { display: none; }
+  main[data-dragging] { user-select: none; }
+  main[data-dragging] * { cursor: col-resize !important; }
   .detail[hidden] { display: none; }
   .block { flex: none; padding: 16px; border-bottom: 1px solid var(--ink); }
   .block > .mono-label:first-child { margin-bottom: 8px; display: flex; justify-content: space-between; }
@@ -141,10 +147,26 @@
   /* the stages run edge to edge, ruled by the block itself */
   .block.flush { padding: 0; }
   .block.flush > .mono-label:first-child { padding: 16px 16px 0; }
-  .choices { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ink); }
-  .choices .cell { border-right: 0; }
-  .choices .cell:nth-child(odd) { border-right: 1px solid var(--ink); }
-  .choices .cell:nth-child(-n+2) { border-bottom: 1px solid var(--ink); }
+  /* the cells are ruled by the gaps between them, so the grid can reflow with the panel's width */
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--ink); border-top: 1px solid var(--ink); }
+  .choices .cell { border-right: 0; background: var(--bg); }
+  /* the steps: the same cells, filled with ink once they're done */
+  .steps { --c: var(--ink); --on: var(--bg); }
+  /* as the panel widens or narrows, its grids follow: one column, two, then all in a row */
+  @container (max-width: 400px) { .choices { grid-template-columns: 1fr; } }
+  @container (min-width: 700px) {
+    .choices:not(.steps) { grid-template-columns: repeat(4, 1fr); }
+    .steps { grid-template-columns: repeat(3, 1fr); }
+    .drawerIn { display: grid; grid-template-columns: 1fr 1fr; }
+    .drawerIn .answer:nth-child(odd) { border-right: 1px solid var(--ink); }
+  }
+
+  /* editing a lead: the same blocks, the head's Edit link, and the rows that end it */
+  .headRow { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  .field.pick { appearance: none; -webkit-appearance: none; text-overflow: ellipsis; }
+  .danger { width: 100%; padding: 16px; border-top: 1px solid var(--ink); transition: background 0.2s ease, color 0.2s ease; }
+  @media (hover: hover) { .danger:hover { background: var(--ink); color: var(--bg); } }
+  .danger:focus-visible { background: var(--ink); color: var(--bg); outline-color: var(--bg); }
 
   /*
    * fields are the block itself, so nothing is drawn inside it: no focus ring
@@ -199,6 +221,7 @@
     .row .follow { grid-column: 1; padding-top: 0; text-align: left; }
     .row .follow:empty { display: none; }
     .stage { grid-column: 2; grid-row: 1 / span 2; }
+    .grip { display: none; }
     .detail { position: fixed; inset: 0; width: auto; background: var(--bg); border-left: 0; z-index: 1; }
     .back { display: block; width: 100%; padding: 16px; border-bottom: 1px solid var(--ink); }
   }
@@ -213,6 +236,7 @@
   </header>
   <main>
     <div class="list" id="list"></div>
+    <div class="grip" id="grip" hidden></div>
     <aside class="detail" id="detail" hidden></aside>
   </main>
 </div>
@@ -237,6 +261,8 @@ let view = { status: "open", type: "all" };
 let openId = null;
 // true while the add-a-lead form is in the side panel
 let adding = false;
+// the lead being edited, if any
+let editing = null;
 // questionnaires you've opened stay open while you click around
 const unfolded = new Set();
 const CLOSE = `<svg viewBox="0 0 10.7033 10.7033" fill="none" aria-hidden="true"><path d="M10 0.7L0.7 10" stroke-width="1.886"/><path d="M0.7 0.7L10 10" stroke-width="1.886"/></svg>`;
@@ -248,6 +274,15 @@ const isOpen = (l) => l.status === "new" || l.status === "talking";
 const isDue = (l) => isOpen(l) && l.follow_up_on && l.follow_up_on <= today();
 const fmtDate = (d) => new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 const kind = (l) => (l.source === "manual" ? "Added" : l.type === "contact" ? "Contact" : "Questionnaire");
+const TASKS = [
+  ["replied", "Replied"],
+  ["questionnaire_sent", "Questionnaire sent"],
+  ["call", "Call"],
+  ["quote_sent", "Quote sent"],
+  ["quote_approved", "Quote approved"],
+  ["invoice_sent", "Invoice sent"],
+];
+const tasks = (l) => { try { return l.tasks ? JSON.parse(l.tasks) : []; } catch { return []; } };
 const answers = (l) => { try { return l.answers ? JSON.parse(l.answers) : null; } catch { return null; } };
 const show = (v) => (Array.isArray(v) ? v.join(", ") : v && typeof v === "object" ? JSON.stringify(v) : String(v ?? ""));
 const preview = (l) => l.message || Object.values(answers(l) || {}).map(show).join(" / ");
@@ -316,6 +351,7 @@ function renderAdd() {
   const el = $("#detail");
   if (el.dataset.mode === "add" && !el.hidden) return; // keep what's typed
   el.hidden = false;
+  $("#grip").hidden = false;
   el.dataset.mode = "add";
   el.innerHTML = `
     <button class="back ui-menu" data-close>Back</button>
@@ -332,8 +368,10 @@ function renderAdd() {
 function renderDetail() {
   const l = leads.find((x) => x.id === openId);
   const el = $("#detail");
+  if (!l) { el.hidden = true; $("#grip").hidden = true; return; }
+  $("#grip").hidden = false;
+  if (editing === l.id) return renderEdit(l);
   el.dataset.mode = "";
-  if (!l) { el.hidden = true; return; }
   el.hidden = false;
   const a = answers(l);
   const subject = encodeURIComponent(l.type === "contact" ? "Re: your message" : "Re: your brand questionnaire");
@@ -341,7 +379,7 @@ function renderDetail() {
   el.innerHTML = `
     <button class="back ui-menu" data-close>Back</button>
     <div class="block">
-      <p class="ui-case">${esc(l.name || l.email)}</p>
+      <div class="headRow"><p class="ui-case" dir="auto">${esc(l.name || l.email)}</p><button class="link" data-edit>Edit</button></div>
       <p class="mono-meta">${kind(l)} / ${esc(when)}${l.name && l.email ? ` / ${esc(l.email)}` : ""}</p>
     </div>
     ${l.message ? `<div class="block"><p class="mono-label">Message</p><p class="message mono-body" dir="auto">${esc(l.message)}</p></div>` : ""}
@@ -359,6 +397,11 @@ function renderDetail() {
       <div class="choices">${STATUSES.map(([k, label]) =>
         `<button class="cell ui-menu" data-status="${k}" data-stage="${k}" aria-pressed="${l.status === k}">${label}</button>`).join("")}</div>
     </div>
+    <div class="block flush">
+      <p class="mono-label"><span>Steps</span><span>${tasks(l).length}/${TASKS.length}</span></p>
+      <div class="choices steps">${TASKS.map(([k, label]) =>
+        `<button class="cell ui-menu" data-task="${k}" aria-pressed="${tasks(l).includes(k)}">${label}</button>`).join("")}</div>
+    </div>
     <div class="block">
       <p class="mono-label">Follow up on</p>
       <div class="followRow">
@@ -373,6 +416,67 @@ function renderDetail() {
       <textarea class="field mono-body" id="notes" dir="auto">${esc(l.notes)}</textarea>
     </div>
     ${l.email ? `<a class="reply ui-menu" href="mailto:${esc(l.email)}?subject=${subject}"><span class="label">Reply by email</span><span class="arrowCell">${ARROW}</span></a>` : ""}`;
+}
+
+/* the lead's own details as fields, then folding another lead into it, then deleting it */
+function renderEdit(l) {
+  const el = $("#detail");
+  if (el.dataset.mode === `edit:${l.id}` && !el.hidden) return; // keep what's typed
+  el.hidden = false;
+  el.dataset.mode = `edit:${l.id}`;
+  const others = sorted(leads.filter((x) => x.id !== l.id));
+  el.innerHTML = `
+    <button class="back ui-menu" data-close>Back</button>
+    <form id="editForm" style="display:contents">
+      <div class="block"><div class="headRow"><p class="ui-case">Edit lead</p><button class="link" type="button" data-done>Cancel</button></div></div>
+      <label class="block"><p class="mono-label">Name</p><input class="field mono-body" name="name" dir="auto" autocomplete="off" value="${esc(l.name)}"></label>
+      <label class="block"><p class="mono-label">Email</p><input class="field mono-body" name="email" type="email" autocomplete="off" value="${esc(l.email)}"></label>
+      <label class="block notes"><p class="mono-label"><span>Message</span><span id="editErr" hidden></span></p><textarea class="field mono-body" name="message" dir="auto">${esc(l.message)}</textarea></label>
+      <label class="block"><p class="mono-label">Merge with</p>
+        <select class="field mono-body pick" name="merge">
+          <option value="">Pick a lead that’s the same person</option>
+          ${others.map((o) => `<option value="${o.id}">${esc(o.name || o.email)} / ${kind(o)} / ${fmtDate(o.created_at)}</option>`).join("")}
+        </select>
+        <p class="mono-meta">Their message, answers, notes and steps move into this lead, and theirs is removed</p>
+      </label>
+      <button class="reply ui-menu" type="submit"><span class="label">Save lead</span><span class="arrowCell">${ARROW}</span></button>
+    </form>
+    <button class="danger ui-menu" type="button" data-delete>Delete lead</button>`;
+}
+
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "editForm") return;
+  e.preventDefault();
+  const id = editing;
+  const f = new FormData(e.target);
+  const body = Object.fromEntries(["name", "email", "message"].map((k) => [k, f.get(k).trim() || null]));
+  const err = $("#editErr");
+  const fail = (text) => { err.textContent = text; err.hidden = false; };
+  if (!body.name && !body.email) return fail("A name or an email");
+  const res = await fetch(`${API}/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!res.ok) {
+    const { field } = await res.json().catch(() => ({}));
+    return fail(field === "email" ? "That email doesn’t look right" : "That didn’t save");
+  }
+  replace((await res.json()).submission);
+  const from = f.get("merge");
+  if (from) {
+    const other = leads.find((x) => x.id === from);
+    if (confirm(`Merge ${other.name || other.email} into this lead? Theirs is removed.`)) {
+      const m = await fetch(`${API}/${id}/merge`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ from }) });
+      if (!m.ok) return fail("The merge didn’t go through");
+      const { submission, removed } = await m.json();
+      leads = leads.filter((x) => x.id !== removed);
+      replace(submission);
+    }
+  }
+  editing = null;
+  render();
+});
+
+function replace(row) {
+  const i = leads.findIndex((x) => x.id === row.id);
+  if (i >= 0) leads[i] = { ...leads[i], ...row };
 }
 
 async function save(id, patch) {
@@ -400,8 +504,19 @@ document.addEventListener("click", (e) => {
   if (t.dataset.view) { view.status = t.dataset.view; render(); }
   else if (t.dataset.type) { view.type = t.dataset.type; render(); }
   else if (t.id === "add") { adding = !adding; if (adding) openId = null; render(); }
-  else if (t.dataset.id) { adding = false; openId = openId === t.dataset.id ? null : t.dataset.id; render(); }
-  else if ("close" in t.dataset) { adding = false; openId = null; render(); }
+  else if (t.dataset.id) { adding = false; editing = null; openId = openId === t.dataset.id ? null : t.dataset.id; render(); }
+  else if ("close" in t.dataset) { adding = false; editing = null; openId = null; render(); }
+  else if ("edit" in t.dataset) { editing = openId; render(); }
+  else if ("done" in t.dataset) { editing = null; render(); }
+  else if ("delete" in t.dataset) {
+    const l = leads.find((x) => x.id === openId);
+    if (!confirm(`Delete ${l.name || l.email}? This can’t be undone.`)) return;
+    fetch(`${API}/${openId}`, { method: "DELETE" }).then((res) => {
+      if (!res.ok) return alert("That didn’t delete. Reload and try again.");
+      leads = leads.filter((x) => x.id !== l.id);
+      editing = null; openId = null; render();
+    });
+  }
   else if ("fold" in t.dataset) {
     // flipped in place, not re-rendered, so the drawer animates
     const fold = t.closest(".fold");
@@ -416,6 +531,16 @@ document.addEventListener("click", (e) => {
     const l = leads.find((x) => x.id === openId);
     if (t.dataset.status === "talking" && !l.follow_up_on) patch.follow_up_on = addDays(3);
     save(openId, patch);
+  }
+  else if (t.dataset.task) {
+    const l = leads.find((x) => x.id === openId);
+    const done = tasks(l);
+    const next = done.includes(t.dataset.task) ? done.filter((k) => k !== t.dataset.task) : [...done, t.dataset.task];
+    const ordered = TASKS.map(([k]) => k).filter((k) => next.includes(k));
+    l.tasks = ordered.length ? JSON.stringify(ordered) : null;
+    render();
+    fetch(`${API}/${openId}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tasks: ordered }) })
+      .then((res) => { if (!res.ok) alert("That didn’t save. Reload and try again."); });
   }
   else if ("in" in t.dataset) save(openId, { follow_up_on: t.dataset.in ? addDays(+t.dataset.in) : null });
 });
@@ -480,7 +605,28 @@ $("#copy").addEventListener("click", async (e) => {
   copied = setTimeout(() => { b.textContent = "Copy questionnaire link"; }, 1600);
 });
 
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (openId || adding)) { openId = null; adding = false; render(); } });
+{
+  const main = $("main"), grip = $("#grip");
+  const saved = localStorage.getItem("detailW");
+  if (saved) main.style.setProperty("--detail-w", saved);
+  const clamp = (w) => Math.round(Math.min(Math.max(w, 320), main.clientWidth - 360));
+  grip.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    grip.setPointerCapture(e.pointerId);
+    main.toggleAttribute("data-dragging", true);
+    const move = (ev) => main.style.setProperty("--detail-w", `${clamp(main.getBoundingClientRect().right - ev.clientX)}px`);
+    const up = () => {
+      grip.removeEventListener("pointermove", move);
+      main.removeAttribute("data-dragging");
+      localStorage.setItem("detailW", main.style.getPropertyValue("--detail-w"));
+    };
+    grip.addEventListener("pointermove", move);
+    grip.addEventListener("pointerup", up, { once: true });
+  });
+  grip.addEventListener("dblclick", () => { main.style.removeProperty("--detail-w"); localStorage.removeItem("detailW"); });
+}
+
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && (openId || adding)) { if (editing) { editing = null; } else { openId = null; adding = false; } render(); } });
 
 load();
 </script>
